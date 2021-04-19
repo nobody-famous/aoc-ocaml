@@ -12,9 +12,9 @@ let fns : problem list =
     };
     {
       name = "2019.1.2";
-      file = "input/2019/1/sample.txt";
+      file = "input/2019/1/puzzle.txt";
       fn = Aoc_2019_1.Part2.run;
-      exp = 0;
+      exp = 4916076;
     };
   ]
 
