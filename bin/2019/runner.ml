@@ -40,6 +40,6 @@ let timed_run (p : problem) =
   printf "%s took %d ms\n" p.name diff
 
 ;;
-List.iter timed_run fns
+(* List.iter timed_run fns *)
 
-(* Aoc_2019_2.Part2.run "input/2019/2/puzzle.txt" *)
+Aoc_2019_3.Part1.run "input/2019/3/sample.txt"
