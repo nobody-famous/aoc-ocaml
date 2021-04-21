@@ -1,27 +1,10 @@
 open Parser
-open Printf
+open Intcode
 
 let run file_name =
-  let prog = parse_input file_name in
+  let input = parse_input file_name in
+  let m = new_machine input in
+  let m = set_addr m 1 12 in
+  let m = set_addr m 2 2 in
 
-  let print_array a =
-    let rec helper ndx =
-      match ndx with
-      | n when ndx < Array.length a ->
-          printf ",%d" a.(n);
-          helper (n + 1)
-      | _ -> printf "\n"
-    in
-
-    match Array.length a with
-    | 0 -> ()
-    | _ ->
-        printf "%d" a.(0);
-        helper 1
-  in
-
-  print_array prog;
-  let ndx = 3 in
-  let a, b, c = (prog.(ndx), prog.(ndx + 1), prog.(ndx + 2)) in
-  printf "%d,%d,%d\n" a b c;
-  0
+  get_addr (run_prog m) 0
