@@ -2,5 +2,10 @@ open Printf
 open Parser
 
 let run file_name =
-  parse_input file_name;
-  printf "Day 3 Part 1 %s\n" file_name
+  let deltas = parse_input file_name in
+
+  List.iter
+    (fun line ->
+      printf "LINE\n";
+      List.iter (fun p -> printf "ITEM %d %d\n" p.x p.y) line)
+    deltas
