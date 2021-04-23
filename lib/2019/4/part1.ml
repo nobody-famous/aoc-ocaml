@@ -6,11 +6,9 @@ let find_first input =
   let rec helper ndx =
     match ndx with
     | _ when ndx >= Array.length input -> ()
-    | n when next.(ndx - 1) < input.(ndx) ->
-        next.(n) <- input.(n);
-        helper (n + 1)
     | n ->
-        next.(n) <- next.(n - 1);
+        if next.(n - 1) < input.(n) then next.(n) <- input.(n)
+        else next.(n) <- next.(n - 1);
         helper (n + 1)
   in
 
