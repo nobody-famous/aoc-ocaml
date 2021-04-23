@@ -1,7 +1,7 @@
 open InputParser
 
 let to_int_array input =
-  let rec helper str acc =
+  let rec loop str acc =
     match str with
     | "" -> Array.of_list (List.rev acc)
     | s ->
@@ -9,10 +9,10 @@ let to_int_array input =
         let length = String.length s in
         let rest = String.sub s 1 (length - 1) in
 
-        helper rest (int_value :: acc)
+        loop rest (int_value :: acc)
   in
 
-  helper input []
+  loop input []
 
 let parse_input file_name =
   let lines = read_lines file_name in
