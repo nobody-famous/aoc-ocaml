@@ -57,8 +57,6 @@ let param_value m op offset =
   let v = m.prog.(m.ndx + offset) in
   let value = if op.modes.(offset - 1) = Position then m.prog.(v) else v in
 
-  if m.debug then printf "PARAM %d -> %d\n" v value;
-
   value
 
 let op_code_1 m op =
@@ -97,10 +95,48 @@ let op_code_4 m op =
   let value = param_value m op 1 in
   let fn = m.stdout in
 
-  if m.debug then printf "OUT %d -> %d\n" value addr;
+  if m.debug then printf "OUT %d (%d)\n" addr value;
 
   fn value;
   { m with ndx = m.ndx + 2 }
+
+let op_code_5 m op =
+  let param_1 = param_value m op 1 and param_2 = param_value m op 2 in
+
+  if m.debug then printf "JMP %d %d\n" param_1 param_2;
+
+  if param_1 <> 0 then { m with ndx = param_2 } else { m with ndx = m.ndx + 3 }
+
+  let op_code_6 m op =
+  let param_1 = param_value m op 1 and param_2 = param_value m op 2 in
+
+  if m.debug then printf "JMP %d %d\n" param_1 param_2;
+
+  if param_1 = 0 then { m with ndx = param_2 } else { m with ndx = m.ndx + 3 }
+
+let op_code_7 m op =
+  let param_1 = param_value m op 1
+  and param_2 = param_value m op 2
+  and addr = m.prog.(m.ndx + 3) in
+
+  let value = if param_1 < param_2 then 1 else 0 in
+
+  if m.debug then printf "LT %d %d (%d) -> %d\n" param_1 param_2 value addr;
+
+  m.prog.(addr) <- value;
+  { m with ndx = m.ndx + 4 }
+
+let op_code_8 m op =
+  let param_1 = param_value m op 1
+  and param_2 = param_value m op 2
+  and addr = m.prog.(m.ndx + 3) in
+
+  let value = if param_1 = param_2 then 1 else 0 in
+
+  if m.debug then printf "EQL %d %d (%d) -> %d\n" param_1 param_2 value addr;
+
+  m.prog.(addr) <- value;
+  { m with ndx = m.ndx + 4 }
 
 let op_code_99 m = { m with halt = true; ndx = m.ndx + 1 }
 
@@ -114,6 +150,10 @@ let step m =
   | 2 -> op_code_2 m op
   | 3 -> op_code_3 m op
   | 4 -> op_code_4 m op
+  | 5 -> op_code_5 m op
+  | 6 -> op_code_6 m op
+  | 7 -> op_code_7 m op
+  | 8 -> op_code_8 m op
   | 99 -> op_code_99 m
   | _ -> raise (Invalid_argument (sprintf "UNHANDLED OP CODE %d\n" op.code))
 
