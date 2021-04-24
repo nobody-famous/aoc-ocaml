@@ -7,3 +7,5 @@ val set_addr : machine -> int -> int -> machine
 val get_addr : machine -> int -> int
 
 val run_prog : machine -> machine
+
+val parse_input : string -> int array
