@@ -59,27 +59,21 @@ let param_value m op offset =
 
   value
 
-let op_code_1 m op =
+let math_op label m op fn =
   let param_1 = param_value m op 1
   and param_2 = param_value m op 2
   and addr = m.prog.(m.ndx + 3) in
-  let value = param_1 + param_2 in
+  let value = fn param_1 param_2 in
 
-  if m.debug then printf "ADD %d %d = (%d) -> %d\n" param_1 param_2 value addr;
+  if m.debug then
+    printf "%s %d %d = (%d) -> %d\n" label param_1 param_2 value addr;
 
   m.prog.(addr) <- value;
   { m with ndx = m.ndx + 4 }
 
-let op_code_2 m op =
-  let param_1 = param_value m op 1
-  and param_2 = param_value m op 2
-  and addr = m.prog.(m.ndx + 3) in
-  let value = param_1 * param_2 in
+let op_code_1 m op = math_op "ADD" m op (fun a b -> a + b)
 
-  if m.debug then printf "MUL %d %d (%d)-> %d\n" param_1 param_2 value addr;
-
-  m.prog.(addr) <- value;
-  { m with ndx = m.ndx + 4 }
+let op_code_2 m op = math_op "MUL" m op (fun a b -> a * b)
 
 let op_code_3 m _ =
   let addr = m.prog.(m.ndx + 1) in
@@ -87,7 +81,9 @@ let op_code_3 m _ =
   | [] -> raise (Failure "NO INPUT")
   | next :: rest ->
       m.prog.(addr) <- int_of_string next;
+
       if m.debug then printf "INP %d -> %d\n" m.prog.(addr) addr;
+
       { m with ndx = m.ndx + 2; stdin = rest }
 
 let op_code_4 m op =
@@ -100,19 +96,16 @@ let op_code_4 m op =
   fn value;
   { m with ndx = m.ndx + 2 }
 
-let op_code_5 m op =
+let jmp m op fn =
   let param_1 = param_value m op 1 and param_2 = param_value m op 2 in
 
   if m.debug then printf "JMP %d %d\n" param_1 param_2;
 
-  if param_1 <> 0 then { m with ndx = param_2 } else { m with ndx = m.ndx + 3 }
+  if fn param_1 then { m with ndx = param_2 } else { m with ndx = m.ndx + 3 }
 
-let op_code_6 m op =
-  let param_1 = param_value m op 1 and param_2 = param_value m op 2 in
+let op_code_5 m op = jmp m op (fun n -> n <> 0)
 
-  if m.debug then printf "JMP %d %d\n" param_1 param_2;
-
-  if param_1 = 0 then { m with ndx = param_2 } else { m with ndx = m.ndx + 3 }
+let op_code_6 m op = jmp m op (fun n -> n = 0)
 
 let op_code_7 m op =
   let param_1 = param_value m op 1
