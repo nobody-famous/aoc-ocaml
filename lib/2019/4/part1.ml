@@ -1,4 +1,3 @@
-open Printf
 open Parser
 
 let find_first input =
@@ -41,24 +40,37 @@ let inc input =
 
   loop (Array.length input - 1)
 
-let run file_name =
-  let first, _ = parse_input file_name in
-
-  let print_array a =
-    let rec loop ndx =
-      match ndx with
-      | n when ndx < Array.length a ->
-          printf "%d" a.(n);
-          loop (ndx + 1)
-      | _ -> ()
-    in
-
-    loop 0;
-    printf "\n"
+let is_greater a b =
+  let rec loop ndx =
+    if ndx >= Array.length a then true
+    else if a.(ndx) = b.(ndx) then loop (ndx + 1)
+    else a.(ndx) > b.(ndx)
   in
 
-  let next = find_first first in
-  inc next;
+  loop 0
 
-  printf "Next ";
-  print_array next
+let has_adj input =
+  let rec loop ndx =
+    if ndx >= Array.length input then false
+    else if input.(ndx - 1) = input.(ndx) then true
+    else loop (ndx + 1)
+  in
+
+  loop 1
+
+let count_pws first last =
+  let copy = Array.copy first in
+  let rec loop count =
+    if is_greater copy last then count
+    else (
+      inc copy;
+      loop (if has_adj copy then count + 1 else count))
+  in
+
+  loop 0
+
+let run file_name =
+  let first, last = parse_input file_name in
+  let first = find_first first in
+
+  count_pws first last
