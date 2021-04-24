@@ -1,17 +1,14 @@
-open Parser
-open Intcode
-
 let run_machine m noun verb =
-  let m = set_addr m 1 noun in
-  let m = set_addr m 2 verb in
+  let m = Intcode.set_addr m 1 noun in
+  let m = Intcode.set_addr m 2 verb in
 
-  run_prog m
+  Intcode.run_prog m
 
 let find_values input low high target =
   let rec outer_loop noun noun_max =
     let rec inner_loop verb verb_max =
-      let m = new_machine (Array.copy input) in
-      let value = get_addr (run_machine m noun verb) 0 in
+      let m = Intcode.new_machine (Array.copy input) in
+      let value = Intcode.get_addr (run_machine m noun verb) 0 in
 
       if value = target then Some (noun, verb)
       else if verb = verb_max then None
@@ -26,7 +23,7 @@ let find_values input low high target =
   outer_loop low high
 
 let run file_name =
-  let input = parse_input file_name in
+  let input = Intcode.parse_input file_name in
   let target = 19690720 in
 
   match find_values input 0 99 target with
