@@ -107,7 +107,7 @@ let op_code_5 m op =
 
   if param_1 <> 0 then { m with ndx = param_2 } else { m with ndx = m.ndx + 3 }
 
-  let op_code_6 m op =
+let op_code_6 m op =
   let param_1 = param_value m op 1 and param_2 = param_value m op 2 in
 
   if m.debug then printf "JMP %d %d\n" param_1 param_2;
