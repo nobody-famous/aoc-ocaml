@@ -26,13 +26,7 @@ let new_machine prog =
 let new_machine_io prog input out_fn =
   { prog; ndx = 0; halt = false; stdin = input; stdout = out_fn; debug = false }
 
-let param_mode_mask num =
-  let rec loop value = function 1 -> value | n -> loop (value * 10) (n - 1) in
-
-  loop 100 num
-
-let get_param_mode instr num =
-  let mask = param_mode_mask num in
+let get_param_mode instr mask =
   let digit = instr / mask mod 10 in
   match digit with 1 -> Immediate | _ -> Position
 
@@ -41,7 +35,9 @@ let int_to_op instr =
     code = instr mod 100;
     modes =
       [|
-        get_param_mode instr 1; get_param_mode instr 2; get_param_mode instr 3;
+        get_param_mode instr 100;
+        get_param_mode instr 1000;
+        get_param_mode instr 10000;
       |];
   }
 
