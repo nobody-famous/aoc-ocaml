@@ -1,11 +1,5 @@
 open Parser
-
-let create_tree input =
-  let tree = Hashtbl.create (List.length input) in
-
-  List.iter (fun (parent, child) -> Hashtbl.add tree parent child) input;
-
-  tree
+open Utils
 
 let count_orbits tree start =
   let counts = Hashtbl.create (Hashtbl.length tree) in
