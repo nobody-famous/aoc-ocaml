@@ -25,37 +25,31 @@ let swap a n1 n2 =
   a.(n2) <- tmp
 
 let perms amps =
-  let count = ref 0 in
-  let out = ref [] in
-
-  let rec loop size =
+  let rec loop size out =
     match size with
-    | 1 ->
-        out := Array.copy amps :: !out;
-        count := !count + 1
+    | 1 -> Array.copy amps :: out
     | size' ->
-        let rec i_loop i stop =
-          if i = stop then ()
-          else (
-            loop (size - 1);
+        let rec i_loop i stop out' =
+          if i = stop then out'
+          else
+            let o = loop (size - 1) out' in
 
             if size mod 2 = 1 then swap amps 0 (size - 1)
             else swap amps i (size - 1);
 
-            i_loop (i + 1) stop)
+            i_loop (i + 1) stop o
         in
 
-        i_loop 0 size'
+        i_loop 0 size' out
   in
 
-  loop (Array.length amps);
-
-  !out
+  loop (Array.length amps) []
 
 let run file_name =
   let prog = Intcode.parse_input file_name in
 
   let p = perms [| 0; 1; 2; 3; 4 |] in
+
   Printf.printf "perms %d\n" (List.length p);
 
   let output = run_seq prog [ 1; 0; 4; 3; 2 ] in
