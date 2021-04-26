@@ -41,11 +41,15 @@ let int_to_op instr =
       |];
   }
 
+let halted m = m.halt
+
 let set_addr m addr value =
   m.prog.(addr) <- value;
   m
 
 let set_stdin m fn = { m with stdin = fn }
+
+let set_stdout m fn = { m with stdout = fn }
 
 let set_debug m value = { m with debug = value }
 
