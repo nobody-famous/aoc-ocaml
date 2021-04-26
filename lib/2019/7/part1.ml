@@ -24,20 +24,20 @@ let swap a n1 n2 =
   a.(n1) <- a.(n2);
   a.(n2) <- tmp
 
-let perms amps =
+let permutations amps =
   let rec loop size out =
     match size with
-    | 1 -> Array.copy amps :: out
+    | 1 -> Array.to_list amps :: out
     | size' ->
         let rec i_loop i stop out' =
           if i = stop then out'
           else
-            let o = loop (size - 1) out' in
+            let new_out = loop (size - 1) out' in
 
             if size mod 2 = 1 then swap amps 0 (size - 1)
             else swap amps i (size - 1);
 
-            i_loop (i + 1) stop o
+            i_loop (i + 1) stop new_out
         in
 
         i_loop 0 size' out
@@ -45,14 +45,15 @@ let perms amps =
 
   loop (Array.length amps) []
 
+let run_perms prog perms =
+  List.fold_left
+    (fun acc perm ->
+      let result = run_seq prog perm in
+      Stdlib.max result acc)
+    0 perms
+
 let run file_name =
   let prog = Intcode.parse_input file_name in
+  let perms = permutations [| 0; 1; 2; 3; 4 |] in
 
-  let p = perms [| 0; 1; 2; 3; 4 |] in
-
-  Printf.printf "perms %d\n" (List.length p);
-
-  let output = run_seq prog [ 1; 0; 4; 3; 2 ] in
-  Printf.printf "output %d\n" output;
-
-  output
+  run_perms prog perms
