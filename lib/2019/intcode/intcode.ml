@@ -4,7 +4,7 @@ type machine = {
   prog : int array;
   ndx : int;
   halt : bool;
-  stdin : string list;
+  stdin : unit -> int;
   stdout : int -> unit;
   debug : bool;
 }
@@ -18,13 +18,13 @@ let new_machine prog =
     prog;
     ndx = 0;
     halt = false;
-    stdin = [];
+    stdin = (fun () -> 0);
     stdout = (fun _ -> ());
     debug = false;
   }
 
-let new_machine_io prog input out_fn =
-  { prog; ndx = 0; halt = false; stdin = input; stdout = out_fn; debug = false }
+let new_machine_io prog in_fn out_fn =
+  { prog; ndx = 0; halt = false; stdin = in_fn; stdout = out_fn; debug = false }
 
 let get_param_mode instr mask =
   let digit = instr / mask mod 10 in
@@ -44,6 +44,8 @@ let int_to_op instr =
 let set_addr m addr value =
   m.prog.(addr) <- value;
   m
+
+let set_stdin m fn = { m with stdin = fn }
 
 let set_debug m value = { m with debug = value }
 
@@ -73,14 +75,13 @@ let op_code_2 m op = math_op "MUL" m op (fun a b -> a * b)
 
 let op_code_3 m _ =
   let addr = m.prog.(m.ndx + 1) in
-  match m.stdin with
-  | [] -> raise (Failure "NO INPUT")
-  | next :: rest ->
-      m.prog.(addr) <- int_of_string next;
+  let input = m.stdin () in
 
-      if m.debug then printf "INP %d -> %d\n" m.prog.(addr) addr;
+  m.prog.(addr) <- input;
 
-      { m with ndx = m.ndx + 2; stdin = rest }
+  if m.debug then printf "INP %d -> %d\n" m.prog.(addr) addr;
+
+  { m with ndx = m.ndx + 2 }
 
 let op_code_4 m op =
   let addr = m.prog.(m.ndx + 1) in

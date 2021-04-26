@@ -2,9 +2,11 @@ type machine
 
 val new_machine : int array -> machine
 
-val new_machine_io : int array -> string list -> (int -> unit) -> machine
+val new_machine_io : int array -> (unit -> int) -> (int -> unit) -> machine
 
 val set_addr : machine -> int -> int -> machine
+
+val set_stdin : machine -> (unit -> int) -> machine
 
 val set_debug : machine -> bool -> machine
 
