@@ -1,5 +1,7 @@
 type machine
 
+type machine_state
+
 val new_machine : int array -> machine
 
 val new_machine_io : int array -> (unit -> int) -> (int -> unit) -> machine

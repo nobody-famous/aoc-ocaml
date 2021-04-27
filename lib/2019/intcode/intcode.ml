@@ -1,11 +1,14 @@
 open Printf
 
+(* type machine_state = HALT | NEED_INPUT | HAS_OUTPUT *)
+type machine_state = HALT | RUN
+
 type machine = {
   prog : int array;
   ip : int;
-  halt : bool;
   stdin : unit -> int;
   stdout : int -> unit;
+  state : machine_state;
   debug : bool;
 }
 
@@ -17,14 +20,14 @@ let new_machine prog =
   {
     prog;
     ip = 0;
-    halt = false;
     stdin = (fun () -> 0);
     stdout = (fun _ -> ());
+    state = RUN;
     debug = false;
   }
 
 let new_machine_io prog in_fn out_fn =
-  { prog; ip = 0; halt = false; stdin = in_fn; stdout = out_fn; debug = false }
+  { prog; ip = 0; stdin = in_fn; stdout = out_fn; state = RUN; debug = false }
 
 let get_param_mode instr mask =
   let digit = instr / mask mod 10 in
@@ -41,7 +44,7 @@ let int_to_op instr =
       |];
   }
 
-let halted m = m.halt
+let halted m = m.state = HALT
 
 let set_addr m addr value =
   m.prog.(addr) <- value;
@@ -132,10 +135,10 @@ let op_code_8 m op =
   m.prog.(addr) <- value;
   { m with ip = m.ip + 4 }
 
-let op_code_99 m = { m with halt = true; ip = m.ip + 1 }
+let op_code_99 m = { m with state = HALT; ip = m.ip + 1 }
 
 let step m =
-  if m.halt then raise (Failure "Machine Halted");
+  if m.state = HALT then raise (Failure "Machine Halted");
   let op = int_to_op m.prog.(m.ip) in
 
   if m.debug then printf "OP %d (%d)\n" m.prog.(m.ip) op.code;
@@ -152,9 +155,10 @@ let step m =
   | 99 -> op_code_99 m
   | _ -> raise (Invalid_argument (sprintf "UNHANDLED OP CODE %d\n" op.code))
 
-let rec run_prog m = match m.halt with true -> m | false -> run_prog (step m)
+let rec run_prog m =
+  match m.state = HALT with true -> m | false -> run_prog (step m)
 
-let mach_to_string m = Printf.sprintf "{IP: %d HALT: %b}" m.ip m.halt
+let mach_to_string m = Printf.sprintf "{IP: %d HALT: %b}" m.ip (m.state = HALT)
 
 let read_line input = try Some (input_line input) with End_of_file -> None
 
