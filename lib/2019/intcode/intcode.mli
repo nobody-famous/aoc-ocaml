@@ -20,4 +20,6 @@ val run_prog : machine -> machine
 
 val step : machine -> machine
 
+val mach_to_string : machine -> string
+
 val parse_input : string -> int array

@@ -6,11 +6,14 @@ let run_to_output m =
 
   let rec loop m =
     let m = Intcode.step m in
+
     if Intcode.halted m then None
-    else match !output with None -> loop m | Some v -> Some v
+    else match !output with None -> loop m | Some v -> Some (m, v)
   in
 
-  match loop m with Some v -> (m, v) | None -> raise (Failure "NO OUTPUT")
+  match loop m with
+  | Some (m, v) -> (m, v)
+  | None -> raise (Failure "NO OUTPUT")
 
 let run_to_input m input =
   let has_input = ref false in
@@ -31,13 +34,49 @@ let start_machine m phase = run_to_input m phase
 
 let start_machines ms phases =
   let rec loop ndx =
-    if ndx >= Array.length ms then ms
-    else (
+    if ndx < Array.length ms then (
       ms.(ndx) <- start_machine ms.(ndx) phases.(ndx);
       loop (ndx + 1))
   in
 
   loop 0
+
+let run_chain machines =
+  let rec loop ndx out =
+    if ndx < Array.length machines then (
+      machines.(ndx) <- run_to_input machines.(ndx) out;
+
+      let m, out' = run_to_output machines.(ndx) in
+      machines.(ndx) <- m;
+
+      loop (ndx + 1) out')
+    else out
+  in
+
+  loop 0 0
+
+let run_perm prog perm =
+  let machines =
+    [|
+      Intcode.new_machine prog;
+      Intcode.new_machine prog;
+      Intcode.new_machine prog;
+      Intcode.new_machine prog;
+      Intcode.new_machine prog;
+    |]
+  in
+
+  start_machines machines perm;
+
+  let rec loop n out =
+    if n < 1 then (
+      let out' = run_chain machines in
+      Printf.printf "OUT %d\n" out';
+      loop (n + 1) out')
+    else out
+  in
+
+  loop 0 0
 
 let run file_name =
   let prog = Intcode.parse_input file_name in
@@ -52,9 +91,8 @@ let run file_name =
     |]
   in
 
-  let machines = start_machines machines [| 9; 8; 7; 6; 5 |] in
-  let _, v = run_to_output machines.(0) in
+  start_machines machines [| 9; 8; 7; 6; 5 |];
 
-  Printf.printf "OUTPUT %d\n" v;
+  let _ = run_perm prog [| 9; 8; 7; 6; 5 |] in
 
   0
