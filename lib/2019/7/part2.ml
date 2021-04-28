@@ -1,69 +1,61 @@
 open Utils
 
-(* let start_machine m phase = run_to_input m phase *)
+let run_amp machine signal =
+  let rec loop m out =
+    let m = Intcode.step m in
 
-(* let start_machines ms phases =
-  let rec loop ndx =
-    if ndx < Array.length ms then (
-      ms.(ndx) <- start_machine ms.(ndx) phases.(ndx);
-      loop (ndx + 1))
+    match Intcode.get_state m with
+    | RUN ->
+        let m, v = Intcode.get_output m in
+        let out' = match v with None -> out | Some v -> v in
+
+        Printf.printf "out %d\n" out';
+        loop m out'
+    | HALT -> out
+    | INPUT ->
+        let m = Intcode.set_input m signal in
+        loop m out
   in
 
-  loop 0 *)
+  loop machine signal
 
-(* let run_chain machines =
-  let rec loop ndx out =
+let run_seq machines =
+  let rec loop ndx signal =
     if ndx < Array.length machines then (
-      machines.(ndx) <- run_to_input machines.(ndx) out;
+      let m = machines.(ndx) in
+      let signal' = run_amp m signal in
 
-      let m, out' = run_to_output machines.(ndx) in
       machines.(ndx) <- m;
-
-      loop (ndx + 1) out')
-    else out
+      loop (ndx + 1) signal')
+    else signal
   in
-
-  loop 0 0 *)
-
-(* let run_perm prog perm =
-  let machines =
-    [|
-      Intcode.new_machine prog;
-      Intcode.new_machine prog;
-      Intcode.new_machine prog;
-      Intcode.new_machine prog;
-      Intcode.new_machine prog;
-    |]
-  in
-
-  start_machines machines perm;
-
-  let rec loop n out =
-       if n < 1 then (
-         let out' = run_chain machines in
-         Printf.printf "OUT %d\n" out';
-         loop (n + 1) out')
-       else out
-     in
 
   loop 0 0
-  0 *)
 
-let run _ =
-  (* let prog = Intcode.parse_input file_name in *)
-  let _ = permutations [| 5; 6; 7; 8; 9 |] in
-  (* let machines =
-    [|
-      Intcode.new_machine prog;
-      Intcode.new_machine prog;
-      Intcode.new_machine prog;
-      Intcode.new_machine prog;
-      Intcode.new_machine prog;
-    |]
-  in *)
+let run_perms prog perms =
+  let machines = make_machines prog in
 
-  (* start_machines machines [| 9; 8; 7; 6; 5 |]; *)
+  match perms with
+  | first :: _ ->
+      start_machines machines first;
+      Printf.printf "after start\n";
+      let signal = run_seq machines in
+      Printf.printf "signal %d\n" signal
+  | _ -> ()
 
-  (* let _ = run_perm prog [| 9; 8; 7; 6; 5 |] in *)
+(* List.fold_left
+   (fun acc perm ->
+     let machines = make_machines prog in
+     Printf.printf "START\n";
+     start_machines machines perm;
 
-  0
+     let result = run_seq machines in
+
+     Stdlib.max result acc)
+   0 perms *)
+
+let run file_name =
+  let prog = Intcode.parse_input file_name in
+  let perms = permutations [| 5; 6; 7; 8; 9 |] in
+
+  run_perms prog perms
