@@ -1,22 +1,30 @@
+type image = int array array list
+
 let parse_input file_name width height =
   let lines = InputParser.read_lines file_name in
-  let matrix = Array.make_matrix width height 0 in
   let line = match lines with first :: _ -> first | [] -> "" in
 
-  Printf.printf "line %s\n" line;
+  let rec loop ndx img =
+    let matrix = Array.make_matrix height width '0' in
 
-  let rec loop row =
-    let rec col_loop col =
-      if col < width then (
-        let ndx = (row * width) + col in
-        Printf.printf "%d,%d %c\n" row col (String.get line ndx);
-        col_loop (col + 1))
+    let rec row_loop row row_ndx =
+      let rec col_loop col col_ndx =
+        if col < width then (
+          matrix.(row).(col) <- String.get line col_ndx;
+          col_loop (col + 1) (col_ndx + 1))
+        else col_ndx
+      in
+
+      if row < height then
+        let ndx' = col_loop 0 row_ndx in
+        row_loop (row + 1) ndx'
+      else row_ndx
     in
 
-    if row < height then (
-      col_loop 0;
-      loop (row + 1))
+    let ndx' = row_loop 0 ndx in
+    let img' = matrix :: img in
+
+    if ndx' < String.length line then loop ndx' img' else img'
   in
 
-  loop 0;
-  matrix
+  loop 0 []
