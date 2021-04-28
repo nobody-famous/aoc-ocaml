@@ -24,7 +24,7 @@ let parse_input file_name width height =
     let ndx' = row_loop 0 ndx in
     let img' = matrix :: img in
 
-    if ndx' < String.length line then loop ndx' img' else img'
+    if ndx' < String.length line then loop ndx' img' else List.rev img'
   in
 
   loop 0 []
