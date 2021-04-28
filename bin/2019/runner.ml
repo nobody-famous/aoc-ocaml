@@ -76,6 +76,18 @@ let fns : problem list =
       fn = Aoc_2019_6.Part2.run;
       exp = 304;
     };
+    {
+      name = "2019.7.1";
+      file = "input/2019/7/puzzle.txt";
+      fn = Aoc_2019_7.Part1.run;
+      exp = 21760;
+    };
+    {
+      name = "2019.7.2";
+      file = "input/2019/7/puzzle.txt";
+      fn = Aoc_2019_7.Part2.run;
+      exp = 69816958;
+    };
   ]
 
 let timed_run (p : problem) =
@@ -90,4 +102,4 @@ let timed_run (p : problem) =
 ;;
 List.iter timed_run fns
 
-(* Aoc_2019_6.Part2.run "input/2019/6/puzzle.txt" *)
+(* Aoc_2019_7.Part2.run "input/2019/7/puzzle.txt" *)
