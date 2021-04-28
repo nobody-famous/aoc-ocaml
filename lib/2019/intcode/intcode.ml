@@ -1,13 +1,12 @@
 open Printf
 
-(* type machine_state = HALT | NEED_INPUT | HAS_OUTPUT *)
-type machine_state = HALT | RUN
+type machine_state = HALT | RUN | INPUT
 
 type machine = {
   prog : int array;
   ip : int;
-  stdin : unit -> int;
-  stdout : int -> unit;
+  input : int option;
+  output : int option;
   state : machine_state;
   debug : bool;
 }
@@ -17,17 +16,7 @@ type param_mode = Position | Immediate
 type op = { code : int; modes : param_mode array }
 
 let new_machine prog =
-  {
-    prog;
-    ip = 0;
-    stdin = (fun () -> 0);
-    stdout = (fun _ -> ());
-    state = RUN;
-    debug = false;
-  }
-
-let new_machine_io prog in_fn out_fn =
-  { prog; ip = 0; stdin = in_fn; stdout = out_fn; state = RUN; debug = false }
+  { prog; ip = 0; input = None; output = None; state = RUN; debug = false }
 
 let get_param_mode instr mask =
   let digit = instr / mask mod 10 in
@@ -46,13 +35,18 @@ let int_to_op instr =
 
 let halted m = m.state = HALT
 
+let set_input m value = { m with input = Some value }
+
+let get_output m =
+  match m.output with
+  | None -> (m, None)
+  | Some v -> ({ m with output = None }, Some v)
+
+let get_state m = m.state
+
 let set_addr m addr value =
   m.prog.(addr) <- value;
   m
-
-let set_stdin m fn = { m with stdin = fn }
-
-let set_stdout m fn = { m with stdout = fn }
 
 let set_debug m value = { m with debug = value }
 
@@ -82,23 +76,23 @@ let op_code_2 m op = math_op "MUL" m op (fun a b -> a * b)
 
 let op_code_3 m _ =
   let addr = m.prog.(m.ip + 1) in
-  let input = m.stdin () in
 
-  m.prog.(addr) <- input;
+  match m.input with
+  | None -> { m with state = INPUT }
+  | Some i ->
+      m.prog.(addr) <- i;
 
-  if m.debug then printf "INP %d -> %d\n" m.prog.(addr) addr;
+      if m.debug then printf "INP %d -> %d\n" m.prog.(addr) addr;
 
-  { m with ip = m.ip + 2 }
+      { m with input = None; state = RUN; ip = m.ip + 2 }
 
 let op_code_4 m op =
   let addr = m.prog.(m.ip + 1) in
   let value = param_value m op 1 in
-  let fn = m.stdout in
 
   if m.debug then printf "OUT %d (%d)\n" addr value;
 
-  fn value;
-  { m with ip = m.ip + 2 }
+  { m with output = Some value; ip = m.ip + 2 }
 
 let jmp m op fn =
   let param_1 = param_value m op 1 and param_2 = param_value m op 2 in
@@ -154,9 +148,6 @@ let step m =
   | 8 -> op_code_8 m op
   | 99 -> op_code_99 m
   | _ -> raise (Invalid_argument (sprintf "UNHANDLED OP CODE %d\n" op.code))
-
-let rec run_prog m =
-  match m.state = HALT with true -> m | false -> run_prog (step m)
 
 let mach_to_string m = Printf.sprintf "{IP: %d HALT: %b}" m.ip (m.state = HALT)
 

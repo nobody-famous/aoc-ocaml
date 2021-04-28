@@ -23,3 +23,38 @@ let permutations amps =
   in
 
   loop (Array.length amps) []
+
+let make_machines prog =
+  [|
+    Intcode.new_machine prog;
+    Intcode.new_machine prog;
+    Intcode.new_machine prog;
+    Intcode.new_machine prog;
+    Intcode.new_machine prog;
+  |]
+
+let start_machine machine phase =
+  let rec loop m =
+    let m = Intcode.step m in
+
+    match Intcode.get_state m with
+    | INPUT ->
+        let m = Intcode.set_input m phase in
+        let m = Intcode.step m in
+        m
+    | HALT -> m
+    | RUN -> loop m
+  in
+
+  loop machine
+
+let start_machines machines phases =
+  let rec loop ndx ph_list =
+    match ph_list with
+    | [] -> ()
+    | first :: rest ->
+        machines.(ndx) <- start_machine machines.(ndx) first;
+        loop (ndx + 1) rest
+  in
+
+  loop 0 phases

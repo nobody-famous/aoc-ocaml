@@ -96,4 +96,4 @@ let timed_run (p : problem) =
 ;;
 (* List.iter timed_run fns *)
 
-Aoc_2019_7.Part2.run "input/2019/7/sample4.txt"
+Aoc_2019_7.Part1.run "input/2019/7/sample.txt"
