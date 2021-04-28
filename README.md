@@ -52,3 +52,23 @@ For part 1, the criteria of it needing to have at least one run of 2 digits the 
 For part 2, it's a little more complicated. My input only had one invalid candidate for part 1, but close to 200 for part 2.
 
 I'm still certain there's a mathy way to calculate most of part 1, but my solution runs in under 1 ms already so I see no reason to try to optimize it further. I'm not sure if the mathy approach would work for part 2.
+
+### Day 5
+
+This was just more Intcode machine updates. Added support for pointers and conditional jumps. Important stuff, but not too compilcated.
+
+### Day 6
+
+The input ends up being a tree. I didnt' create a proper tree structure. OCaml's hash table implementation lets you store multiple values for the same key with lookup returning the most recent. There's also a lookup_all function that returns all of them. I made use of that to store all the child nodes for each node.
+
+Part 1 wanted to count the total number of orbits. This simply involved walking the tree and having the parent add one to each child before continuing down the tree. After all the nodes had their counts, summing them all up gave the desired answer.
+
+Part 2 wanted to know the minimum jumps between two nodes. I did this by walking the tree to get the path to the two requested nodes. After stripping off the common part of the paths, the count of remaining nodes between the two gives the answer.
+
+### Day 7
+
+This was using the Intcode machine for something a little more interesting. It asked to chain a series of machines together so that the output from one is given as the input to the next.
+
+The first part wasn't bad because it only went one time through the chain. The second part, though, exposed several issues I had with my implementation as well as issues with using immutable data. I had a lot of bugs caused by earlier design decisions that ended up not working out and had to be redone, as well as times when I didn't handle the immutable stuff right and kept losing updates.
+
+This one ended up taking me forever, primarily because it exposed some of my shortcomings with using OCaml. It was a good learning experience, though.
