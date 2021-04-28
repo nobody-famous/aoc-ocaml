@@ -5,15 +5,16 @@ let run_amp machine signal =
     let m = Intcode.step m in
 
     match Intcode.get_state m with
-    | RUN ->
-        let m, v = Intcode.get_output m in
-        let out' = match v with None -> out | Some v -> v in
-
-        loop m out'
+    | RUN -> loop m out
     | HALT -> out
     | INPUT ->
         let m = Intcode.set_input m signal in
         loop m out
+    | OUTPUT ->
+        let m, v = Intcode.get_output m in
+        let out' = match v with None -> out | Some v -> v in
+
+        loop m out'
   in
 
   loop machine signal

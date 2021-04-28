@@ -1,6 +1,6 @@
 open Printf
 
-type machine_state = HALT | RUN | INPUT
+type machine_state = HALT | RUN | INPUT | OUTPUT
 
 type machine = {
   prog : int array;
@@ -65,7 +65,7 @@ let math_op label m op fn =
   let value = fn param_1 param_2 in
 
   if m.debug then
-    printf "%s %d %d = (%d) -> %d\n" label param_1 param_2 value addr;
+    printf "%d %s %d %d = (%d) -> %d\n" m.ip label param_1 param_2 value addr;
 
   m.prog.(addr) <- value;
   { m with ip = m.ip + 4 }
@@ -82,7 +82,7 @@ let op_code_3 m _ =
   | Some i ->
       m.prog.(addr) <- i;
 
-      if m.debug then printf "INP %d -> %d\n" m.prog.(addr) addr;
+      if m.debug then printf "%d INP %d -> %d\n" m.ip m.prog.(addr) addr;
 
       { m with input = None; state = RUN; ip = m.ip + 2 }
 
@@ -90,14 +90,14 @@ let op_code_4 m op =
   let addr = m.prog.(m.ip + 1) in
   let value = param_value m op 1 in
 
-  if m.debug then printf "OUT %d (%d)\n" addr value;
+  if m.debug then printf "%d OUT %d (%d)\n" m.ip addr value;
 
-  { m with output = Some value; ip = m.ip + 2 }
+  { m with output = Some value; state = OUTPUT; ip = m.ip + 2 }
 
 let jmp m op fn =
   let param_1 = param_value m op 1 and param_2 = param_value m op 2 in
 
-  if m.debug then printf "JMP %d %d\n" param_1 param_2;
+  if m.debug then printf "%d JMP %d %d\n" m.ip param_1 param_2;
 
   if fn param_1 then { m with ip = param_2 } else { m with ip = m.ip + 3 }
 
@@ -112,7 +112,8 @@ let op_code_7 m op =
 
   let value = if param_1 < param_2 then 1 else 0 in
 
-  if m.debug then printf "LT %d %d (%d) -> %d\n" param_1 param_2 value addr;
+  if m.debug then
+    printf "%d LT %d %d (%d) -> %d\n" m.ip param_1 param_2 value addr;
 
   m.prog.(addr) <- value;
   { m with ip = m.ip + 4 }
@@ -124,7 +125,8 @@ let op_code_8 m op =
 
   let value = if param_1 = param_2 then 1 else 0 in
 
-  if m.debug then printf "EQL %d %d (%d) -> %d\n" param_1 param_2 value addr;
+  if m.debug then
+    printf "%d EQL %d %d (%d) -> %d\n" m.ip param_1 param_2 value addr;
 
   m.prog.(addr) <- value;
   { m with ip = m.ip + 4 }
@@ -132,10 +134,10 @@ let op_code_8 m op =
 let op_code_99 m = { m with state = HALT; ip = m.ip + 1 }
 
 let step m =
-  if m.state = HALT then raise (Failure "Machine Halted");
+  if m.state = HALT then raise (Failure "step: HALTED");
   let op = int_to_op m.prog.(m.ip) in
 
-  if m.debug then printf "OP %d (%d)\n" m.prog.(m.ip) op.code;
+  if m.debug then printf "%d OP %d (%d)\n" m.ip m.prog.(m.ip) op.code;
 
   match op.code with
   | 1 -> op_code_1 m op
@@ -149,7 +151,15 @@ let step m =
   | 99 -> op_code_99 m
   | _ -> raise (Invalid_argument (sprintf "UNHANDLED OP CODE %d\n" op.code))
 
-let mach_to_string m = Printf.sprintf "{IP: %d HALT: %b}" m.ip (m.state = HALT)
+let state_to_string s =
+  match s with
+  | HALT -> "HALT"
+  | RUN -> "RUN"
+  | INPUT -> "INPUT"
+  | OUTPUT -> "OUTPUT"
+
+let mach_to_string m =
+  Printf.sprintf "{IP: %d STATE: %s}" m.ip (state_to_string m.state)
 
 let read_line input = try Some (input_line input) with End_of_file -> None
 

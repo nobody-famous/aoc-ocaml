@@ -1,6 +1,6 @@
 type machine
 
-type machine_state = HALT | RUN | INPUT
+type machine_state = HALT | RUN | INPUT | OUTPUT
 
 val new_machine : int array -> machine
 
