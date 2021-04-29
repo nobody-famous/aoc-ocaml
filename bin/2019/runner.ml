@@ -88,12 +88,24 @@ let fns : problem list =
       fn = Aoc_2019_7.Part2.run;
       exp = 69816958;
     };
+    {
+      name = "2019.8.1";
+      file = "input/2019/8/puzzle.txt";
+      fn = Aoc_2019_8.Part1.run;
+      exp = 2356;
+    };
+    {
+      name = "2019.8.2";
+      file = "input/2019/8/puzzle.txt";
+      fn = Aoc_2019_8.Part2.run;
+      exp = 0;
+    };
   ]
 
 let timed_run (p : problem) =
   let start = int_of_float (Unix.gettimeofday () *. 1000.0) in
-
   let actual = p.fn p.file in
+
   if actual <> p.exp then printf "%s FAILED: %d != %d\n" p.name actual p.exp;
 
   let diff = int_of_float (Unix.gettimeofday () *. 1000.0) - start in
@@ -102,4 +114,4 @@ let timed_run (p : problem) =
 ;;
 List.iter timed_run fns
 
-(* Aoc_2019_7.Part2.run "input/2019/7/puzzle.txt" *)
+(* Aoc_2019_8.Part2.run "input/2019/8/puzzle.txt" *)
