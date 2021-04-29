@@ -22,4 +22,6 @@ val step : machine -> machine
 
 val mach_to_string : machine -> string
 
+val state_to_string : machine_state -> string
+
 val parse_input : string -> int array
