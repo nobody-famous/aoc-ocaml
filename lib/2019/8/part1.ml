@@ -1,25 +1,36 @@
-(* type stats = { zeroes : int; ones : int; twos : int } *)
+type stats = { zeros : int; ones : int; twos : int }
 
-let print_matrix m =
-  let rec row_loop row =
-    let rec col_loop col =
-      if col < Array.length m.(row) then (
-        Printf.printf "%c" m.(row).(col);
-        col_loop (col + 1))
+let calc_stats m =
+  let rec row_loop row stats =
+    let rec col_loop col stats =
+      if col >= Array.length m.(row) then stats
+      else if m.(row).(col) = '0' then
+        col_loop (col + 1) { stats with zeros = stats.zeros + 1 }
+      else if m.(row).(col) = '1' then
+        col_loop (col + 1) { stats with ones = stats.ones + 1 }
+      else if m.(row).(col) = '2' then
+        col_loop (col + 1) { stats with twos = stats.twos + 1 }
+      else col_loop (col + 1) stats
     in
 
-    if row < Array.length m then (
-      col_loop 0;
-      print_endline "";
-      row_loop (row + 1))
+    if row < Array.length m then
+      let stats' = col_loop 0 stats in
+      row_loop (row + 1) stats'
+    else stats
   in
 
-  row_loop 0;
-  0
+  row_loop 0 { zeros = 0; ones = 0; twos = 0 }
 
 let run file_name =
-  let img = Parser.parse_input file_name 3 2 in
-  Printf.printf "Layers %d\n" (List.length img);
+  let img = Parser.parse_input file_name 25 6 in
 
-  let _ = List.fold_left (fun _ m -> print_matrix m) 0 img in
-  0
+  let stats =
+    List.fold_left
+      (fun cur m ->
+        let stats = calc_stats m in
+        if stats.zeros < cur.zeros then stats else cur)
+      { zeros = max_int; ones = 0; twos = 0 }
+      img
+  in
+
+  stats.ones * stats.twos
