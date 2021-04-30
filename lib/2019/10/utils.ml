@@ -1,8 +1,8 @@
-type point = int * int
+type point = { x : int; y : int }
 
 type slope_side = { pos : point list; neg : point list }
 
-let count_asteroids slope_map =
+let count_visible slope_map =
   Hashtbl.fold
     (fun _ sides acc ->
       let pos = if List.length sides.pos > 0 then 1 else 0 in
@@ -17,8 +17,7 @@ let build_map p1 points =
     match rem_points with
     | [] -> seen
     | p2 :: rest ->
-        let x1, y1 = p1 and x2, y2 = p2 in
-        let dx = x2 - x1 and dy = y2 - y1 in
+        let dx = p2.x - p1.x and dy = p2.y - p1.y in
         let slope =
           if dx <> 0 then float_of_int dy /. float_of_int dx else Float.infinity
         in

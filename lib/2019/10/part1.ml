@@ -6,5 +6,5 @@ let run file_name =
   List.fold_left
     (fun acc p ->
       let slope_map = build_map p input in
-      Stdlib.max acc (count_asteroids slope_map))
+      Stdlib.max acc (count_visible slope_map))
     0 input
