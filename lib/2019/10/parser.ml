@@ -1,5 +1,3 @@
-type point = int * int
-
 let find_asteroids lines =
   let rec loop rem_lines row asteroids =
     match rem_lines with
