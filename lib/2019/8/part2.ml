@@ -11,7 +11,7 @@ let print_img img =
   let rec row_loop row =
     let rec col_loop col =
       if col < Array.length img.(row) then (
-        Printf.printf "%c" (if img.(row).(col) = '0' then 'X' else ' ');
+        Printf.printf "%c" (if img.(row).(col) = '0' then ' ' else 'X');
         col_loop (col + 1))
     in
 

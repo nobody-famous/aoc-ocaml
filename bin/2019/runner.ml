@@ -118,6 +118,12 @@ let fns : problem list =
       fn = Aoc_2019_10.Part1.run;
       exp = 347;
     };
+    {
+      name = "2019.10.2";
+      file = "input/2019/10/puzzle.txt";
+      fn = Aoc_2019_10.Part2.run;
+      exp = 829;
+    };
   ]
 
 let timed_run (p : problem) =
@@ -130,6 +136,6 @@ let timed_run (p : problem) =
   printf "%s took %d ms\n" p.name diff
 
 ;;
-(* List.iter timed_run fns *)
+List.iter timed_run fns
 
-Aoc_2019_10.Part2.run "input/2019/10/sample.txt"
+(* Aoc_2019_10.Part2.run "input/2019/10/puzzle.txt" *)
