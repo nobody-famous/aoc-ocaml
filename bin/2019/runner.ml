@@ -2,7 +2,7 @@ open Printf
 
 type problem = { name : string; file : string; fn : string -> int; exp : int }
 
-let fns : problem list =
+let problems : problem list =
   [
     {
       name = "2019.1.1";
@@ -124,18 +124,31 @@ let fns : problem list =
       fn = Aoc_2019_10.Part2.run;
       exp = 829;
     };
+    {
+      name = "2019.11.1";
+      file = "input/2019/11/puzzle.txt";
+      fn = Aoc_2019_11.Part1.run;
+      exp = 1885;
+    };
   ]
 
-let timed_run (p : problem) =
+let timed_run p =
   let start = int_of_float (Unix.gettimeofday () *. 1000.0) in
   let actual = p.fn p.file in
 
   if actual <> p.exp then printf "%s FAILED: %d != %d\n" p.name actual p.exp;
 
   let diff = int_of_float (Unix.gettimeofday () *. 1000.0) - start in
-  printf "%s took %d ms\n" p.name diff
+  printf "%s took %d ms\n" p.name diff;
+
+  diff
+
+let time_all probs =
+  let total = List.fold_left (fun acc fn -> acc + timed_run fn) 0 probs in
+
+  Printf.printf "Total: %d ms\n" total
 
 ;;
-List.iter timed_run fns
+time_all problems
 
-(* Aoc_2019_10.Part2.run "input/2019/10/puzzle.txt" *)
+(* Aoc_2019_11.Part1.run "input/2019/11/puzzle.txt" *)
