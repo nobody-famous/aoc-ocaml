@@ -22,10 +22,7 @@ let build_map p1 points =
           if dx <> 0 then float_of_int dy /. float_of_int dx else Float.infinity
         in
 
-        if p1.x = 3 && p1.y = 4 && p2.x = 0 && p2.y = 2 then
-          Printf.printf "HERE %d %d %f\n" dx dy slope;
-
-          if not (Hashtbl.mem seen slope) then
+        if not (Hashtbl.mem seen slope) then
           Hashtbl.replace seen slope { pos = []; neg = [] };
 
         let item = Hashtbl.find seen slope in
@@ -42,3 +39,7 @@ let build_map p1 points =
   in
 
   loop points
+
+let diff a b = Int.abs (a - b)
+
+let man_dist p1 p2 = diff p1.x p2.x + diff p1.y p2.y

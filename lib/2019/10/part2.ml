@@ -2,7 +2,7 @@ open Utils
 
 type quadrant = NORTH_EAST | SOUTH_EAST | NORTH_WEST | SOUTH_WEST
 
-type slope_point = { slope : float; quad : quadrant; point : point }
+type slope_point = { slope : float; quad : quadrant; points : point array }
 
 let quad_to_string quad =
   match quad with
@@ -25,33 +25,46 @@ let find_station_map input =
   (point, map)
 
 let slope_to_quadrant slope point origin =
-  Printf.printf "%d %d %f\n" point.x point.y slope;
-
-  if (slope > 0. || slope = Float.infinity) && point.y < origin.y then
+  if (slope < 0. || slope = Float.infinity) && point.y < origin.y then
     NORTH_EAST
-  else if slope <= 0. && point.y >= origin.y then SOUTH_EAST
-  else if (slope > 0. || slope = Float.infinity) && point.y > origin.y then
+  else if slope >= 0. && point.x > origin.x then SOUTH_EAST
+  else if (slope < 0. || slope = Float.infinity) && point.y > origin.y then
     SOUTH_WEST
-  else if slope <= 0. && point.y <= origin.y then NORTH_WEST
+  else if slope >= 0. && point.x <= origin.x then NORTH_WEST
   else raise (Failure "Could not assign quadrant")
 
+let sort_points points origin =
+  Array.sort
+    (fun p1 p2 ->
+      let dist1 = man_dist p1 origin in
+      let dist2 = man_dist p2 origin in
+
+      compare dist1 dist2)
+    points
+
 let add_sides acc slope sides origin =
-  let pos =
-    List.fold_left
-      (fun acc p ->
-        let quad = slope_to_quadrant slope (List.nth sides.pos 0) origin in
-        { slope; quad; point = p } :: acc)
-      [] sides.pos
-  in
-  let neg =
-    List.fold_left
-      (fun acc p ->
-        let quad = slope_to_quadrant slope (List.nth sides.neg 0) origin in
-        { slope; quad; point = p } :: acc)
-      [] sides.neg
+  let acc =
+    if List.length sides.pos > 0 then (
+      let points = Array.of_list sides.pos in
+      let quad = slope_to_quadrant slope (List.nth sides.pos 0) origin in
+
+      sort_points points origin;
+
+      { slope; points; quad } :: acc)
+    else acc
   in
 
-  acc @ pos @ neg
+  let acc =
+    if List.length sides.neg > 0 then (
+      let points = Array.of_list sides.neg in
+      let quad = slope_to_quadrant slope (List.nth sides.neg 0) origin in
+
+      sort_points points origin;
+      { slope; points; quad } :: acc)
+    else acc
+  in
+
+  acc
 
 let compare_quadrant q1 q2 =
   if q1 = q2 then 0
@@ -62,6 +75,8 @@ let compare_quadrant q1 q2 =
     | SOUTH_WEST -> ( match q2 with NORTH_WEST -> -1 | _ -> 1)
     | NORTH_WEST -> 1
 
+let compare_slopes s1 s2 = compare s1.quad s2.quad
+
 let map_to_array map origin =
   let items = Hashtbl.to_seq map in
 
@@ -71,11 +86,15 @@ let map_to_array map origin =
       [] items
   in
 
+  let point_array = Array.of_list point_data in
+  Array.sort compare_slopes point_array;
+
   Printf.printf "origin %d %d\n" origin.x origin.y;
-  List.iter
+  Array.iter
     (fun p ->
-      Printf.printf "%d %d %s\n" p.point.x p.point.y (quad_to_string p.quad))
-    point_data;
+      Printf.printf "%f %d %s\n" p.slope (Array.length p.points)
+        (quad_to_string p.quad))
+    point_array;
 
   Printf.printf "length %d\n" (List.length point_data);
 
