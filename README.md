@@ -72,3 +72,23 @@ This was using the Intcode machine for something a little more interesting. It a
 The first part wasn't bad because it only went one time through the chain. The second part, though, exposed several issues I had with my implementation as well as issues with using immutable data. I had a lot of bugs caused by earlier design decisions that ended up not working out and had to be redone, as well as times when I didn't handle the immutable stuff right and kept losing updates.
 
 This one ended up taking me forever, primarily because it exposed some of my shortcomings with using OCaml. It was a good learning experience, though.
+
+### Day 8
+
+This one is implementing an image layer algorithm. Pretty standard stuff when dealing with images. Part 1 was just a matter of counting what was on each layer and keeping track of the one with the least 0's.
+
+Part 2 I wasn't a fan of. It draws out the image, which contains some test, and asks what the text is. There's not really a good way to automate the validation of that. I prefer the ones that return something so that it can be checked.
+
+### Day 9
+
+More Intcode stuff. Added more opcodes, which it says are the last ones, and then run it with a certain input for part 1 and a different input for part 2.
+
+Only interesting part was handling additional memory, which I used a hashmap for. Interesting, but not difficult.
+
+### Day 10
+
+This one got complicated. I didn't want to mess with trig functions, so instead of converting the points to angles I used their slopes. I managed to confuse myself several times on this one, which caused some annoying bugs.
+
+For part 1, determining how many are visible is solved by grouping them by slope. All the ones with the same slope hide each other. One bug was having to take into account whether the points were above or below the pivot point.
+
+Part 2 took me forever. My solution was to sort the slopes so that walking the sorted list would have the same effect as the laser rotating around a circle. This meant needing to group them by quadrant and handle the cases of the slope being zero or infinity.
