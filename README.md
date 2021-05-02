@@ -92,3 +92,19 @@ This one got complicated. I didn't want to mess with trig functions, so instead 
 For part 1, determining how many are visible is solved by grouping them by slope. All the ones with the same slope hide each other. One bug was having to take into account whether the points were above or below the pivot point.
 
 Part 2 took me forever. My solution was to sort the slopes so that walking the sorted list would have the same effect as the laser rotating around a circle. This meant needing to group them by quadrant and handle the cases of the slope being zero or infinity.
+
+### Day 11
+
+Another Intcode one, again not one that can automate validating the answer because you have to read what it draws. This one was simple, just having a robot move according to the output of the machine. Nothing complicated.
+
+### Day 12
+
+I knew there'd be a mathy one eventually and here it is. The first part looped through a given number of steps and checked where things were at that point. It involved moving 3D points according to velocity, so some simple math there.
+
+Part 2 needed some thinking. It was stated that running it to completion would take too long, which means the answer needed to be calculated. The problem is figuring out the equation.
+
+I saw a hint on this one that each vertex could be viewed independantly, so I started with that. I printed out the sequence of X values for one of the moons and looked at what it was doing. I noticed it was looping after a few iterations, so I did the same thing with the Y and Z values. I saw how long each took to loop and then checked all moons. Fortunately, they all looped at the same point which gives the first part of the math. The solution is the lowest common multiple of the 3 values.
+
+The next trick was to automate finding when a sequence looped. I noticed that the loops are all mirrored, meaning it's never something like 1, 2, 3, 4, 1, 2, 3, 4. Instead, it's always something like 1, 2, 3, 4, 4, 3, 2, 1. So, start with pointers at either end and walk the pointers towards each other. If they cross, it's a loop.
+
+I hit an issue with OCaml not having expanding arrays built in. Trying to detect the loops with linked lists isn't feasible, so I was converting them to arrays to do the check. It took forever, over 6 seconds on my machine. I converted the lists to arrays from the start and increased their size until it stopped getting array index errors. I needed to use arrays of size 300000 for it to work. After that change, it runs under 100 ms.

@@ -1,6 +1,11 @@
 type coords = { x : int; y : int; z : int }
 
-type cycle_state = { first : int; seen : int list; size : int option }
+type cycle_state = {
+  first : int;
+  seen : int array;
+  ndx : int;
+  size : int option;
+}
 
 type moon = { pos : coords; vel : coords; cycles : cycle_state array }
 
@@ -10,23 +15,32 @@ let moon_to_string m =
   Printf.sprintf "{pos=%s,vel=%s}" (coords_to_string m.pos)
     (coords_to_string m.vel)
 
+let cycle_array item =
+  let arr = Array.make 300000 0 in
+  arr.(0) <- item;
+  arr
+
+let new_cycle_state first =
+  let state = { first; seen = cycle_array first; ndx = 1; size = None } in
+  state
+
 let new_moon pos vel =
-  let x_state = { first = pos.x; seen = [ pos.x ]; size = None } in
-  let y_state = { first = pos.y; seen = [ pos.y ]; size = None } in
-  let z_state = { first = pos.z; seen = [ pos.z ]; size = None } in
+  let x_state = new_cycle_state pos.x in
+  let y_state = new_cycle_state pos.y in
+  let z_state = new_cycle_state pos.z in
   let cycles = [| x_state; y_state; z_state |] in
 
   { pos; vel; cycles }
 
 let cycle_to_string cycle =
-  let rec loop s seen =
-    match seen with
-    | [] -> s
-    | first :: rest -> loop (Printf.sprintf "%s%d," s first) rest
+  let rec loop s ndx =
+    if ndx < cycle.ndx then
+      loop (Printf.sprintf "%s%d," s cycle.seen.(ndx)) (ndx + 1)
+    else s
   in
 
   let s = Printf.sprintf "{seen [" in
-  let s = loop s cycle.seen in
+  let s = loop s 0 in
   let s = Printf.sprintf "%s]" s in
   let s =
     Printf.sprintf "%s,size %d}" s
@@ -38,16 +52,15 @@ let cycle_to_string cycle =
 let has_cycle cycle = match cycle.size with Some _ -> true | None -> false
 
 let check_for_loop cycle =
-  let arr = Array.of_list cycle.seen in
   let rec loop n n' =
-    if n > n' then List.length cycle.seen > 1
-    else if arr.(n) <> arr.(n') then false
+    if n > n' then cycle.ndx > 1
+    else if cycle.seen.(n) <> cycle.seen.(n') then false
     else loop (n + 1) (n' - 1)
   in
 
-  let found = loop 0 (Array.length arr - 1) in
+  let found = loop 0 (cycle.ndx - 1) in
 
-  if found then { cycle with size = Some (Array.length arr) } else cycle
+  if found then { cycle with size = Some cycle.ndx } else cycle
 
 let all_cycles moon =
   let has_all =
@@ -59,14 +72,13 @@ let add_to_cycle cycle item =
   match cycle.size with
   | Some _ -> cycle
   | None ->
-      let cycle' = { cycle with seen = item :: cycle.seen } in
-      let cycle' =
-        if has_cycle cycle' then
-          { cycle' with size = Some (List.length cycle'.seen) }
-        else cycle'
-      in
+      if cycle.ndx >= Array.length cycle.seen then
+        raise (Failure (Printf.sprintf "NDX %d\n" cycle.ndx));
 
-      cycle'
+      if has_cycle cycle then cycle
+      else (
+        cycle.seen.(cycle.ndx) <- item;
+        { cycle with ndx = cycle.ndx + 1 })
 
 let compute_vel m moons =
   let rec loop ms delta =

@@ -36,6 +36,7 @@ let lcm m n =
 let run file_name =
   let moons = Parser.parse_input file_name in
   let moons = steps moons in
+
   let cycles = get_cycles moons in
 
   Array.fold_left (fun acc c -> lcm acc c) 1 cycles
