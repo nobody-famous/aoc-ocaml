@@ -35,7 +35,7 @@ let get_param_mode instr mask =
   | 0 -> Position
   | 1 -> Immediate
   | 2 -> Relative
-  | _ -> raise (Failure (Printf.sprintf "Invalid Mode %d" digit))
+  | _ -> raise @@ Failure (Printf.sprintf "Invalid Mode %d" digit)
 
 let int_to_op instr =
   {
@@ -71,12 +71,12 @@ let set_addr m addr value =
 let set_debug m value = { m with debug = value }
 
 let param_value m op offset =
-  let v = get_addr m (m.ip + offset) in
+  let v = get_addr m @@ (m.ip + offset) in
   let value =
     match op.modes.(offset - 1) with
     | Position -> get_addr m v
     | Immediate -> v
-    | Relative -> get_addr m (v + m.rel_base)
+    | Relative -> get_addr m @@ (v + m.rel_base)
   in
 
   value
@@ -166,7 +166,7 @@ let op_code_9 m op =
 let op_code_99 m = { m with state = HALT; ip = m.ip + 1 }
 
 let step m =
-  if m.state = HALT then raise (Failure "step: HALTED");
+  if m.state = HALT then raise @@ Failure "step: HALTED";
   let op = int_to_op m.prog.(m.ip) in
 
   if m.debug then printf "%d OP %d (%d)\n" m.ip m.prog.(m.ip) op.code;
@@ -182,7 +182,7 @@ let step m =
   | 8 -> op_code_8 m op
   | 9 -> op_code_9 m op
   | 99 -> op_code_99 m
-  | _ -> raise (Invalid_argument (sprintf "UNHANDLED OP CODE %d\n" op.code))
+  | _ -> raise @@ Invalid_argument (sprintf "UNHANDLED OP CODE %d\n" op.code)
 
 let state_to_string s =
   match s with
@@ -192,7 +192,7 @@ let state_to_string s =
   | OUTPUT -> "OUTPUT"
 
 let mach_to_string m =
-  Printf.sprintf "{IP: %d STATE: %s}" m.ip (state_to_string m.state)
+  Printf.sprintf "{IP: %d STATE: %s}" m.ip @@ state_to_string m.state
 
 let read_line input = try Some (input_line input) with End_of_file -> None
 

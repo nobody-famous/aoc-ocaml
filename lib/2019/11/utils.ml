@@ -82,7 +82,7 @@ let run_robot in_bot in_color =
     | OUTPUT -> (
         let m, out = Intcode.get_output bot.mach in
         match out with
-        | None -> raise (Failure "NO OUTPUT")
+        | None -> raise @@ Failure "NO OUTPUT"
         | Some v -> loop (proc_output { bot with mach = m } v))
   in
 

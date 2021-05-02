@@ -5,7 +5,7 @@ let run_prog m =
     match Intcode.get_state m with
     | RUN -> loop m
     | HALT -> m
-    | _ -> raise (Failure "Invalid state")
+    | _ -> raise @@ Failure "Invalid state"
   in
 
   loop m

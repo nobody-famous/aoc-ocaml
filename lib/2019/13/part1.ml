@@ -58,8 +58,7 @@ let proc_out game out =
 
 let run_game game =
   let rec loop g =
-    let m = g.mach in
-    let m = Intcode.step m in
+    let m = g.mach |> Intcode.step in
 
     match Intcode.get_state m with
     | HALT -> g
