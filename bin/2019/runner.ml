@@ -142,6 +142,12 @@ let problems : problem list =
       fn = Aoc_2019_12.Part1.run;
       exp = 7077;
     };
+    {
+      name = "2019.12.2";
+      file = "input/2019/12/puzzle.txt";
+      fn = Aoc_2019_12.Part2.run;
+      exp = 402951477454512;
+    };
   ]
 
 let timed_run p =
@@ -161,6 +167,6 @@ let time_all probs =
   Printf.printf "Total: %d ms\n" total
 
 ;;
-(* time_all problems *)
+time_all problems
 
-Aoc_2019_12.Part2.run "input/2019/12/sample2.txt"
+(* Aoc_2019_12.Part2.run "input/2019/12/puzzle.txt" *)

@@ -1,6 +1,6 @@
 type coords = { x : int; y : int; z : int }
 
-type cycle_state = { seen : int list; size : int option }
+type cycle_state = { first : int; seen : int list; size : int option }
 
 type moon = { pos : coords; vel : coords; cycles : cycle_state array }
 
@@ -11,9 +11,9 @@ let moon_to_string m =
     (coords_to_string m.vel)
 
 let new_moon pos vel =
-  let x_state = { seen = [ pos.x ]; size = None } in
-  let y_state = { seen = [ pos.y ]; size = None } in
-  let z_state = { seen = [ pos.z ]; size = None } in
+  let x_state = { first = pos.x; seen = [ pos.x ]; size = None } in
+  let y_state = { first = pos.y; seen = [ pos.y ]; size = None } in
+  let z_state = { first = pos.z; seen = [ pos.z ]; size = None } in
   let cycles = [| x_state; y_state; z_state |] in
 
   { pos; vel; cycles }
@@ -35,24 +35,24 @@ let cycle_to_string cycle =
 
   s
 
-let has_cycle cycle =
-  match cycle.size with
-  | Some _ -> true
-  | None ->
-      let arr = Array.of_list cycle.seen in
-      let rec loop n n' =
-        if n > n' then List.length cycle.seen > 1
-        else if arr.(n) <> arr.(n') then false
-        else loop (n + 1) (n' - 1)
-      in
+let has_cycle cycle = match cycle.size with Some _ -> true | None -> false
 
-      loop 0 (Array.length arr - 1)
+let check_for_loop cycle =
+  let arr = Array.of_list cycle.seen in
+  let rec loop n n' =
+    if n > n' then List.length cycle.seen > 1
+    else if arr.(n) <> arr.(n') then false
+    else loop (n + 1) (n' - 1)
+  in
+
+  let found = loop 0 (Array.length arr - 1) in
+
+  if found then { cycle with size = Some (Array.length arr) } else cycle
 
 let all_cycles moon =
   let has_all =
     Array.fold_left (fun acc c -> acc && has_cycle c) true moon.cycles
   in
-
   has_all
 
 let add_to_cycle cycle item =
@@ -90,5 +90,14 @@ let apply_vel m =
   m.cycles.(0) <- add_to_cycle m.cycles.(0) new_pos.x;
   m.cycles.(1) <- add_to_cycle m.cycles.(1) new_pos.y;
   m.cycles.(2) <- add_to_cycle m.cycles.(2) new_pos.z;
+
+  if (not (has_cycle m.cycles.(0))) && new_pos.x = m.cycles.(0).first then
+    m.cycles.(0) <- check_for_loop m.cycles.(0);
+
+  if (not (has_cycle m.cycles.(1))) && new_pos.y = m.cycles.(1).first then
+    m.cycles.(1) <- check_for_loop m.cycles.(1);
+
+  if (not (has_cycle m.cycles.(2))) && new_pos.z = m.cycles.(2).first then
+    m.cycles.(2) <- check_for_loop m.cycles.(2);
 
   { m with pos = new_pos }
