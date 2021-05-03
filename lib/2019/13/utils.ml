@@ -1,6 +1,6 @@
 type next_output = X_POS | Y_POS | VALUE
 
-type instr = { x : int; y : int; tile_id : int }
+type instr = { x : int; y : int; value : int }
 
 type game_piece = EMPTY | WALL | BLOCK | PADDLE | BALL
 
@@ -10,6 +10,9 @@ type game_state = {
   mach : Intcode.machine;
   next_out : next_output;
   cur_instr : instr;
+  score : int;
+  paddle : coords;
+  ball : coords;
   grid : (coords, game_piece) Hashtbl.t;
 }
 
@@ -17,7 +20,10 @@ let new_game prog =
   {
     mach = Intcode.new_machine prog;
     next_out = X_POS;
-    cur_instr = { x = 0; y = 0; tile_id = 0 };
+    cur_instr = { x = 0; y = 0; value = 0 };
+    score = 0;
+    paddle = { x = 0; y = 0 };
+    ball = { x = 0; y = 0 };
     grid = Hashtbl.create 64;
   }
 
@@ -35,9 +41,17 @@ let piece_of_id id =
 
 let update_tile game =
   let point = { x = game.cur_instr.x; y = game.cur_instr.y } in
-  let piece = piece_of_id game.cur_instr.tile_id in
+  let piece = piece_of_id game.cur_instr.value in
+  let game =
+    if piece = PADDLE then { game with paddle = point }
+    else if piece = BALL then { game with ball = point }
+    else game
+  in
 
-  Hashtbl.replace game.grid point piece
+  Hashtbl.replace game.grid point piece;
+  game
+
+let update_score game = { game with score = game.cur_instr.value }
 
 let proc_out game out =
   let next = inc_next_output game.next_out in
@@ -47,11 +61,11 @@ let proc_out game out =
     | Y_POS -> { game with cur_instr = { game.cur_instr with y = out } }
     | VALUE ->
         let game =
-          { game with cur_instr = { game.cur_instr with tile_id = out } }
+          { game with cur_instr = { game.cur_instr with value = out } }
         in
 
-        update_tile game;
-        game
+        if game.cur_instr.x = -1 && game.cur_instr.y = 0 then update_score game
+        else update_tile game
   in
 
   { game with next_out = next }
@@ -68,6 +82,20 @@ let machine_output game =
 
   game'
 
+let machine_input game =
+  let ball = game.ball in
+  let paddle = game.paddle in
+
+  let game =
+    if ball.x < paddle.x then
+      { game with mach = Intcode.set_input game.mach (-1) }
+    else if ball.x > paddle.x then
+      { game with mach = Intcode.set_input game.mach 1 }
+    else { game with mach = Intcode.set_input game.mach 0 }
+  in
+
+  game
+
 let run_game game =
   let rec loop g =
     let m = g.mach |> Intcode.step in
@@ -77,9 +105,7 @@ let run_game game =
     | HALT -> g
     | RUN -> loop { g with mach = m }
     | OUTPUT -> loop @@ machine_output g
-    | s ->
-        raise
-        @@ Failure (Printf.sprintf "UNHANDLED %s" @@ Intcode.state_to_string s)
+    | INPUT -> loop @@ machine_input g
   in
 
   loop game
