@@ -31,7 +31,7 @@ let slope_to_quadrant slope point origin =
   else if (slope < 0. || slope = Float.infinity) && point.y > origin.y then
     SOUTH_WEST
   else if slope >= 0. && point.x <= origin.x then NORTH_WEST
-  else raise (Failure "Could not assign quadrant")
+  else raise @@ Failure "Could not assign quadrant"
 
 let sort_points points origin =
   if List.length points = 1 then points
@@ -116,7 +116,7 @@ let remove_asteroids arr =
       | [] -> loop (ndx + 1) count last
       | first :: rest ->
           arr.(ndx) <- { (arr.(ndx)) with points = rest };
-          loop (ndx + 1) (count + 1) (Some first)
+          loop (ndx + 1) (count + 1) @@ Some first
   in
 
   loop 0 0 None

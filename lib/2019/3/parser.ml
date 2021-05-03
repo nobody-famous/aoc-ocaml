@@ -3,7 +3,7 @@ open InputParser
 open Types
 
 let dir_to_delta str =
-  let d, v = (str.[0], String.sub str 1 (String.length str - 1)) in
+  let d, v = (str.[0], String.sub str 1 @@ (String.length str - 1)) in
   let d, v = (d, int_of_string v) in
 
   match d with
@@ -11,7 +11,7 @@ let dir_to_delta str =
   | 'L' -> { x = -v; y = 0 }
   | 'U' -> { x = 0; y = v }
   | 'D' -> { x = 0; y = -v }
-  | _ -> raise (Invalid_argument (sprintf "Unknown direction %c" d))
+  | _ -> raise @@ Invalid_argument (sprintf "Unknown direction %c" d)
 
 let deltas_to_lines deltas =
   let rec loop p d lines =
@@ -19,7 +19,7 @@ let deltas_to_lines deltas =
     | [] -> List.rev lines
     | h :: t ->
         let p' = { x = p.x + h.x; y = p.y + h.y } in
-        loop p' t ({ p1 = p; p2 = p' } :: lines)
+        loop p' t @@ { p1 = p; p2 = p' } :: lines
   in
 
   loop { x = 0; y = 0 } deltas []

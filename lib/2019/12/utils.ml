@@ -35,7 +35,7 @@ let new_moon pos vel =
 let cycle_to_string cycle =
   let rec loop s ndx =
     if ndx < cycle.ndx then
-      loop (Printf.sprintf "%s%d," s cycle.seen.(ndx)) (ndx + 1)
+      loop (Printf.sprintf "%s%d," s cycle.seen.(ndx)) @@ (ndx + 1)
     else s
   in
 
@@ -44,7 +44,7 @@ let cycle_to_string cycle =
   let s = Printf.sprintf "%s]" s in
   let s =
     Printf.sprintf "%s,size %d}" s
-      (match cycle.size with None -> 0 | Some s -> s)
+    @@ match cycle.size with None -> 0 | Some s -> s
   in
 
   s
@@ -73,7 +73,7 @@ let add_to_cycle cycle item =
   | Some _ -> cycle
   | None ->
       if cycle.ndx >= Array.length cycle.seen then
-        raise (Failure (Printf.sprintf "NDX %d\n" cycle.ndx));
+        raise @@ Failure (Printf.sprintf "NDX %d\n" cycle.ndx);
 
       if has_cycle cycle then cycle
       else (
@@ -103,13 +103,13 @@ let apply_vel m =
   m.cycles.(1) <- add_to_cycle m.cycles.(1) new_pos.y;
   m.cycles.(2) <- add_to_cycle m.cycles.(2) new_pos.z;
 
-  if (not (has_cycle m.cycles.(0))) && new_pos.x = m.cycles.(0).first then
+  if (not @@ has_cycle m.cycles.(0)) && new_pos.x = m.cycles.(0).first then
     m.cycles.(0) <- check_for_loop m.cycles.(0);
 
-  if (not (has_cycle m.cycles.(1))) && new_pos.y = m.cycles.(1).first then
+  if (not @@ has_cycle m.cycles.(1)) && new_pos.y = m.cycles.(1).first then
     m.cycles.(1) <- check_for_loop m.cycles.(1);
 
-  if (not (has_cycle m.cycles.(2))) && new_pos.z = m.cycles.(2).first then
+  if (not @@ has_cycle m.cycles.(2)) && new_pos.z = m.cycles.(2).first then
     m.cycles.(2) <- check_for_loop m.cycles.(2);
 
   { m with pos = new_pos }
