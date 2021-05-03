@@ -33,24 +33,50 @@ let piece_of_id id =
   | 4 -> BALL
   | _ -> raise @@ Failure (Printf.sprintf "Invalid ID %d" id)
 
-let run_game out_fn game =
+let update_tile game =
+  let point = { x = game.cur_instr.x; y = game.cur_instr.y } in
+  let piece = piece_of_id game.cur_instr.tile_id in
+
+  Hashtbl.replace game.grid point piece
+
+let proc_out game out =
+  let next = inc_next_output game.next_out in
+  let game =
+    match game.next_out with
+    | X_POS -> { game with cur_instr = { game.cur_instr with x = out } }
+    | Y_POS -> { game with cur_instr = { game.cur_instr with y = out } }
+    | VALUE ->
+        let game =
+          { game with cur_instr = { game.cur_instr with tile_id = out } }
+        in
+
+        update_tile game;
+        game
+  in
+
+  { game with next_out = next }
+
+let machine_output game =
+  let m, out = Intcode.get_output game.mach in
+  let game' = { game with mach = m } in
+
+  let game' =
+    match out with
+    | None -> raise @@ Failure "Expected output, but had none"
+    | Some v -> proc_out game' v
+  in
+
+  game'
+
+let run_game game =
   let rec loop g =
     let m = g.mach |> Intcode.step in
+    let g = { g with mach = m } in
 
     match Intcode.get_state m with
     | HALT -> g
     | RUN -> loop { g with mach = m }
-    | OUTPUT ->
-        let m, out = Intcode.get_output m in
-        let game' = { g with mach = m } in
-
-        let game' =
-          match out with
-          | None -> raise @@ Failure "Expected output, but had none"
-          | Some v -> out_fn game' v
-        in
-
-        loop game'
+    | OUTPUT -> loop @@ machine_output g
     | s ->
         raise
         @@ Failure (Printf.sprintf "UNHANDLED %s" @@ Intcode.state_to_string s)
