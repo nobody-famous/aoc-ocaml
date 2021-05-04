@@ -181,4 +181,4 @@ let time_all probs =
 ;;
 (* time_all problems *)
 
-Aoc_2019_14.Part1.run "input/2019/14/sample5.txt"
+Aoc_2019_14.Part1.run "input/2019/14/sample4.txt"

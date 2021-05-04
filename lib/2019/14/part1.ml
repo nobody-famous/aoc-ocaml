@@ -8,8 +8,13 @@ let find_min_amount needed required =
 
   mul * required
 
+let add_to_ht ht key value =
+  let cur_value = try Hashtbl.find ht key with Not_found -> 0 in
+  Hashtbl.replace ht key @@ (value + cur_value)
+
 let sum_chems input =
   let sums = Hashtbl.create 64 in
+  let diffs = Hashtbl.create 64 in
 
   let rec walk (input : (string, Parser.input_chems) Hashtbl.t) name mul =
     let in_chems =
@@ -17,25 +22,33 @@ let sum_chems input =
       with Not_found -> raise @@ Failure (Printf.sprintf "Missing %s" name)
     in
 
-    Printf.printf "%s %d\n" name mul;
-
     let top = List.nth in_chems.chems 0 in
-    if top.name = "ORE" then (
-      let cur_value = try Hashtbl.find sums name with Not_found -> 0 in
-      Hashtbl.replace sums name (cur_value + mul);
-      Printf.printf "BOTTOM %s %d\n" name (cur_value + mul))
+    if top.name = "ORE" then add_to_ht sums name mul
     else
+      let min_amount = find_min_amount mul in_chems.amount in
+      let diff = min_amount - mul in
+
+      if diff > 0 then add_to_ht diffs name diff;
+
+      let extras = try Hashtbl.find diffs name with Not_found -> 0 in
+
+      (* let target = in_chems.amount - extras in *)
+      Printf.printf "extras %s %d\n" name extras;
+      Hashtbl.replace diffs name 0;
+
+      (* if target > 0 then *)
       List.iter
         (fun (chem : Parser.chemical) ->
           let mul' = max 1 (ceil_div mul in_chems.amount) in
 
-          Printf.printf "  %s %d %d %d\n" chem.name in_chems.amount chem.amount
-            mul';
           walk input chem.name (chem.amount * mul'))
         in_chems.chems
   in
 
   walk input "FUEL" 1;
+
+  Printf.printf "DIFFS\n";
+  Hashtbl.iter (fun k v -> Printf.printf "%s %d\n" k v) diffs;
 
   sums
 
