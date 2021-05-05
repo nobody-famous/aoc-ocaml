@@ -162,9 +162,9 @@ let problems : problem list =
     };
     {
       name = "2019.14.1";
-      file = "input/2019/14/sample4.txt";
+      file = "input/2019/14/puzzle.txt";
       fn = Aoc_2019_14.Part1.run;
-      exp = 0;
+      exp = 136771;
     };
   ]
 
@@ -185,6 +185,6 @@ let time_all probs =
   Printf.printf "Total: %d ms\n" total
 
 ;;
-(* time_all problems *)
+time_all problems
 
-Aoc_2019_14.Part1.run "input/2019/14/puzzle.txt"
+(* Aoc_2019_14.Part1.run "input/2019/14/puzzle.txt" *)

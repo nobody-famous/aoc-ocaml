@@ -1,10 +1,5 @@
 let ceil_div num den = (num + (den - 1)) / den
 
-let find_min_amount needed required =
-  let mul = ceil_div needed required in
-
-  mul * required
-
 let add_to_ht ht key value =
   let cur_value = try Hashtbl.find ht key with Not_found -> 0 in
   Hashtbl.replace ht key @@ (value + cur_value)
@@ -23,17 +18,16 @@ let calc_ore (input : (string, Parser.reaction) Hashtbl.t) =
   Hashtbl.replace seen "FUEL" 0;
   Hashtbl.replace req "FUEL" 1;
 
-  let rec loop is_done =
-    if is_done then ()
-    else
-      Hashtbl.iter
-        (fun key value ->
-          if value = 0 then
+  let rec loop () =
+    let n =
+      Hashtbl.fold
+        (fun key value acc ->
+          if value <> 0 then acc
+          else
             let n = Hashtbl.find req key in
+
             match key with
-            | "ORE" ->
-                Printf.printf "%d\n" n;
-                loop true
+            | "ORE" -> Some n
             | _ ->
                 (let entry = Hashtbl.find input key in
                  let amt = ceil_div n entry.amount in
@@ -44,18 +38,17 @@ let calc_ore (input : (string, Parser.reaction) Hashtbl.t) =
                      add_to_ht seen chem.name (-1))
                    entry.chems);
                 Hashtbl.remove seen key;
-                loop false)
-        seen
+                acc)
+        seen None
+    in
+
+    match n with None -> loop () | Some value -> value
   in
 
-  loop false
+  loop ()
 
 let run file_name =
   let input = Parser.parse_input file_name in
-  let _ = calc_ore input in
-
-  let answer = 0 in
-
-  Printf.printf "%d\n" answer;
+  let answer = calc_ore input in
 
   answer
