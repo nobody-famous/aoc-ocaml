@@ -1,6 +1,6 @@
 type chemical = { amount : int; name : string }
 
-type input_chems = { amount : int; chems : chemical list }
+type reaction = { amount : int; chems : chemical list }
 
 let parse_chem chem_str =
   let str = Str.regexp "\\([0-9]+\\) \\([A-Z]+\\)" in
