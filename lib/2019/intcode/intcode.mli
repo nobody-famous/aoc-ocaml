@@ -25,3 +25,6 @@ val mach_to_string : machine -> string
 val state_to_string : machine_state -> string
 
 val parse_input : string -> int array
+
+val run_machine :
+  (machine -> machine) -> (machine -> machine) -> machine -> machine

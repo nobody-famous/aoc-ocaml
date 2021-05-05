@@ -165,6 +165,25 @@ let op_code_9 m op =
 
 let op_code_99 m = { m with state = HALT; ip = m.ip + 1 }
 
+let state_to_string s =
+  match s with
+  | HALT -> "HALT"
+  | RUN -> "RUN"
+  | INPUT -> "INPUT"
+  | OUTPUT -> "OUTPUT"
+
+let mach_to_string m =
+  Printf.sprintf "{IP: %d STATE: %s}" m.ip @@ state_to_string m.state
+
+let read_line input = try Some (input_line input) with End_of_file -> None
+
+let parse_input file_name =
+  let input = open_in file_name in
+  match read_line input with
+  | Some line ->
+      String.split_on_char ',' line |> List.map int_of_string |> Array.of_list
+  | None -> [||]
+
 let step m =
   if m.state = HALT then raise @@ Failure "step: HALTED";
   let op = int_to_op m.prog.(m.ip) in
@@ -184,21 +203,14 @@ let step m =
   | 99 -> op_code_99 m
   | _ -> raise @@ Invalid_argument (sprintf "UNHANDLED OP CODE %d\n" op.code)
 
-let state_to_string s =
-  match s with
-  | HALT -> "HALT"
-  | RUN -> "RUN"
-  | INPUT -> "INPUT"
-  | OUTPUT -> "OUTPUT"
+let run_machine in_fn out_fn m =
+  let rec loop mach =
+    let mach = step mach in
+    match get_state mach with
+    | HALT -> mach
+    | RUN -> loop mach
+    | INPUT -> loop @@ in_fn mach
+    | OUTPUT -> loop @@ out_fn mach
+  in
 
-let mach_to_string m =
-  Printf.sprintf "{IP: %d STATE: %s}" m.ip @@ state_to_string m.state
-
-let read_line input = try Some (input_line input) with End_of_file -> None
-
-let parse_input file_name =
-  let input = open_in file_name in
-  match read_line input with
-  | Some line ->
-      String.split_on_char ',' line |> List.map int_of_string |> Array.of_list
-  | None -> [||]
+  loop m
