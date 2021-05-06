@@ -9,6 +9,7 @@ type point = { x : int; y : int }
 type robot_state = {
   loc : point;
   move : direction;
+  bt_list : direction list;
   board : (point, piece) Hashtbl.t;
 }
 
@@ -17,10 +18,16 @@ let new_state () =
   let start_point = { x = 0; y = 0 } in
 
   Hashtbl.replace board start_point EMPTY;
-  { loc = start_point; move = NORTH; board }
+  { loc = start_point; move = NORTH; bt_list = []; board }
+
+let peice_to_string p =
+  match p with WALL -> "WALL" | EMPTY -> "EMPTY" | OXYGEN_SYS -> "OXYGEN_SYS"
 
 let dir_to_int m =
   match m with NORTH -> 1 | SOUTH -> 2 | WEST -> 3 | EAST -> 4
+
+let dir_to_opp dir =
+  match dir with NORTH -> SOUTH | SOUTH -> NORTH | WEST -> EAST | EAST -> WEST
 
 let dir_to_string m =
   match m with
@@ -47,13 +54,26 @@ let next_move dir =
 
 let move_to_loc state =
   let loc = state.loc in
+  let state = { state with bt_list = state.move :: state.bt_list } in
 
-  Printf.printf "move_to_loc %s\n" (dir_to_string state.move);
   match state.move with
-  | NORTH -> { state with loc = { loc with y = loc.y - 1 } }
-  | SOUTH -> { state with loc = { loc with y = loc.y + 1 } }
+  | NORTH -> { state with loc = { loc with y = loc.y + 1 } }
+  | SOUTH -> { state with loc = { loc with y = loc.y - 1 } }
   | EAST -> { state with loc = { loc with x = loc.x + 1 } }
   | WEST -> { state with loc = { loc with x = loc.x - 1 } }
+
+let untried_dir state =
+  let loc = state.loc in
+  let north = { loc with y = loc.y + 1 } in
+  let south = { loc with y = loc.y - 1 } in
+  let east = { loc with x = loc.x + 1 } in
+  let west = { loc with x = loc.x - 1 } in
+
+  if not @@ Hashtbl.mem state.board north then Some NORTH
+  else if not @@ Hashtbl.mem state.board south then Some SOUTH
+  else if not @@ Hashtbl.mem state.board east then Some EAST
+  else if not @@ Hashtbl.mem state.board west then Some WEST
+  else None
 
 let handle_input mach =
   let stack = Intcode.get_payload mach in
@@ -64,8 +84,19 @@ let handle_input mach =
   in
 
   let new_state = move_to_loc state in
+
+  Printf.printf "loc %d,%d => %d,%d\n" state.loc.x state.loc.y new_state.loc.x
+    new_state.loc.y;
+
   let mach = Intcode.set_payload mach (new_state :: stack) in
   Intcode.set_input mach move
+
+let pop_list lst = match lst with [] -> [] | _ :: rest -> rest
+
+let backtrack state =
+  match state.bt_list with
+  | top :: rest -> { state with move = dir_to_opp top; bt_list = rest }
+  | [] -> raise @@ Failure (Printf.sprintf "Backtrack ran out")
 
 let handle_hit_wall mach =
   let state, rest =
@@ -79,10 +110,17 @@ let handle_hit_wall mach =
     | [] -> raise @@ Failure (Printf.sprintf "Hit WALL, no backtrack")
   in
 
-  Printf.printf "Hit wall %d,%d, back to %d,%d\n" state.loc.x state.loc.y
-    top.loc.x top.loc.y;
+  let state = backtrack state in
+
+  Printf.printf "Hit wall %d,%d, %s back to %d,%d\n" state.loc.x state.loc.y
+    (dir_to_string state.move) top.loc.x top.loc.y;
+
   Hashtbl.replace state.board state.loc WALL;
   Intcode.set_payload mach ({ top with move = next_move top.move } :: rest)
+
+let print_bt state =
+  List.iter (fun bt -> Printf.printf "%s " (dir_to_string bt)) state.bt_list;
+  Printf.printf "\n"
 
 let handle_moved mach =
   let state, rest =
@@ -91,9 +129,27 @@ let handle_moved mach =
     | [] -> raise @@ Failure (Printf.sprintf "Moved no state")
   in
 
-  Printf.printf "Moved to %d,%d\n" state.loc.x state.loc.y;
+  Printf.printf "Moved %s to %d,%d\n" (dir_to_string state.move) state.loc.x
+    state.loc.y;
+  print_bt state;
+
+  let state =
+    match untried_dir state with
+    | None ->
+        Printf.printf "handle_moved backtrack\n";
+        print_bt state;
+        exit 0 (* backtrack state *)
+    | Some dir -> { state with move = dir }
+  in
+
+  (* Printf.printf "Next move %s\n" (dir_to_string state.move); *)
+  (* Hashtbl.iter
+     (fun k v -> Printf.printf "%d,%d %s\n" k.x k.y (peice_to_string v))
+     state.board; *)
+
+  (* let mach = Intcode.set_state mach Intcode.HALT in *)
   Hashtbl.replace state.board state.loc EMPTY;
-  Intcode.set_payload mach ({ state with move = NORTH } :: rest)
+  Intcode.set_payload mach (state :: rest)
 
 let handle_out_code code mach =
   let state_list = Intcode.get_payload mach in
@@ -103,8 +159,6 @@ let handle_out_code code mach =
     | [] -> raise @@ Failure (Printf.sprintf "Output no state")
   in
 
-  Printf.printf "output state %d %d\n" state.loc.x state.loc.y;
-
   match code with
   | HIT_WALL -> handle_hit_wall mach
   | MOVED -> handle_moved mach
@@ -113,7 +167,6 @@ let handle_out_code code mach =
       raise @@ Failure (Printf.sprintf "Unhandled code %s" (status_to_string s))
 
 let handle_output mach =
-  Printf.printf "handle_output\n";
   let mach, out = Intcode.get_output mach in
 
   match out with
