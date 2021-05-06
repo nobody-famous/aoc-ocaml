@@ -26,11 +26,11 @@ let permutations amps =
 
 let make_machines prog =
   [|
-    Intcode.new_machine (Array.copy prog);
-    Intcode.new_machine (Array.copy prog);
-    Intcode.new_machine (Array.copy prog);
-    Intcode.new_machine (Array.copy prog);
-    Intcode.new_machine (Array.copy prog);
+    Intcode.new_machine () (Array.copy prog);
+    Intcode.new_machine () (Array.copy prog);
+    Intcode.new_machine () (Array.copy prog);
+    Intcode.new_machine () (Array.copy prog);
+    Intcode.new_machine () (Array.copy prog);
   |]
 
 let start_machine machine phase =

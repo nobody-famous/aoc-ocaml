@@ -2,8 +2,9 @@ open Printf
 
 type machine_state = HALT | RUN | INPUT | OUTPUT
 
-type machine = {
+type 'a machine = {
   prog : int array;
+  payload : 'a;
   memory : (int, int) Hashtbl.t;
   ip : int;
   rel_base : int;
@@ -17,9 +18,10 @@ type param_mode = Position | Immediate | Relative
 
 type op = { code : int; modes : param_mode array }
 
-let new_machine prog =
+let new_machine payload prog =
   {
     prog;
+    payload;
     memory = Hashtbl.create 16;
     ip = 0;
     rel_base = 0;
@@ -50,12 +52,18 @@ let int_to_op instr =
 
 let halted m = m.state = HALT
 
+let set_payload m p = { m with payload = p }
+
+let get_payload m = m.payload
+
 let set_input m value = { m with input = Some value }
 
 let get_output m =
   match m.output with
   | None -> ({ m with state = RUN }, None)
   | Some v -> ({ m with output = None; state = RUN }, Some v)
+
+let set_state m s = { m with state = s }
 
 let get_state m = m.state
 
