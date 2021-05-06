@@ -79,7 +79,8 @@ let handle_hit_wall mach =
     | [] -> raise @@ Failure (Printf.sprintf "Hit WALL, no backtrack")
   in
 
-  Printf.printf "Hit wall %d,%d\n" state.loc.x state.loc.y;
+  Printf.printf "Hit wall %d,%d, back to %d,%d\n" state.loc.x state.loc.y
+    top.loc.x top.loc.y;
   Hashtbl.replace state.board state.loc WALL;
   Intcode.set_payload mach ({ top with move = next_move top.move } :: rest)
 
