@@ -2,7 +2,7 @@ type direction = NORTH | SOUTH | EAST | WEST
 
 type status = HIT_WALL | MOVED | FOUND_SYS
 
-type piece = WALL | EMPTY | OXYGEN_SYS
+type piece = WALL | EMPTY | OXYGEN_SYS | UNKNOWN
 
 type point = { x : int; y : int }
 
@@ -34,12 +34,51 @@ let new_state () =
   }
 
 let piece_to_string p =
-  match p with WALL -> "WALL" | EMPTY -> "EMPTY" | OXYGEN_SYS -> "OXYGEN_SYS"
+  match p with
+  | WALL -> "WALL"
+  | EMPTY -> "EMPTY"
+  | OXYGEN_SYS -> "OXYGEN_SYS"
+  | UNKNOWN -> "UNKNOWN"
 
 let print_board state =
-  Hashtbl.iter
-    (fun k v -> Printf.printf "%d,%d %s\n" k.x k.y (piece_to_string v))
-    state.board
+  let low_x, high_x, low_y, high_y =
+    Hashtbl.fold
+      (fun k _ (lx, hx, ly, hy) ->
+        ( Stdlib.min lx k.x,
+          Stdlib.max hx k.x,
+          Stdlib.min ly k.y,
+          Stdlib.max hy k.y ))
+      state.board
+      (max_int, min_int, max_int, min_int)
+  in
+
+  let rec y_loop y =
+    let rec x_loop x =
+      let piece =
+        try Hashtbl.find state.board { x; y } with Not_found -> UNKNOWN
+      in
+
+      let ch =
+        match piece with
+        | EMPTY -> ' '
+        | WALL -> '#'
+        | OXYGEN_SYS -> 'X'
+        | UNKNOWN -> '?'
+      in
+
+      let ch = if x = 0 && y = 0 then 'S' else ch in
+
+      Printf.printf "%c" ch;
+      if x <= high_x then x_loop (x + 1)
+    in
+
+    Printf.printf "?";
+    x_loop low_x;
+    Printf.printf "?\n";
+    if y >= low_y then y_loop (y - 1)
+  in
+
+  y_loop high_y
 
 let dir_to_int m =
   match m with NORTH -> 1 | SOUTH -> 2 | WEST -> 3 | EAST -> 4
@@ -112,18 +151,16 @@ let backtrack state =
       }
   | [] -> raise @@ Failure (Printf.sprintf "Backtrack ran out")
 
+let get_next_dir bt state =
+  match untried_dir state with
+  | None -> backtrack state
+  | Some dir -> { state with move = { dir; is_bt = bt } }
+
 let handle_hit_wall mach =
   let state = Intcode.get_payload mach in
+  let state = get_next_dir state.move.is_bt state in
 
   Hashtbl.replace state.board state.to_check WALL;
-
-  let untried = untried_dir state in
-
-  let state =
-    match untried with
-    | None -> backtrack state
-    | Some dir -> { state with move = { state.move with dir } }
-  in
 
   Intcode.set_payload mach state
 
@@ -131,18 +168,16 @@ let print_bt state =
   List.iter (fun bt -> Printf.printf "%s " (dir_to_string bt)) state.bt_list;
   Printf.printf "\n"
 
-let handle_moved mach =
-  let state = Intcode.get_payload mach in
-  let state =
-    if state.move.is_bt then state
-    else { state with bt_list = state.move.dir :: state.bt_list }
-  in
-  let state = { state with loc = state.to_check } in
+let add_to_bt state =
+  if state.move.is_bt then state
+  else { state with bt_list = state.move.dir :: state.bt_list }
 
+let loc_from_check state = { state with loc = state.to_check }
+
+let handle_moved mach =
   let state =
-    match untried_dir state with
-    | None -> backtrack state
-    | Some dir -> { state with move = { dir; is_bt = false } }
+    Intcode.get_payload mach |> add_to_bt |> loc_from_check
+    |> get_next_dir false
   in
 
   Hashtbl.replace state.board state.loc EMPTY;
@@ -157,6 +192,8 @@ let handle_out_code code mach =
   | FOUND_SYS ->
       let state = { state with sys_loc = Some state.loc } in
       let mach = Intcode.set_payload mach state in
+
+      Hashtbl.replace state.board state.loc OXYGEN_SYS;
 
       halt_machine mach
 
@@ -179,6 +216,7 @@ let run file_name =
   in
   let state = Intcode.get_payload mach in
 
+  print_board state;
   match state.sys_loc with
   | None -> Printf.printf "Did not find it"
   | Some loc -> Printf.printf "Found it at %d,%d\n" loc.x loc.y
