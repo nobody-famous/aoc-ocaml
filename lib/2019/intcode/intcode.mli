@@ -24,13 +24,15 @@ val get_state : 'a machine -> machine_state
 
 val halted : 'a machine -> bool
 
-val step : 'a machine -> 'a machine
-
 val mach_to_string : 'a machine -> string
 
 val state_to_string : machine_state -> string
 
 val parse_input : string -> int array
+
+val halt_machine : 'a machine -> 'a machine
+
+val step : 'a machine -> 'a machine
 
 val run_machine :
   ('a machine -> 'a machine) ->

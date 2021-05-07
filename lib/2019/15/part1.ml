@@ -1,10 +1,4 @@
-type direction = NORTH | SOUTH | EAST | WEST
-
-type status = HIT_WALL | MOVED | FOUND_SYS
-
-type piece = WALL | EMPTY | OXYGEN_SYS | UNKNOWN
-
-type point = { x : int; y : int }
+open Utils
 
 type robot_move = { dir : direction; is_bt : bool }
 
@@ -16,8 +10,6 @@ type robot_state = {
   bt_list : direction list;
   board : (point, piece) Hashtbl.t;
 }
-
-let halt_machine mach = Intcode.set_state mach Intcode.HALT
 
 let new_state () =
   let board = Hashtbl.create 64 in
@@ -33,66 +25,6 @@ let new_state () =
     board;
   }
 
-let piece_to_string p =
-  match p with
-  | WALL -> "WALL"
-  | EMPTY -> "EMPTY"
-  | OXYGEN_SYS -> "OXYGEN_SYS"
-  | UNKNOWN -> "UNKNOWN"
-
-let print_board state =
-  let low_x, high_x, low_y, high_y =
-    Hashtbl.fold
-      (fun k _ (lx, hx, ly, hy) ->
-        ( Stdlib.min lx k.x,
-          Stdlib.max hx k.x,
-          Stdlib.min ly k.y,
-          Stdlib.max hy k.y ))
-      state.board
-      (max_int, min_int, max_int, min_int)
-  in
-
-  let rec y_loop y =
-    let rec x_loop x =
-      let piece =
-        try Hashtbl.find state.board { x; y } with Not_found -> UNKNOWN
-      in
-
-      let ch =
-        match piece with
-        | EMPTY -> ' '
-        | WALL -> '#'
-        | OXYGEN_SYS -> 'X'
-        | UNKNOWN -> '?'
-      in
-
-      let ch = if x = 0 && y = 0 then 'S' else ch in
-
-      Printf.printf "%c" ch;
-      if x <= high_x then x_loop (x + 1)
-    in
-
-    Printf.printf "?";
-    x_loop low_x;
-    Printf.printf "?\n";
-    if y >= low_y then y_loop (y - 1)
-  in
-
-  y_loop high_y
-
-let dir_to_int m =
-  match m with NORTH -> 1 | SOUTH -> 2 | WEST -> 3 | EAST -> 4
-
-let dir_to_opp dir =
-  match dir with NORTH -> SOUTH | SOUTH -> NORTH | WEST -> EAST | EAST -> WEST
-
-let dir_to_string m =
-  match m with
-  | NORTH -> "NORTH"
-  | SOUTH -> "SOUTH"
-  | EAST -> "EAST"
-  | WEST -> "WEST"
-
 let status_of_int v =
   match v with
   | 0 -> HIT_WALL
@@ -105,9 +37,6 @@ let status_to_string s =
   | HIT_WALL -> "WALL"
   | MOVED -> "MOVED"
   | FOUND_SYS -> "OXYGEN_SYS"
-
-let next_move dir =
-  match dir with NORTH -> EAST | SOUTH -> WEST | EAST -> SOUTH | WEST -> NORTH
 
 let loc_to_check state =
   let loc = state.loc in
@@ -195,7 +124,7 @@ let handle_out_code code mach =
 
       Hashtbl.replace state.board state.loc OXYGEN_SYS;
 
-      halt_machine mach
+      Intcode.halt_machine mach
 
 let handle_output mach =
   let mach, out = Intcode.get_output mach in
@@ -216,7 +145,7 @@ let run file_name =
   in
   let state = Intcode.get_payload mach in
 
-  print_board state;
+  print_board state.board;
   match state.sys_loc with
   | None -> Printf.printf "Did not find it"
   | Some loc -> Printf.printf "Found it at %d,%d\n" loc.x loc.y

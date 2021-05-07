@@ -192,6 +192,8 @@ let parse_input file_name =
       String.split_on_char ',' line |> List.map int_of_string |> Array.of_list
   | None -> [||]
 
+let halt_machine m = set_state m HALT
+
 let step m =
   if m.state = HALT then raise @@ Failure "step: HALTED";
   let op = int_to_op m.prog.(m.ip) in
