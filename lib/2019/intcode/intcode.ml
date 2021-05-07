@@ -213,12 +213,14 @@ let step m =
 
 let run_machine in_fn out_fn m =
   let rec loop mach =
-    let mach = step mach in
-    match get_state mach with
-    | HALT -> mach
-    | RUN -> loop mach
-    | INPUT -> loop @@ in_fn mach
-    | OUTPUT -> loop @@ out_fn mach
+    if get_state mach = HALT then mach
+    else
+      let mach = step mach in
+      match get_state mach with
+      | HALT -> mach
+      | RUN -> loop mach
+      | INPUT -> loop @@ in_fn mach
+      | OUTPUT -> loop @@ out_fn mach
   in
 
   loop m
