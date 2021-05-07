@@ -77,7 +77,7 @@ let run_robot in_bot in_color =
     | HALT -> ()
     | RUN -> loop bot
     | INPUT ->
-        let m = Intcode.set_input bot.mach (get_color_input bot) in
+        let m = Intcode.set_input (get_color_input bot) bot.mach in
         loop { bot with mach = m }
     | OUTPUT -> (
         let m, out = Intcode.get_output bot.mach in

@@ -40,7 +40,7 @@ let start_machine machine phase =
     match Intcode.get_state m with RUN -> loop m | _ -> m
   in
 
-  let machine = Intcode.set_input machine phase in
+  let machine = Intcode.set_input phase machine in
 
   loop machine
 

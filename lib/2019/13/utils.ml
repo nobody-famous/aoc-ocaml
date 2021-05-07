@@ -88,10 +88,10 @@ let machine_input game =
 
   let game =
     if ball.x < paddle.x then
-      { game with mach = Intcode.set_input game.mach (-1) }
+      { game with mach = Intcode.set_input (-1) game.mach }
     else if ball.x > paddle.x then
-      { game with mach = Intcode.set_input game.mach 1 }
-    else { game with mach = Intcode.set_input game.mach 0 }
+      { game with mach = Intcode.set_input 1 game.mach }
+    else { game with mach = Intcode.set_input 0 game.mach }
   in
 
   game

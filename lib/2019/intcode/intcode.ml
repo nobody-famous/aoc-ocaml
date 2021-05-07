@@ -56,7 +56,7 @@ let set_payload m p = { m with payload = p }
 
 let get_payload m = m.payload
 
-let set_input m value = { m with input = Some value }
+let set_input value m = { m with input = Some value }
 
 let get_output m =
   match m.output with

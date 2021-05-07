@@ -8,7 +8,7 @@ val set_payload : 'a machine -> 'a -> 'a machine
 
 val get_payload : 'a machine -> 'a
 
-val set_input : 'a machine -> int -> 'a machine
+val set_input : int -> 'a machine -> 'a machine
 
 val get_output : 'a machine -> 'a machine * int option
 

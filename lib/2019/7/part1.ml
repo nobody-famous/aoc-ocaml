@@ -8,7 +8,7 @@ let run_amp machine signal =
     | RUN -> loop m out
     | HALT -> out
     | INPUT ->
-        let m = Intcode.set_input m signal in
+        let m = Intcode.set_input signal m in
         loop m out
     | OUTPUT ->
         let m, v = Intcode.get_output m in
