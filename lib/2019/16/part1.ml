@@ -37,7 +37,9 @@ let gen_sequence seqs count target =
 
     seq
 
-let apply_seq input seq =
+let apply_seq input seq count =
+  (* Printf.printf "apply %s %s %d\n" (arr_to_string input) (arr_to_string seq)
+     count; *)
   let rec loop total ndx =
     if ndx < Array.length input then
       let mul = input.(ndx) * seq.(ndx + 1) in
@@ -46,7 +48,7 @@ let apply_seq input seq =
     else total
   in
 
-  let value = loop 0 0 in
+  let value = loop 0 (count - 1) in
 
   abs @@ (value mod 10)
 
@@ -55,9 +57,10 @@ let phase seqs input =
 
   let rec loop ndx =
     if ndx < Array.length output then (
-      let seq = gen_sequence seqs (ndx + 1) (Array.length output) in
+      let count = ndx + 1 in
+      let seq = gen_sequence seqs count (Array.length output) in
 
-      output.(ndx) <- apply_seq input seq;
+      output.(ndx) <- apply_seq input seq count;
       loop (ndx + 1))
   in
 
@@ -72,9 +75,16 @@ let run file_name =
     if count > 0 then loop (phase seqs arr) (count - 1) else arr
   in
 
-  let arr = loop input 100 in
+  let start = int_of_float (Unix.gettimeofday () *. 1000.0) in
+
+  let arr = loop input 10000 in
+
+  let diff = int_of_float (Unix.gettimeofday () *. 1000.0) - start in
+  timer := !timer + diff;
+
   let pref = Array.sub arr 0 8 in
 
   Printf.printf "timer %d\n" !timer;
   let answer = Array.fold_left (fun total item -> (total * 10) + item) 0 pref in
+  Printf.printf "%d\n" answer;
   answer
