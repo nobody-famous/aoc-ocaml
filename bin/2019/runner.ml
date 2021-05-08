@@ -184,6 +184,12 @@ let problems : problem list =
       fn = Aoc_2019_15.Part2.run;
       exp = 268;
     };
+    {
+      name = "2019.16.1";
+      file = "input/2019/16/puzzle.txt";
+      fn = Aoc_2019_16.Part1.run;
+      exp = 68764632;
+    };
   ]
 
 let timed_run p =
@@ -205,4 +211,4 @@ let time_all probs =
 ;;
 time_all problems
 
-(* Aoc_2019_15.Part2.run "input/2019/15/puzzle.txt" *)
+(* Aoc_2019_16.Part1.run "input/2019/16/puzzle.txt" *)
