@@ -7,21 +7,43 @@
             "label": "run 2019",
             "type": "shell",
             "command": "dune",
-            "args": ["exec", "bin/2019/runner.exe"],
+            "args": [
+                "exec",
+                "bin/2019/runner.exe"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "debug 2019",
+            "type": "shell",
+            "command": "dune",
+            "args": [
+                "exec",
+                "bin/2019/runner.exe"
+            ],
+            "options": {
+                "env": {
+                    "OCAMLRUNPARAM": "b"
+                }
+            },
             "problemMatcher": []
         },
         {
             "label": "build",
             "type": "shell",
             "command": "dune",
-            "args": ["build"],
+            "args": [
+                "build"
+            ],
             "problemMatcher": []
         },
         {
             "label": "clean",
             "type": "shell",
             "command": "dune",
-            "args": ["clean"],
+            "args": [
+                "clean"
+            ],
             "problemMatcher": []
         }
     ]
