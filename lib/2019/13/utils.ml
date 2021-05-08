@@ -6,8 +6,8 @@ type game_piece = EMPTY | WALL | BLOCK | PADDLE | BALL
 
 type coords = { x : int; y : int }
 
-type game_state = {
-  mach : Intcode.machine;
+type 'a game_state = {
+  mach : 'a Intcode.machine;
   next_out : next_output;
   cur_instr : instr;
   score : int;
@@ -18,7 +18,7 @@ type game_state = {
 
 let new_game prog =
   {
-    mach = Intcode.new_machine prog;
+    mach = Intcode.new_machine () prog;
     next_out = X_POS;
     cur_instr = { x = 0; y = 0; value = 0 };
     score = 0;
@@ -88,10 +88,10 @@ let machine_input game =
 
   let game =
     if ball.x < paddle.x then
-      { game with mach = Intcode.set_input game.mach (-1) }
+      { game with mach = Intcode.set_input (-1) game.mach }
     else if ball.x > paddle.x then
-      { game with mach = Intcode.set_input game.mach 1 }
-    else { game with mach = Intcode.set_input game.mach 0 }
+      { game with mach = Intcode.set_input 1 game.mach }
+    else { game with mach = Intcode.set_input 0 game.mach }
   in
 
   game

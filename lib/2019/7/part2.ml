@@ -13,7 +13,7 @@ let run_amp machine signal =
         (m, out')
     | HALT -> (m, out)
     | INPUT ->
-        let m = Intcode.set_input m signal in
+        let m = Intcode.set_input signal m in
         loop m out
   in
 

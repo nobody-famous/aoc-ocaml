@@ -6,8 +6,8 @@ type out_type = COLOR | DIRECTION
 
 type location = { row : int; col : int }
 
-type robot = {
-  mach : Intcode.machine;
+type 'a robot = {
+  mach : 'a Intcode.machine;
   dir : direction;
   loc : location;
   seen : (location, color) Hashtbl.t;
@@ -16,7 +16,7 @@ type robot = {
 
 let new_robot prog =
   {
-    mach = Intcode.new_machine prog;
+    mach = Intcode.new_machine () prog;
     dir = UP;
     loc = { row = 0; col = 0 };
     seen = Hashtbl.create 64;
@@ -77,7 +77,7 @@ let run_robot in_bot in_color =
     | HALT -> ()
     | RUN -> loop bot
     | INPUT ->
-        let m = Intcode.set_input bot.mach (get_color_input bot) in
+        let m = Intcode.set_input (get_color_input bot) bot.mach in
         loop { bot with mach = m }
     | OUTPUT -> (
         let m, out = Intcode.get_output bot.mach in

@@ -6,7 +6,7 @@ let run_prog m input =
     | RUN -> loop m output
     | HALT -> output
     | INPUT ->
-        let m = Intcode.set_input m input in
+        let m = Intcode.set_input input m in
         loop m output
     | OUTPUT ->
         let m, out = Intcode.get_output m in
