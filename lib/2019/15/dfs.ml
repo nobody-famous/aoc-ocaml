@@ -58,7 +58,7 @@ let handle_input mach =
   let move = dir_to_int state.move.dir in
   let new_state = loc_to_check state in
 
-  let mach = Intcode.set_payload mach new_state in
+  let mach = Intcode.set_payload new_state mach in
   Intcode.set_input move mach
 
 let pop_list lst = match lst with [] -> [] | _ :: rest -> rest
@@ -84,7 +84,7 @@ let handle_hit_wall mach =
 
   Hashtbl.replace state.board state.to_check WALL;
 
-  Intcode.set_payload mach state
+  Intcode.set_payload state mach
 
 let print_bt state =
   List.iter (fun bt -> Printf.printf "%s " (dir_to_string bt)) state.bt_list;
@@ -103,7 +103,7 @@ let handle_moved mach =
   in
 
   Hashtbl.replace state.board state.loc EMPTY;
-  Intcode.set_payload mach state
+  Intcode.set_payload state mach
 
 let handle_out_code code mach =
   let state = Intcode.get_payload mach in
@@ -113,7 +113,7 @@ let handle_out_code code mach =
   | MOVED -> handle_moved mach
   | FOUND_SYS ->
       let state = { state with sys_loc = Some state.loc } in
-      let mach = Intcode.set_payload mach state in
+      let mach = Intcode.set_payload state mach in
 
       Hashtbl.replace state.board state.loc OXYGEN_SYS;
 

@@ -6,19 +6,27 @@ type piece = WALL | EMPTY | OXYGEN_SYS | UNKNOWN
 
 type point = { x : int; y : int }
 
-let status_of_int v =
-  match v with
+let status_of_int = function
   | 0 -> HIT_WALL
   | 1 -> MOVED
   | 2 -> FOUND_SYS
   | s -> raise @@ Failure (Printf.sprintf "Invalid status code %d" s)
 
-let piece_to_string p =
-  match p with
+let piece_to_string = function
   | WALL -> "WALL"
   | EMPTY -> "EMPTY"
   | OXYGEN_SYS -> "OXYGEN_SYS"
   | UNKNOWN -> "UNKNOWN"
+
+let status_to_piece = function
+  | HIT_WALL -> WALL
+  | MOVED -> EMPTY
+  | FOUND_SYS -> OXYGEN_SYS
+
+let status_to_string = function
+  | HIT_WALL -> "WALL"
+  | MOVED -> "EMPTY"
+  | FOUND_SYS -> "OXYGEN_SYS"
 
 let dir_to_int dir =
   match dir with NORTH -> 1 | SOUTH -> 2 | WEST -> 3 | EAST -> 4

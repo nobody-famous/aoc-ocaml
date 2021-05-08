@@ -52,7 +52,11 @@ let int_to_op instr =
 
 let halted m = m.state = HALT
 
-let set_payload m p = { m with payload = p }
+let get_prog m = m.prog
+
+let set_prog prog m = { m with prog }
+
+let set_payload p m = { m with payload = p }
 
 let get_payload m = m.payload
 

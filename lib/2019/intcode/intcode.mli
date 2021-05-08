@@ -4,7 +4,11 @@ type machine_state = HALT | RUN | INPUT | OUTPUT
 
 val new_machine : 'a -> int array -> 'a machine
 
-val set_payload : 'a machine -> 'a -> 'a machine
+val get_prog : 'a machine -> int array
+
+val set_prog : int array -> 'a machine -> 'a machine
+
+val set_payload : 'a -> 'a machine -> 'a machine
 
 val get_payload : 'a machine -> 'a
 
