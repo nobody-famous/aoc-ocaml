@@ -13,10 +13,10 @@ type search_state = {
   visited : (point, piece) Hashtbl.t;
 }
 
-let new_state =
+let new_state start_loc =
   let state =
     {
-      loc = { x = 0; y = 0 };
+      loc = start_loc;
       oxygen_sys = None;
       path = [];
       visited = Hashtbl.create 64;
@@ -182,3 +182,24 @@ let get_all_neighbors mach_list =
 
       if List.length neighbors > 0 then neighbors @ acc else acc)
     [] mach_list
+
+let check_for_sys machs =
+  List.fold_left
+    (fun acc m ->
+      let state = Intcode.get_payload m in
+      match state.oxygen_sys with None -> acc | Some _ -> Some m)
+    None machs
+
+let search_for_sys mach =
+  let rec loop machs count =
+    let mach_list = get_all_neighbors machs in
+    let sys_mach = check_for_sys mach_list in
+
+    match sys_mach with
+    | None ->
+        if List.length mach_list = 0 then (None, count)
+        else loop mach_list (count + 1)
+    | Some mach -> (Some mach, count)
+  in
+
+  loop [ mach ] 0
