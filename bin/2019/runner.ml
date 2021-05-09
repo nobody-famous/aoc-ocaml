@@ -209,6 +209,7 @@ let time_all probs =
   Printf.printf "Total: %d ms\n" total
 
 ;;
-time_all problems
 
-(* Aoc_2019_16.Part1.run "input/2019/16/puzzle.txt" *)
+(* time_all problems *)
+
+Aoc_2019_16.Part2.run "input/2019/16/puzzle.txt"
