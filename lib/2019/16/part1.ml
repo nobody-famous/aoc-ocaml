@@ -38,9 +38,11 @@ let gen_sequence seqs count target =
     seq
 
 let apply_seq input seq count =
-  (* Printf.printf "apply %s %s %d\n" (arr_to_string input) (arr_to_string seq)
-     count; *)
   let rec loop total ndx =
+    let ndx =
+      if ndx < Array.length input && seq.(ndx + 1) = 0 then ndx + count else ndx
+    in
+
     if ndx < Array.length input then
       let mul = input.(ndx) * seq.(ndx + 1) in
 
@@ -77,7 +79,7 @@ let run file_name =
 
   let start = int_of_float (Unix.gettimeofday () *. 1000.0) in
 
-  let arr = loop input 10000 in
+  let arr = loop input 100 in
 
   let diff = int_of_float (Unix.gettimeofday () *. 1000.0) - start in
   timer := !timer + diff;
