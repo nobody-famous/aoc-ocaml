@@ -37,17 +37,29 @@ let gen_sequence seqs count target =
 
     seq
 
-let apply_seq input seq count =
+let build_sum_table input =
+  let table = Array.make (Array.length input) 0 in
+  let rec loop ndx =
+    if ndx < Array.length input then (
+      table.(ndx) <- table.(ndx - 1) + input.(ndx);
+      loop (ndx + 1))
+  in
+
+  table.(0) <- input.(0);
+  loop 1;
+  table
+
+let apply_seq input seq table count =
   let rec loop total ndx =
-    let ndx =
-      if ndx < Array.length input && seq.(ndx + 1) = 0 then ndx + count else ndx
-    in
+    if ndx >= Array.length input then total
+    else if seq.(ndx + 1) = 0 then loop total (ndx + count)
+    else
+      let seq_value = seq.(ndx + 1) in
+      let end_ndx = min (ndx + count - 1) (Array.length input - 1) in
+      let to_sub = if ndx > 0 then table.(ndx - 1) else 0 in
+      let value = (table.(end_ndx) - to_sub) * seq_value in
 
-    if ndx < Array.length input then
-      let mul = input.(ndx) * seq.(ndx + 1) in
-
-      loop (total + mul) (ndx + 1)
-    else total
+      loop (total + value) (ndx + count)
   in
 
   let value = loop 0 (count - 1) in
@@ -56,13 +68,14 @@ let apply_seq input seq count =
 
 let phase seqs input =
   let output = Array.make (Array.length input) 0 in
+  let table = build_sum_table input in
 
   let rec loop ndx =
     if ndx < Array.length output then (
       let count = ndx + 1 in
       let seq = gen_sequence seqs count (Array.length output) in
 
-      output.(ndx) <- apply_seq input seq count;
+      output.(ndx) <- apply_seq input seq table count;
       loop (ndx + 1))
   in
 
@@ -77,16 +90,7 @@ let run file_name =
     if count > 0 then loop (phase seqs arr) (count - 1) else arr
   in
 
-  let start = int_of_float (Unix.gettimeofday () *. 1000.0) in
-
   let arr = loop input 100 in
-
-  let diff = int_of_float (Unix.gettimeofday () *. 1000.0) - start in
-  timer := !timer + diff;
-
   let pref = Array.sub arr 0 8 in
 
-  Printf.printf "timer %d\n" !timer;
-  let answer = Array.fold_left (fun total item -> (total * 10) + item) 0 pref in
-  Printf.printf "%d\n" answer;
-  answer
+  Array.fold_left (fun total item -> (total * 10) + item) 0 pref
