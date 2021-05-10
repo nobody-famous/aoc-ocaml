@@ -1,10 +1,5 @@
 open Utils
 
-let find_crosses board =
-  Hashtbl.fold
-    (fun pt _ acc -> if is_cross pt board then pt :: acc else acc)
-    board []
-
 let run_machine mach =
   let rec loop m =
     let m = Intcode.step m in
@@ -26,6 +21,6 @@ let run file_name =
     |> Intcode.new_machine new_state
     |> run_machine |> Intcode.get_payload
   in
-  let crosses = find_crosses state.board in
 
-  List.fold_left (fun acc pt -> acc + (pt.row * pt.col)) 0 crosses
+  print_board state.board;
+  0

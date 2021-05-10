@@ -88,7 +88,7 @@ let print_board board =
 
   let rec row_loop row =
     let rec col_loop col =
-      if col < bounds.high_col then (
+      if col <= bounds.high_col then (
         let piece =
           try Hashtbl.find board { row; col } with Not_found -> SPACE
         in
