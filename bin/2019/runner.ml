@@ -191,6 +191,12 @@ let problems : problem list =
       exp = 68764632;
     };
     {
+      name = "2019.16.2";
+      file = "input/2019/16/puzzle.txt";
+      fn = Aoc_2019_16.Part2.run;
+      exp = 52825021;
+    };
+    {
       name = "2019.17.1";
       file = "input/2019/17/puzzle.txt";
       fn = Aoc_2019_17.Part1.run;
