@@ -37,9 +37,20 @@ let char_to_piece = function
 
 type point = { row : int; col : int }
 
-type scaffold_state = { loc : point; board : (point, piece) Hashtbl.t }
+let point_to_string pt = Printf.sprintf "(%d,%d)" pt.row pt.col
 
-let new_state = { loc = { row = 0; col = 0 }; board = Hashtbl.create 64 }
+type scaffold_state = {
+  loc : point;
+  robot : point;
+  board : (point, piece) Hashtbl.t;
+}
+
+let new_state =
+  {
+    loc = { row = 0; col = 0 };
+    robot = { row = 0; col = 0 };
+    board = Hashtbl.create 64;
+  }
 
 type board_bounds = {
   low_row : int;
@@ -67,22 +78,27 @@ let get_board_bounds board =
       })
     board new_bounds
 
-let is_scaffold = function
-  | SCAFFOLD | ROBOT_UP | ROBOT_DOWN | ROBOT_RIGHT | ROBOT_LEFT -> true
+let is_scaffold = function SCAFFOLD -> true | _ -> false
+
+let is_robot = function
+  | ROBOT_UP | ROBOT_DOWN | ROBOT_RIGHT | ROBOT_LEFT -> true
   | _ -> false
 
-  let is_cross pt board =
-    let get_piece pt = try Hashtbl.find board pt with Not_found -> SPACE in
-  
-    let center = get_piece pt in
-    let north = get_piece { pt with row = pt.row - 1 } in
-    let south = get_piece { pt with row = pt.row + 1 } in
-    let east = get_piece { pt with col = pt.col + 1 } in
-    let west = get_piece { pt with col = pt.col - 1 } in
-  
-    is_scaffold center && is_scaffold north && is_scaffold south
-    && is_scaffold east && is_scaffold west
-  
+let is_cross pt board =
+  let get_piece pt = try Hashtbl.find board pt with Not_found -> SPACE in
+
+  let center = get_piece pt in
+  let north = get_piece { pt with row = pt.row - 1 } in
+  let south = get_piece { pt with row = pt.row + 1 } in
+  let east = get_piece { pt with col = pt.col + 1 } in
+  let west = get_piece { pt with col = pt.col - 1 } in
+
+  (is_robot center || is_scaffold center)
+  && (is_robot north || is_scaffold north)
+  && (is_robot south || is_scaffold south)
+  && (is_robot east || is_scaffold east)
+  && (is_robot west || is_scaffold west)
+
 let print_board board =
   let bounds = get_board_bounds board in
 
@@ -107,21 +123,24 @@ let print_board board =
 
   row_loop bounds.low_row
 
-  let handle_output mach =
-    let state = Intcode.get_payload mach in
-    let m, out = Intcode.get_output mach in
-  
-    match out with
-    | None -> raise @@ Failure "Expected output, but had none"
-    | Some v ->
-        let ht = state.board in
-        let piece = char_of_int v |> char_to_piece in
-        let new_loc =
-          if piece = NEW_LINE then { row = state.loc.row + 1; col = 0 }
-          else { row = state.loc.row; col = state.loc.col + 1 }
-        in
-  
-        if is_scaffold piece then Hashtbl.replace ht state.loc piece;
-  
-        Intcode.set_payload { state with loc = new_loc } m
-  
+let handle_output mach =
+  let state = Intcode.get_payload mach in
+  let m, out = Intcode.get_output mach in
+
+  match out with
+  | None -> raise @@ Failure "Expected output, but had none"
+  | Some v ->
+      let ht = state.board in
+      let piece = char_of_int v |> char_to_piece in
+      let new_loc =
+        if piece = NEW_LINE then { row = state.loc.row + 1; col = 0 }
+        else { row = state.loc.row; col = state.loc.col + 1 }
+      in
+      let state =
+        if is_robot piece then { state with robot = state.loc } else state
+      in
+
+      if is_robot piece || is_scaffold piece then
+        Hashtbl.replace ht state.loc piece;
+
+      Intcode.set_payload { state with loc = new_loc } m
