@@ -3,8 +3,6 @@ let arr_to_string arr =
 
 let gen_sequence _ _ _ = [| 0; 1; 0; -1 |]
 
-let timer = ref 0
-
 let build_sum_table input =
   let table = Array.make (Array.length input) 0 in
   let rec loop ndx =
@@ -15,10 +13,7 @@ let build_sum_table input =
 
   table.(0) <- input.(0);
 
-  let start = int_of_float (Unix.gettimeofday () *. 1000.0) in
   loop 1;
-  let diff = int_of_float (Unix.gettimeofday () *. 1000.0) - start in
-  timer := !timer + diff;
   table
 
 let inc_seq_ndx seq ndx = if ndx + 1 >= Array.length seq then 0 else ndx + 1
@@ -39,10 +34,22 @@ let apply_seq input seq table count =
 
   let value = loop 0 1 (count - 1) in
 
-  abs @@ (value mod 10)
+  abs (value mod 10)
 
-let phase seqs input offset =
-  let output = Array.make (Array.length input) 0 in
+let fill_rev input output target =
+  let rec loop ndx =
+    if ndx >= target then (
+      let value = input.(ndx) + output.(ndx + 1) in
+      output.(ndx) <- abs (value mod 10);
+      loop (ndx - 1))
+  in
+
+  let end_ndx = Array.length input - 1 in
+
+  output.(end_ndx) <- abs (input.(end_ndx) mod 10);
+  loop (end_ndx - 1)
+
+let fill_forward seqs input output offset =
   let table = build_sum_table input in
 
   let rec loop ndx =
@@ -54,5 +61,8 @@ let phase seqs input offset =
       loop (ndx + 1))
   in
 
-  loop offset;
-  output
+  loop offset
+
+let phase seqs input offset =
+  if offset > Array.length input / 2 then fill_rev input input offset
+  else fill_forward seqs input input offset;
