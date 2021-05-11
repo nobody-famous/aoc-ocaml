@@ -146,7 +146,7 @@ type path_state = {
   c_fn : string option;
   fn_path : string;
   str_path : string list;
-  ndx : int;
+  is_done : bool;
 }
 
 let new_path_state () =
@@ -156,7 +156,7 @@ let new_path_state () =
     c_fn = None;
     fn_path = "";
     str_path = [];
-    ndx = 0;
+    is_done = false;
   }
 
 let state_to_string state =
@@ -164,8 +164,7 @@ let state_to_string state =
   let b_str = match state.b_fn with None -> "None" | Some f -> f in
   let c_str = match state.c_fn with None -> "None" | Some f -> f in
 
-  Printf.sprintf "{ndx: %d A: %s B: %s C: %s fns: %s}" state.ndx a_str b_str
-    c_str state.fn_path
+  Printf.sprintf "{A: %s B: %s C: %s fns: %s}" a_str b_str c_str state.fn_path
 
 let append_str base str =
   if base = "" then str else Printf.sprintf "%s,%s" base str
@@ -236,72 +235,119 @@ let list_to_string arr =
   traverse (new_path_state ()) *)
 
 let traverse_opts path_opts =
-  Printf.printf "traverse_opts %d\n" @@ Array.length path_opts;
-
   let rec loop ndx state =
     let opts = path_opts.(ndx) in
 
-    Printf.printf "loop %d [%s] [%s]\n" ndx (list_to_string state.str_path) @@ list_to_string opts;
-    (* if ndx > 20 then exit 0; *)
     let rec opts_loop opts state' =
       match opts with
       | [] -> state'
       | first :: rest ->
-          (* Printf.printf "opts_loop %d %s\n" (List.length opts) first; *)
           let ndx' = ndx + List.length opts in
+          let state' = update_fns first state in
 
           let state' =
-            if ndx' >= Array.length path_opts then state
+            if state' = state then state
+            else if ndx' > Array.length path_opts then state
+            else if ndx' = Array.length path_opts then
+              {
+                state' with
+                str_path = first :: state'.str_path;
+                is_done = true;
+              }
             else
               loop
                 (ndx + List.length opts)
-                { state with str_path = first :: state.str_path }
+                { state' with str_path = first :: state'.str_path }
           in
 
-          opts_loop rest state'
+          if state'.is_done then state' else opts_loop rest state'
     in
 
     opts_loop opts state
   in
 
-  loop 0 @@ new_path_state ()
+  let state = loop 0 @@ new_path_state () in
 
-let run _ =
-  (* let state =
-    Intcode.parse_input file_name
-    |> Intcode.new_machine new_state
-    |> run_machine |> Intcode.get_payload
-  in *)
+  { state with str_path = List.rev state.str_path }
 
-  (* let path = walk_path state in *)
-  (* let path_opts = gen_path_opts path in *)
+let str_to_input str =
+  let buffer = Array.make (String.length str) @@ Char.code '\n' in
 
-  let test =
-    [|
-      [ "L,6,R,12,L,6,R,12"; "L,6,R,12,L,6"; "L,6,R,12"; "L,6" ];
-      [ "R,12,L,6,R,12,L,10"; "R,12,L,6,R,12"; "R,12,L,6"; "R,12" ];
-      [ "L,6,R,12,L,10,L,4"; "L,6,R,12,L,10"; "L,6,R,12"; "L,6" ];
-    |]
+  let loop ndx =
+    if ndx < String.length str then
+      buffer.(ndx) <- Char.code @@ String.get str ndx
   in
 
-  Array.iter
-    (fun elem ->
-      List.iter (fun s -> Printf.printf "[%s] " s) elem;
-      Printf.printf "\n")
-    test;
+  loop 0;
+  buffer
 
-  let state = traverse_opts test in
+let send_input input mach =
+  let rec loop ndx m =
+    if ndx >= Array.length input then m
+    else
+      let m = Intcode.step m in
 
-  (match state.a_fn with
-  | None -> Printf.printf "No A Function\n"
-  | Some fn -> Printf.printf "A: %s\n" fn);
+      match Intcode.get_state m with
+      | RUN -> loop ndx m
+      | HALT -> m
+      | INPUT ->
+          Printf.printf "INPUT\n";
+          m
+      | OUTPUT ->
+          let _, out = Intcode.get_output m in
 
-  (match state.b_fn with
-  | None -> Printf.printf "No B Function\n"
-  | Some fn -> Printf.printf "B: %s\n" fn);
+          (match out with
+          | None -> ()
+          | Some _ -> ());
+          loop ndx m
+  in
 
-  (match state.c_fn with
-  | None -> Printf.printf "No C Function\n"
-  | Some fn -> Printf.printf "C: %s\n" fn);
+  let prog' = Intcode.get_prog mach in
+  Printf.printf "ADDR 0 %d\n" prog'.(0);
+
+  Array.iter (fun n -> Printf.printf " %d" n) prog';
+  Printf.printf "\n";
+  loop 0 mach
+
+let run file_name =
+  let prog = Intcode.parse_input file_name in
+  let state =
+    Intcode.new_machine new_state (Array.copy prog)
+    |> run_machine |> Intcode.get_payload |> walk_path |> gen_path_opts
+    |> traverse_opts
+  in
+
+  Printf.printf "%s\n" @@ state_to_string state;
+
+  let a_fn =
+    match state.a_fn with
+    | None -> raise @@ Failure "Fn A not defined"
+    | Some f -> f
+  in
+
+  let b_fn =
+    match state.b_fn with
+    | None -> raise @@ Failure "Fn B not defined"
+    | Some f -> f
+  in
+
+  let c_fn =
+    match state.c_fn with
+    | None -> raise @@ Failure "Fn C not defined"
+    | Some f -> f
+  in
+
+  let fns_str = Printf.sprintf "%s\n%s\n%s\n" a_fn b_fn c_fn in
+  let fns_buf = str_to_input fns_str in
+  let path_str = Printf.sprintf "%s\n" state.fn_path in
+  let path_buf = str_to_input path_str in
+
+  Printf.printf "%d\n" @@ Array.length fns_buf;
+  Printf.printf "%d\n" @@ Array.length path_buf;
+
+  let mach = Intcode.new_machine () (Array.copy prog) in
+  let mach = Intcode.set_addr mach 0 2 in
+
+  let _ = send_input path_buf mach in
 
   0
