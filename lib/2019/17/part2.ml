@@ -145,11 +145,19 @@ type path_state = {
   b_fn : string option;
   c_fn : string option;
   fn_path : string;
+  str_path : string list;
   ndx : int;
 }
 
 let new_path_state () =
-  { a_fn = None; b_fn = None; c_fn = None; fn_path = ""; ndx = 0 }
+  {
+    a_fn = None;
+    b_fn = None;
+    c_fn = None;
+    fn_path = "";
+    str_path = [];
+    ndx = 0;
+  }
 
 let state_to_string state =
   let a_str = match state.a_fn with None -> "None" | Some f -> f in
@@ -197,7 +205,7 @@ let update_fns opt state =
 let list_to_string arr =
   List.fold_left (fun s n -> Printf.sprintf "%s %s" s n) "" arr
 
-let traverse_opts path_opts =
+(* let traverse_opts path_opts =
   let rec traverse state =
     if state.ndx >= Array.length path_opts then state
     else
@@ -225,19 +233,64 @@ let traverse_opts path_opts =
       state
   in
 
-  traverse (new_path_state ())
+  traverse (new_path_state ()) *)
 
-let run file_name =
-  let state =
+let traverse_opts path_opts =
+  Printf.printf "traverse_opts %d\n" @@ Array.length path_opts;
+
+  let rec loop ndx state =
+    let opts = path_opts.(ndx) in
+
+    Printf.printf "loop %d [%s] [%s]\n" ndx (list_to_string state.str_path) @@ list_to_string opts;
+    (* if ndx > 20 then exit 0; *)
+    let rec opts_loop opts state' =
+      match opts with
+      | [] -> state'
+      | first :: rest ->
+          (* Printf.printf "opts_loop %d %s\n" (List.length opts) first; *)
+          let ndx' = ndx + List.length opts in
+
+          let state' =
+            if ndx' >= Array.length path_opts then state
+            else
+              loop
+                (ndx + List.length opts)
+                { state with str_path = first :: state.str_path }
+          in
+
+          opts_loop rest state'
+    in
+
+    opts_loop opts state
+  in
+
+  loop 0 @@ new_path_state ()
+
+let run _ =
+  (* let state =
     Intcode.parse_input file_name
     |> Intcode.new_machine new_state
     |> run_machine |> Intcode.get_payload
+  in *)
+
+  (* let path = walk_path state in *)
+  (* let path_opts = gen_path_opts path in *)
+
+  let test =
+    [|
+      [ "L,6,R,12,L,6,R,12"; "L,6,R,12,L,6"; "L,6,R,12"; "L,6" ];
+      [ "R,12,L,6,R,12,L,10"; "R,12,L,6,R,12"; "R,12,L,6"; "R,12" ];
+      [ "L,6,R,12,L,10,L,4"; "L,6,R,12,L,10"; "L,6,R,12"; "L,6" ];
+    |]
   in
 
-  let path = walk_path state in
-  let path_opts = gen_path_opts path in
+  Array.iter
+    (fun elem ->
+      List.iter (fun s -> Printf.printf "[%s] " s) elem;
+      Printf.printf "\n")
+    test;
 
-  let state = traverse_opts path_opts in
+  let state = traverse_opts test in
 
   (match state.a_fn with
   | None -> Printf.printf "No A Function\n"
@@ -250,11 +303,5 @@ let run file_name =
   (match state.c_fn with
   | None -> Printf.printf "No C Function\n"
   | Some fn -> Printf.printf "C: %s\n" fn);
-
-  Array.iter
-    (fun elem ->
-      List.iter (fun s -> Printf.printf "[%s] " s) elem;
-      Printf.printf "\n")
-    path_opts;
 
   0
