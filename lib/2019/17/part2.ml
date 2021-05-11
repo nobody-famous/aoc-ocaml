@@ -192,11 +192,23 @@ let traverse_opts (path_opts : string list array) =
     else
       let opts = path_opts.(state.ndx) in
 
-      match opts with
-      | first :: _ ->
-          let state = update_fns first state in
-          traverse { state with ndx = state.ndx + List.length opts }
-      | [] -> state
+      let rec try_opts opts' state =
+        match opts' with
+        | first :: rest ->
+            let state = update_fns first state in
+            Printf.printf "%s\n" state.fn_path;
+
+            let state =
+              traverse { state with ndx = state.ndx + List.length opts' }
+            in
+
+            try_opts rest state
+        | [] -> state
+      in
+
+      let state = try_opts opts state in
+      Printf.printf "%s\n" state.fn_path;
+      state
   in
 
   traverse (new_path_state ())
