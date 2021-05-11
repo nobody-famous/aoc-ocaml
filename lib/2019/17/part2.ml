@@ -151,6 +151,14 @@ type path_state = {
 let new_path_state () =
   { a_fn = None; b_fn = None; c_fn = None; fn_path = ""; ndx = 0 }
 
+let state_to_string state =
+  let a_str = match state.a_fn with None -> "None" | Some f -> f in
+  let b_str = match state.b_fn with None -> "None" | Some f -> f in
+  let c_str = match state.c_fn with None -> "None" | Some f -> f in
+
+  Printf.sprintf "{ndx: %d A: %s B: %s C: %s fns: %s}" state.ndx a_str b_str
+    c_str state.fn_path
+
 let append_str base str =
   if base = "" then str else Printf.sprintf "%s,%s" base str
 
@@ -186,28 +194,34 @@ let update_fns opt state =
   |> update_fn update_b_fn opt state
   |> update_fn update_c_fn opt state
 
-let traverse_opts (path_opts : string list array) =
+let list_to_string arr =
+  List.fold_left (fun s n -> Printf.sprintf "%s %s" s n) "" arr
+
+let traverse_opts path_opts =
   let rec traverse state =
     if state.ndx >= Array.length path_opts then state
     else
       let opts = path_opts.(state.ndx) in
 
+      Printf.printf "traverse %d %s\n" (Array.length path_opts)
+        (state_to_string state);
+
       let rec try_opts opts' state =
+        Printf.printf "try_opts %s\n" (list_to_string opts');
         match opts' with
         | first :: rest ->
-            let state = update_fns first state in
-            Printf.printf "%s\n" state.fn_path;
-
-            let state =
-              traverse { state with ndx = state.ndx + List.length opts' }
+            let new_state = update_fns first state in
+            let new_state =
+              traverse
+                { new_state with ndx = new_state.ndx + List.length opts' }
             in
 
-            try_opts rest state
+            if new_state == state then try_opts rest new_state else new_state
         | [] -> state
       in
 
       let state = try_opts opts state in
-      Printf.printf "%s\n" state.fn_path;
+      Printf.printf "%s\n" (state_to_string state);
       state
   in
 
