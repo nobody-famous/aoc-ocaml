@@ -156,35 +156,35 @@ let append_str base str =
 
 let update_a_fn fn state =
   match state.a_fn with
-  | None -> { state with a_fn = Some fn }
+  | None ->
+      { state with a_fn = Some fn; fn_path = append_str state.fn_path "A" }
   | Some f ->
       if f = fn then { state with fn_path = append_str state.fn_path "A" }
       else state
 
 let update_b_fn fn state =
   match state.b_fn with
-  | None -> { state with b_fn = Some fn }
+  | None ->
+      { state with b_fn = Some fn; fn_path = append_str state.fn_path "B" }
   | Some f ->
       if f = fn then { state with fn_path = append_str state.fn_path "B" }
       else state
 
 let update_c_fn fn state =
   match state.c_fn with
-  | None -> { state with c_fn = Some fn }
+  | None ->
+      { state with c_fn = Some fn; fn_path = append_str state.fn_path "C" }
   | Some f ->
       if f = fn then { state with fn_path = append_str state.fn_path "C" }
       else state
 
-let update_fns fn state =
-  let new_state = update_a_fn fn state in
-  let new_state =
-    if state == new_state then update_b_fn fn state else new_state
-  in
-  let new_state =
-    if state == new_state then update_c_fn fn state else new_state
-  in
+let update_fn fn opt orig_state state =
+  if orig_state == state then fn opt state else state
 
-  new_state
+let update_fns opt state =
+  update_fn update_a_fn opt state state
+  |> update_fn update_b_fn opt state
+  |> update_fn update_c_fn opt state
 
 let traverse_opts (path_opts : string list array) =
   let rec traverse state =
