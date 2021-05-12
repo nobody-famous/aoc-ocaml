@@ -12,9 +12,7 @@ let run_machine mach =
     | HALT -> m
     | RUN -> loop m
     | OUTPUT -> handle_output m |> loop
-    | s ->
-        let str = Intcode.state_to_string s in
-        raise @@ Failure (Printf.sprintf "Unhandled state %s" str)
+    | INPUT -> m
   in
 
   loop mach
@@ -296,57 +294,52 @@ let send_input input mach =
       | OUTPUT ->
           let _, out = Intcode.get_output m in
 
-          (match out with
-          | None -> ()
-          | Some _ -> ());
+          (match out with None -> () | Some _ -> ());
           loop ndx m
   in
 
-  let prog' = Intcode.get_prog mach in
-  Printf.printf "ADDR 0 %d\n" prog'.(0);
-
-  Array.iter (fun n -> Printf.printf " %d" n) prog';
-  Printf.printf "\n";
   loop 0 mach
 
-let run file_name =
-  let prog = Intcode.parse_input file_name in
-  let state =
-    Intcode.new_machine new_state (Array.copy prog)
-    |> run_machine |> Intcode.get_payload |> walk_path |> gen_path_opts
-    |> traverse_opts
-  in
-
-  Printf.printf "%s\n" @@ state_to_string state;
-
-  let a_fn =
+let get_fns state =
+  let a =
     match state.a_fn with
     | None -> raise @@ Failure "Fn A not defined"
     | Some f -> f
   in
-
-  let b_fn =
+  let b =
     match state.b_fn with
     | None -> raise @@ Failure "Fn B not defined"
     | Some f -> f
   in
-
-  let c_fn =
+  let c =
     match state.c_fn with
     | None -> raise @@ Failure "Fn C not defined"
     | Some f -> f
   in
 
-  let fns_str = Printf.sprintf "%s\n%s\n%s\n" a_fn b_fn c_fn in
-  let fns_buf = str_to_input fns_str in
-  let path_str = Printf.sprintf "%s\n" state.fn_path in
-  let path_buf = str_to_input path_str in
+  (a, b, c)
+
+let run file_name =
+  let prog = Intcode.parse_input file_name in
+  let mach =
+    Intcode.new_machine new_state (Array.copy prog)
+    |> Intcode.set_addr 0 2 |> run_machine
+  in
+  let state =
+    Intcode.get_payload mach |> walk_path |> gen_path_opts |> traverse_opts
+  in
+
+  Printf.printf "%s\n" @@ state_to_string state;
+
+  let a_fn, b_fn, c_fn = get_fns state in
+
+  let fns_buf = Printf.sprintf "%s\n%s\n%s\n" a_fn b_fn c_fn |> str_to_input in
+  let path_buf = Printf.sprintf "%s\n" state.fn_path |> str_to_input in
+  let yn_buf = Printf.sprintf "n\n" |> str_to_input in
 
   Printf.printf "%d\n" @@ Array.length fns_buf;
   Printf.printf "%d\n" @@ Array.length path_buf;
-
-  let mach = Intcode.new_machine () (Array.copy prog) in
-  let mach = Intcode.set_addr mach 0 2 in
+  Printf.printf "%d\n" @@ Array.length yn_buf;
 
   let _ = send_input path_buf mach in
 

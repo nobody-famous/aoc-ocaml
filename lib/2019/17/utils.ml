@@ -35,6 +35,10 @@ let char_to_piece = function
   | '<' -> ROBOT_LEFT
   | ch -> raise @@ Failure (Printf.sprintf "Invalid piece %c" ch)
 
+let is_piece v =
+  let ch = char_of_int v in
+  match ch with '\n' | '#' | '.' | '^' | '>' | 'v' | '<' -> true | _ -> false
+
 type point = { row : int; col : int }
 
 let point_to_string pt = Printf.sprintf "(%d,%d)" pt.row pt.col
@@ -131,16 +135,21 @@ let handle_output mach =
   | None -> raise @@ Failure "Expected output, but had none"
   | Some v ->
       let ht = state.board in
-      let piece = char_of_int v |> char_to_piece in
-      let new_loc =
-        if piece = NEW_LINE then { row = state.loc.row + 1; col = 0 }
-        else { row = state.loc.row; col = state.loc.col + 1 }
-      in
-      let state =
-        if is_robot piece then { state with robot = state.loc } else state
-      in
 
-      if is_robot piece || is_scaffold piece then
-        Hashtbl.replace ht state.loc piece;
+      if is_piece v then (
+        let piece = char_of_int v |> char_to_piece in
+        let new_loc =
+          if piece = NEW_LINE then { row = state.loc.row + 1; col = 0 }
+          else { row = state.loc.row; col = state.loc.col + 1 }
+        in
+        let state =
+          if is_robot piece then { state with robot = state.loc } else state
+        in
 
-      Intcode.set_payload { state with loc = new_loc } m
+        if is_robot piece || is_scaffold piece then
+          Hashtbl.replace ht state.loc piece;
+
+        Intcode.set_payload { state with loc = new_loc } m)
+      else (
+        Printf.printf "%c" @@ char_of_int v;
+        m)
