@@ -271,9 +271,10 @@ let traverse_opts path_opts =
 let str_to_input str =
   let buffer = Array.make (String.length str) @@ Char.code '\n' in
 
-  let loop ndx =
-    if ndx < String.length str then
-      buffer.(ndx) <- Char.code @@ String.get str ndx
+  let rec loop ndx =
+    if ndx < String.length str then (
+      buffer.(ndx) <- Char.code @@ String.get str ndx;
+      loop (ndx + 1))
   in
 
   loop 0;
@@ -289,12 +290,14 @@ let send_input input mach =
       | RUN -> loop ndx m
       | HALT -> m
       | INPUT ->
-          Printf.printf "INPUT\n";
-          m
+          Printf.printf "INPUT %d %d\n" ndx input.(ndx);
+          loop (ndx + 1) @@ Intcode.set_input input.(ndx) m
       | OUTPUT ->
-          let _, out = Intcode.get_output m in
+          let m, out = Intcode.get_output m in
 
-          (match out with None -> () | Some _ -> ());
+          (match out with
+          | None -> ()
+          | Some v -> Printf.printf "%d " v);
           loop ndx m
   in
 
@@ -337,10 +340,12 @@ let run file_name =
   let path_buf = Printf.sprintf "%s\n" state.fn_path |> str_to_input in
   let yn_buf = Printf.sprintf "n\n" |> str_to_input in
 
-  Printf.printf "%d\n" @@ Array.length fns_buf;
-  Printf.printf "%d\n" @@ Array.length path_buf;
-  Printf.printf "%d\n" @@ Array.length yn_buf;
+  Printf.printf "fns_buf %d\n" @@ Array.length fns_buf;
+  Printf.printf "path_buf %d\n" @@ Array.length path_buf;
+  Printf.printf "yn_buf %d\n" @@ Array.length yn_buf;
 
-  let _ = send_input path_buf mach in
+  Printf.printf "%s\n" state.fn_path;
+  Array.iter (fun i -> Printf.printf "%d " i) path_buf;
+  let _ = send_input path_buf mach |> send_input fns_buf |> send_input yn_buf |> send_input yn_buf in
 
   0
