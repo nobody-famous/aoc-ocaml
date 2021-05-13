@@ -1,10 +1,7 @@
 open Utils
 
 let run_machine m noun verb =
-  let m = Intcode.set_addr m 1 noun in
-  let m = Intcode.set_addr m 2 verb in
-
-  run_prog m
+  m |> Intcode.set_addr 1 noun |> Intcode.set_addr 2 verb |> run_prog
 
 let find_values input low high target =
   let rec outer_loop noun noun_max =

@@ -75,7 +75,7 @@ let get_addr m addr =
   if addr < Array.length m.prog then m.prog.(addr)
   else try Hashtbl.find m.memory addr with Not_found -> 0
 
-let set_addr m addr value =
+let set_addr addr value m =
   if addr < Array.length m.prog then m.prog.(addr) <- value
   else Hashtbl.replace m.memory addr value;
   m
@@ -106,7 +106,7 @@ let math_op label m op fn =
   if m.debug then
     printf "%d %s %d %d = (%d) -> %d\n" m.ip label param_1 param_2 value addr;
 
-  let m = set_addr m addr value in
+  let m = set_addr addr value m in
   { m with ip = m.ip + 4 }
 
 let op_code_1 m op = math_op "ADD" m op (fun a b -> a + b)
@@ -119,7 +119,7 @@ let op_code_3 m op =
   match m.input with
   | None -> { m with state = INPUT }
   | Some i ->
-      let m = set_addr m addr i in
+      let m = set_addr addr i m in
 
       if m.debug then printf "%d INP %d -> %d\n" m.ip (get_addr m addr) addr;
 
@@ -154,7 +154,7 @@ let op_code_7 m op =
   if m.debug then
     printf "%d LT %d %d (%d) -> %d\n" m.ip param_1 param_2 value addr;
 
-  let m = set_addr m addr value in
+  let m = set_addr addr value m in
   { m with ip = m.ip + 4 }
 
 let op_code_8 m op =
@@ -167,7 +167,7 @@ let op_code_8 m op =
   if m.debug then
     printf "%d EQL %d %d (%d) -> %d\n" m.ip param_1 param_2 value addr;
 
-  let m = set_addr m addr value in
+  let m = set_addr addr value m in
   { m with ip = m.ip + 4 }
 
 let op_code_9 m op =

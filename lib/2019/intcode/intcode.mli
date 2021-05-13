@@ -16,7 +16,7 @@ val set_input : int -> 'a machine -> 'a machine
 
 val get_output : 'a machine -> 'a machine * int option
 
-val set_addr : 'a machine -> int -> int -> 'a machine
+val set_addr : int -> int -> 'a machine -> 'a machine
 
 val set_debug : 'a machine -> bool -> 'a machine
 
