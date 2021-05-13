@@ -1,4 +1,5 @@
 open Utils
+open AocUtils
 
 let find_crosses board =
   Hashtbl.fold
@@ -28,4 +29,4 @@ let run file_name =
   in
   let crosses = find_crosses state.board in
 
-  List.fold_left (fun acc pt -> acc + (pt.row * pt.col)) 0 crosses
+  List.fold_left (fun acc pt -> acc + (pt.x * pt.y)) 0 crosses

@@ -1,3 +1,5 @@
+open AocUtils
+
 type piece =
   | NEW_LINE
   | SCAFFOLD
@@ -39,10 +41,6 @@ let is_piece v =
   let ch = char_of_int v in
   match ch with '\n' | '#' | '.' | '^' | '>' | 'v' | '<' -> true | _ -> false
 
-type point = { row : int; col : int }
-
-let point_to_string pt = Printf.sprintf "(%d,%d)" pt.row pt.col
-
 type scaffold_state = {
   loc : point;
   robot : point;
@@ -51,36 +49,10 @@ type scaffold_state = {
 
 let new_state =
   {
-    loc = { row = 0; col = 0 };
-    robot = { row = 0; col = 0 };
+    loc = { x = 0; y = 0 };
+    robot = { x = 0; y = 0 };
     board = Hashtbl.create 64;
   }
-
-type board_bounds = {
-  low_row : int;
-  high_row : int;
-  low_col : int;
-  high_col : int;
-}
-
-let new_bounds =
-  {
-    low_row = max_int;
-    high_row = min_int;
-    low_col = max_int;
-    high_col = min_int;
-  }
-
-let get_board_bounds board =
-  Hashtbl.fold
-    (fun pt _ acc ->
-      {
-        low_row = min acc.low_row pt.row;
-        high_row = max acc.high_row pt.row;
-        low_col = min acc.low_col pt.col;
-        high_col = max acc.high_col pt.col;
-      })
-    board new_bounds
 
 let is_scaffold = function SCAFFOLD -> true | _ -> false
 
@@ -92,10 +64,10 @@ let is_cross pt board =
   let get_piece pt = try Hashtbl.find board pt with Not_found -> SPACE in
 
   let center = get_piece pt in
-  let north = get_piece { pt with row = pt.row - 1 } in
-  let south = get_piece { pt with row = pt.row + 1 } in
-  let east = get_piece { pt with col = pt.col + 1 } in
-  let west = get_piece { pt with col = pt.col - 1 } in
+  let north = get_piece { pt with x = pt.x - 1 } in
+  let south = get_piece { pt with x = pt.x + 1 } in
+  let east = get_piece { pt with y = pt.y + 1 } in
+  let west = get_piece { pt with y = pt.y - 1 } in
 
   (is_robot center || is_scaffold center)
   && (is_robot north || is_scaffold north)
@@ -106,26 +78,24 @@ let is_cross pt board =
 let print_board board =
   let bounds = get_board_bounds board in
 
-  let rec row_loop row =
-    let rec col_loop col =
-      if col <= bounds.high_col then (
-        let piece =
-          try Hashtbl.find board { row; col } with Not_found -> SPACE
-        in
+  let rec x_loop x =
+    let rec y_loop y =
+      if y <= bounds.high_y then (
+        let piece = try Hashtbl.find board { x; y } with Not_found -> SPACE in
 
-        if is_cross { row; col } board then Printf.printf "O"
+        if is_cross { x; y } board then Printf.printf "O"
         else Printf.printf "%c" @@ piece_to_char piece;
 
-        col_loop (col + 1))
+        y_loop (y + 1))
     in
 
-    col_loop bounds.low_col;
+    y_loop bounds.low_y;
     Printf.printf "\n";
 
-    if row < bounds.high_row then row_loop (row + 1)
+    if x < bounds.high_x then x_loop (x + 1)
   in
 
-  row_loop bounds.low_row
+  x_loop bounds.low_x
 
 let handle_output mach =
   let state = Intcode.get_payload mach in
@@ -139,8 +109,8 @@ let handle_output mach =
       if is_piece v then (
         let piece = char_of_int v |> char_to_piece in
         let new_loc =
-          if piece = NEW_LINE then { row = state.loc.row + 1; col = 0 }
-          else { row = state.loc.row; col = state.loc.col + 1 }
+          if piece = NEW_LINE then { x = state.loc.x + 1; y = 0 }
+          else { x = state.loc.x; y = state.loc.y + 1 }
         in
         let state =
           if is_robot piece then { state with robot = state.loc } else state

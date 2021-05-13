@@ -1,4 +1,5 @@
 open Utils
+open AocUtils
 
 type turn = RIGHT | LEFT
 
@@ -30,23 +31,23 @@ let get_turn state =
 
   match robot_piece with
   | ROBOT_UP ->
-      if has_point board { robot_pt with col = robot_pt.col - 1 } then Some LEFT
-      else if has_point board { robot_pt with col = robot_pt.col + 1 } then
+      if has_point board { robot_pt with y = robot_pt.y - 1 } then Some LEFT
+      else if has_point board { robot_pt with y = robot_pt.y + 1 } then
         Some RIGHT
       else None
   | ROBOT_DOWN ->
-      if has_point board { robot_pt with col = robot_pt.col + 1 } then Some LEFT
-      else if has_point board { robot_pt with col = robot_pt.col - 1 } then
+      if has_point board { robot_pt with y = robot_pt.y + 1 } then Some LEFT
+      else if has_point board { robot_pt with y = robot_pt.y - 1 } then
         Some RIGHT
       else None
   | ROBOT_LEFT ->
-      if has_point board { robot_pt with row = robot_pt.row + 1 } then Some LEFT
-      else if has_point board { robot_pt with row = robot_pt.row - 1 } then
+      if has_point board { robot_pt with x = robot_pt.x + 1 } then Some LEFT
+      else if has_point board { robot_pt with x = robot_pt.x - 1 } then
         Some RIGHT
       else None
   | ROBOT_RIGHT ->
-      if has_point board { robot_pt with row = robot_pt.row - 1 } then Some LEFT
-      else if has_point board { robot_pt with row = robot_pt.row + 1 } then
+      if has_point board { robot_pt with x = robot_pt.x - 1 } then Some LEFT
+      else if has_point board { robot_pt with x = robot_pt.x + 1 } then
         Some RIGHT
       else None
   | p -> raise @@ Failure (Printf.sprintf "get_turn %s" @@ piece_to_string p)
@@ -63,15 +64,15 @@ let forward state =
   let robot = Hashtbl.find state.board state.robot in
   let diff =
     match robot with
-    | ROBOT_UP -> { row = -1; col = 0 }
-    | ROBOT_DOWN -> { row = 1; col = 0 }
-    | ROBOT_RIGHT -> { row = 0; col = 1 }
-    | ROBOT_LEFT -> { row = 0; col = -1 }
-    | _ -> { row = 0; col = 0 }
+    | ROBOT_UP -> { x = -1; y = 0 }
+    | ROBOT_DOWN -> { x = 1; y = 0 }
+    | ROBOT_RIGHT -> { x = 0; y = 1 }
+    | ROBOT_LEFT -> { x = 0; y = -1 }
+    | _ -> { x = 0; y = 0 }
   in
 
   let rec loop pt count =
-    let next_pt = { row = pt.row + diff.row; col = pt.col + diff.col } in
+    let next_pt = { x = pt.x + diff.x; y = pt.y + diff.y } in
     let next_item =
       try Hashtbl.find state.board next_pt with Not_found -> SPACE
     in
@@ -238,7 +239,7 @@ let traverse_opts path_opts =
 
   { state with str_path = List.rev state.str_path }
 
-let str_to_input str =
+let str_to_buffer str =
   let buffer = Array.make (String.length str) @@ Char.code '\n' in
 
   let rec loop ndx =
@@ -316,9 +317,9 @@ let run file_name =
 
   let a_fn, b_fn, c_fn = get_fns state in
 
-  let fns_buf = Printf.sprintf "%s\n%s\n%s\n" a_fn b_fn c_fn |> str_to_input in
-  let path_buf = Printf.sprintf "%s\n" state.fn_path |> str_to_input in
-  let yn_buf = Printf.sprintf "n\n" |> str_to_input in
+  let fns_buf = Printf.sprintf "%s\n%s\n%s\n" a_fn b_fn c_fn |> str_to_buffer in
+  let path_buf = Printf.sprintf "%s\n" state.fn_path |> str_to_buffer in
+  let yn_buf = Printf.sprintf "n\n" |> str_to_buffer in
 
   mach |> send_input path_buf |> send_input fns_buf |> send_input yn_buf
   |> final_output
