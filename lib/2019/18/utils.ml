@@ -15,3 +15,9 @@ let char_to_piece ch =
   | 'a' .. 'z' -> KEY ch
   | 'A' .. 'Z' -> DOOR ch
   | _ -> raise @@ Failure (Printf.sprintf "Invalid input %c" ch)
+
+let is_key = function KEY _ -> true | _ -> false
+
+let is_door = function DOOR _ -> true | _ -> false
+
+let is_empty = function EMPTY -> true | _ -> false
