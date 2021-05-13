@@ -202,36 +202,6 @@ let update_fns opt state =
 let list_to_string arr =
   List.fold_left (fun s n -> Printf.sprintf "%s %s" s n) "" arr
 
-(* let traverse_opts path_opts =
-  let rec traverse state =
-    if state.ndx >= Array.length path_opts then state
-    else
-      let opts = path_opts.(state.ndx) in
-
-      Printf.printf "traverse %d %s\n" (Array.length path_opts)
-        (state_to_string state);
-
-      let rec try_opts opts' state =
-        Printf.printf "try_opts %s\n" (list_to_string opts');
-        match opts' with
-        | first :: rest ->
-            let new_state = update_fns first state in
-            let new_state =
-              traverse
-                { new_state with ndx = new_state.ndx + List.length opts' }
-            in
-
-            if new_state == state then try_opts rest new_state else new_state
-        | [] -> state
-      in
-
-      let state = try_opts opts state in
-      Printf.printf "%s\n" (state_to_string state);
-      state
-  in
-
-  traverse (new_path_state ()) *)
-
 let traverse_opts path_opts =
   let rec loop ndx state =
     let opts = path_opts.(ndx) in
@@ -289,19 +259,32 @@ let send_input input mach =
       match Intcode.get_state m with
       | RUN -> loop ndx m
       | HALT -> m
-      | INPUT ->
-          Printf.printf "INPUT %d %d\n" ndx input.(ndx);
-          loop (ndx + 1) @@ Intcode.set_input input.(ndx) m
+      | INPUT -> loop (ndx + 1) @@ Intcode.set_input input.(ndx) m
       | OUTPUT ->
-          let m, out = Intcode.get_output m in
-
-          (match out with
-          | None -> ()
-          | Some v -> Printf.printf "%d " v);
+          let m, _ = Intcode.get_output m in
           loop ndx m
   in
 
   loop 0 mach
+
+let final_output mach =
+  let rec loop m out =
+    let m = Intcode.step m in
+    match Intcode.get_state m with
+    | HALT -> out
+    | RUN -> loop m out
+    | OUTPUT -> (
+        let m', out' = Intcode.get_output m in
+        match out' with
+        | Some v -> loop m' v
+        | _ -> raise @@ Failure "No output")
+    | s ->
+        raise
+        @@ Failure
+             (Printf.sprintf "final_output %s" @@ Intcode.state_to_string s)
+  in
+
+  loop mach 0
 
 let get_fns state =
   let a =
@@ -325,14 +308,11 @@ let get_fns state =
 let run file_name =
   let prog = Intcode.parse_input file_name in
   let mach =
-    Intcode.new_machine new_state (Array.copy prog)
-    |> Intcode.set_addr 0 2 |> run_machine
+    Intcode.new_machine new_state prog |> Intcode.set_addr 0 2 |> run_machine
   in
   let state =
     Intcode.get_payload mach |> walk_path |> gen_path_opts |> traverse_opts
   in
-
-  Printf.printf "%s\n" @@ state_to_string state;
 
   let a_fn, b_fn, c_fn = get_fns state in
 
@@ -340,12 +320,5 @@ let run file_name =
   let path_buf = Printf.sprintf "%s\n" state.fn_path |> str_to_input in
   let yn_buf = Printf.sprintf "n\n" |> str_to_input in
 
-  Printf.printf "fns_buf %d\n" @@ Array.length fns_buf;
-  Printf.printf "path_buf %d\n" @@ Array.length path_buf;
-  Printf.printf "yn_buf %d\n" @@ Array.length yn_buf;
-
-  Printf.printf "%s\n" state.fn_path;
-  Array.iter (fun i -> Printf.printf "%d " i) path_buf;
-  let _ = send_input path_buf mach |> send_input fns_buf |> send_input yn_buf |> send_input yn_buf in
-
-  0
+  mach |> send_input path_buf |> send_input fns_buf |> send_input yn_buf
+  |> final_output

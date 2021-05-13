@@ -150,6 +150,4 @@ let handle_output mach =
           Hashtbl.replace ht state.loc piece;
 
         Intcode.set_payload { state with loc = new_loc } m)
-      else (
-        Printf.printf "%c" @@ char_of_int v;
-        m)
+      else m
