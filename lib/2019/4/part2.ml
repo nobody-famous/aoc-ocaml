@@ -24,8 +24,4 @@ let is_valid input =
 
   loop 0
 
-let run file_name =
-  let first, last = parse_input file_name in
-  let first = find_first first in
-
-  count_pws first last is_valid
+let run file_name = parse_input file_name |> find_first |> count_pws is_valid

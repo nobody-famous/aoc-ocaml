@@ -19,7 +19,6 @@ let parse_input file_name =
   match lines with
   | [] -> ([||], [||])
   | first :: _ ->
-      let splits = String.split_on_char '-' first in
-      let arrays = List.map to_int_array splits in
+      let arrays = String.split_on_char '-' first |> List.map to_int_array in
 
       (List.nth arrays 0, List.nth arrays 1)

@@ -10,8 +10,4 @@ let has_adj input =
 
   loop 1
 
-let run file_name =
-  let first, last = parse_input file_name in
-  let first = find_first first in
-
-  count_pws first last has_adj
+let run file_name = parse_input file_name |> find_first |> count_pws has_adj

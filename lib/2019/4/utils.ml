@@ -1,4 +1,4 @@
-let find_first input =
+let find_first (input, last) =
   let first = Array.make (Array.length input) input.(0) in
   let rec loop ndx =
     match ndx with
@@ -10,7 +10,7 @@ let find_first input =
   in
 
   loop 1;
-  first
+  (first, last)
 
 let is_greater a b =
   let rec loop ndx =
@@ -47,7 +47,7 @@ let inc input =
 
   loop (Array.length input - 1)
 
-let count_pws first last is_valid =
+let count_pws is_valid (first, last) =
   let copy = Array.copy first in
   let rec loop count =
     if is_greater copy last then count
