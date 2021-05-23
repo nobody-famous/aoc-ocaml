@@ -40,10 +40,8 @@ let print_grid bot =
   row_loop bounds.min_row
 
 let run file_name =
-  let prog = Intcode.parse_input file_name in
-  let bot = new_robot prog in
+  let bot = Intcode.parse_input file_name |> new_robot in
 
   run_robot bot WHITE;
 
-  (* print_grid bot *)
   0

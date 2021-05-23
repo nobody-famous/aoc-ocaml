@@ -1,8 +1,7 @@
 open Utils
 
 let run file_name =
-  let prog = Intcode.parse_input file_name in
-  let bot = new_robot prog in
+  let bot = Intcode.parse_input file_name |> new_robot in
 
   run_robot bot BLACK;
 
