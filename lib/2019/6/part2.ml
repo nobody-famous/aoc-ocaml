@@ -32,8 +32,7 @@ let remove_common path1 path2 =
   loop path1 path2
 
 let run file_name =
-  let input = parse_input file_name in
-  let tree = create_tree input in
+  let tree = parse_input file_name |> create_tree in
   let you_path = find_path tree "YOU" and san_path = find_path tree "SAN" in
 
   let you_path, san_path =

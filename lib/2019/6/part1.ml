@@ -1,7 +1,7 @@
 open Parser
 open Utils
 
-let count_orbits tree start =
+let count_orbits start tree =
   let counts = Hashtbl.create (Hashtbl.length tree) in
   let rec loop node =
     let count =
@@ -23,8 +23,6 @@ let count_orbits tree start =
   counts
 
 let run file_name =
-  let input = parse_input file_name in
-  let tree = create_tree input in
-  let counts = count_orbits tree "COM" in
+  let counts = parse_input file_name |> create_tree |> count_orbits "COM" in
 
   Hashtbl.fold (fun _ count acc -> acc + count) counts 0
