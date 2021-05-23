@@ -1,8 +1,5 @@
 let parse_input file_name =
-  let lines = InputParser.read_lines file_name in
-  let line =
-    match lines with [] -> raise @@ Failure "No input" | first :: _ -> first
-  in
+  let line = InputParser.read_lines file_name |> InputParser.get_first_line in
   let out = Array.make (String.length line) 0 in
 
   let _ =
