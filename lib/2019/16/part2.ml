@@ -30,6 +30,5 @@ let run file_name =
 
   loop 100;
 
-  let pref = Array.sub input offset 8 in
-
-  Array.fold_left (fun total item -> (total * 10) + item) 0 pref
+  Array.sub input offset 8
+  |> Array.fold_left (fun total item -> (total * 10) + item) 0

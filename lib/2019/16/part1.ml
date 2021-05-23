@@ -11,6 +11,6 @@ let run file_name =
   in
 
   loop 100;
-  let pref = Array.sub input 0 8 in
 
-  Array.fold_left (fun total item -> (total * 10) + item) 0 pref
+  Array.sub input 0 8
+  |> Array.fold_left (fun total item -> (total * 10) + item) 0
