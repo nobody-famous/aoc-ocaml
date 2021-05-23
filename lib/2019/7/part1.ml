@@ -35,12 +35,7 @@ let run_seq machines =
 let run_perms prog perms =
   List.fold_left
     (fun acc perm ->
-      let machines = make_machines prog in
-      start_machines machines perm;
-
-      let result = run_seq machines in
-
-      Stdlib.max result acc)
+      prog |> make_machines |> start_machines perm |> run_seq |> Stdlib.max acc)
     0 perms
 
 let run file_name =

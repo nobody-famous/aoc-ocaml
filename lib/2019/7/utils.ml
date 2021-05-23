@@ -44,7 +44,7 @@ let start_machine machine phase =
 
   loop machine
 
-let start_machines machines phases =
+let start_machines phases machines =
   let rec loop ndx ph_list =
     match ph_list with
     | [] -> ()
@@ -53,4 +53,5 @@ let start_machines machines phases =
         loop (ndx + 1) rest
   in
 
-  loop 0 phases
+  loop 0 phases;
+  machines
