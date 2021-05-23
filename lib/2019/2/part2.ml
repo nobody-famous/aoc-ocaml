@@ -7,7 +7,7 @@ let find_values input low high target =
   let rec outer_loop noun noun_max =
     let rec inner_loop verb verb_max =
       let m = Intcode.new_machine () (Array.copy input) in
-      let value = Intcode.get_addr (run_machine m noun verb) 0 in
+      let value = Intcode.get_addr 0 (run_machine m noun verb) in
 
       if value = target then Some (noun, verb)
       else if verb = verb_max then None

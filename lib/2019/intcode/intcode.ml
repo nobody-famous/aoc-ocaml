@@ -71,7 +71,7 @@ let set_state m s = { m with state = s }
 
 let get_state m = m.state
 
-let get_addr m addr =
+let get_addr addr m =
   if addr < Array.length m.prog then m.prog.(addr)
   else try Hashtbl.find m.memory addr with Not_found -> 0
 
@@ -83,18 +83,18 @@ let set_addr addr value m =
 let set_debug m value = { m with debug = value }
 
 let param_value m op offset =
-  let v = get_addr m @@ (m.ip + offset) in
+  let v = get_addr (m.ip + offset) m in
   let value =
     match op.modes.(offset - 1) with
-    | Position -> get_addr m v
+    | Position -> get_addr v m
     | Immediate -> v
-    | Relative -> get_addr m @@ (v + m.rel_base)
+    | Relative -> get_addr (v + m.rel_base) m
   in
 
   value
 
 let write_addr m op offset =
-  let addr = get_addr m (m.ip + offset) in
+  let addr = get_addr (m.ip + offset) m in
   if op.modes.(offset - 1) = Relative then addr + m.rel_base else addr
 
 let math_op label m op fn =
@@ -121,12 +121,12 @@ let op_code_3 m op =
   | Some i ->
       let m = set_addr addr i m in
 
-      if m.debug then printf "%d INP %d -> %d\n" m.ip (get_addr m addr) addr;
+      if m.debug then printf "%d INP %d -> %d\n" m.ip (get_addr addr m) addr;
 
       { m with input = None; state = RUN; ip = m.ip + 2 }
 
 let op_code_4 m op =
-  let addr = get_addr m (m.ip + 1) in
+  let addr = get_addr (m.ip + 1) m in
   let value = param_value m op 1 in
 
   if m.debug then printf "%d OUT %d (%d)\n" m.ip addr value;

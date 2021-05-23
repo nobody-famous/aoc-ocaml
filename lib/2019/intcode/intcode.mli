@@ -20,7 +20,7 @@ val set_addr : int -> int -> 'a machine -> 'a machine
 
 val set_debug : 'a machine -> bool -> 'a machine
 
-val get_addr : 'a machine -> int -> int
+val get_addr : int -> 'a machine -> int
 
 val set_state : 'a machine -> machine_state -> 'a machine
 
