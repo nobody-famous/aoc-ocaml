@@ -1,4 +1,4 @@
-let run_prog m input =
+let run_prog input m =
   let rec loop m output =
     let m = Intcode.step m in
 
