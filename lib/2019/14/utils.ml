@@ -12,7 +12,7 @@ let count_parents input num_parents =
         v.chems)
     input
 
-let calc_ore input fuel_target =
+let calc_ore fuel_target input =
   let parent_counts = Hashtbl.create 64 in
   let req = Hashtbl.create 64 in
 

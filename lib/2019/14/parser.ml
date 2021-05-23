@@ -16,24 +16,25 @@ let parse_line ht line =
   let str = Str.regexp "\\(.*\\) => \\([0-9]+\\) \\(.*\\)" in
 
   if Str.string_match str line 0 then
-    let in_chems_str = Str.matched_group 1 line in
     let out_chem =
       {
         amount = int_of_string @@ Str.matched_group 2 line;
         name = Str.matched_group 3 line;
       }
     in
-    let splits = Str.split (Str.regexp ", ") in_chems_str in
-    let in_chems = List.map parse_chem splits in
+    let in_chems =
+      Str.matched_group 1 line
+      |> Str.split (Str.regexp ", ")
+      |> List.map parse_chem
+    in
 
     Hashtbl.replace ht out_chem.name
       { amount = out_chem.amount; chems = in_chems }
   else raise @@ Failure (Printf.sprintf "Invalid input %s" line)
 
 let parse_input file_name =
-  let lines = InputParser.read_lines file_name in
   let ht = Hashtbl.create 64 in
 
-  List.iter (fun line -> parse_line ht line) lines;
+  InputParser.read_lines file_name |> List.iter (fun line -> parse_line ht line);
 
   ht
