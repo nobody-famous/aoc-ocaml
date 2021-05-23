@@ -34,13 +34,11 @@ let collisions_for_line line lines acc =
 
   loop lines acc
 
-let collisions wire1 wire2 =
+let collisions (wire1, wire2) =
   let rec i_loop i_lines acc =
     match i_lines with
     | [] -> acc
-    | i_h :: t ->
-        let acc' = collisions_for_line i_h wire2 acc in
-        i_loop t acc'
+    | i_h :: t -> i_loop t @@ collisions_for_line i_h wire2 acc
   in
 
   i_loop wire1 []
