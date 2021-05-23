@@ -307,12 +307,13 @@ let get_fns state =
   (a, b, c)
 
 let run file_name =
-  let prog = Intcode.parse_input file_name in
   let mach =
-    Intcode.new_machine new_state prog |> Intcode.set_addr 0 2 |> run_machine
+    Intcode.parse_input file_name
+    |> Intcode.new_machine new_state
+    |> Intcode.set_addr 0 2 |> run_machine
   in
   let state =
-    Intcode.get_payload mach |> walk_path |> gen_path_opts |> traverse_opts
+    mach |> Intcode.get_payload |> walk_path |> gen_path_opts |> traverse_opts
   in
 
   let a_fn, b_fn, c_fn = get_fns state in

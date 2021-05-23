@@ -27,6 +27,6 @@ let run file_name =
     |> Intcode.new_machine new_state
     |> run_machine |> Intcode.get_payload
   in
-  let crosses = find_crosses state.board in
 
-  List.fold_left (fun acc pt -> acc + (pt.x * pt.y)) 0 crosses
+  find_crosses state.board
+  |> List.fold_left (fun acc pt -> acc + (pt.x * pt.y)) 0
