@@ -6,10 +6,10 @@ let steps moons =
 
     if stop then ms
     else
-      let ms' = List.map (fun m -> compute_vel m ms) ms in
-      let ms' = List.map (fun m -> apply_vel m) ms' in
-
-      loop ms'
+      ms
+      |> List.map (fun m -> compute_vel m ms)
+      |> List.map (fun m -> apply_vel m)
+      |> loop
   in
 
   loop moons
@@ -34,9 +34,6 @@ let lcm m n =
   match (m, n) with 0, _ | _, 0 -> 0 | m, n -> abs (m * n) / gcd m n
 
 let run file_name =
-  let moons = Parser.parse_input file_name in
-  let moons = steps moons in
-
-  let cycles = get_cycles moons in
-
-  Array.fold_left (fun acc c -> lcm acc c) 1 cycles
+  Parser.parse_input file_name
+  |> steps |> get_cycles
+  |> Array.fold_left (fun acc c -> lcm acc c) 1

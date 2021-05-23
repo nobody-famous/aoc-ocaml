@@ -14,6 +14,4 @@ let parse_coords line =
   else raise @@ Failure "INVALID INPUT"
 
 let parse_input file_name =
-  let lines = InputParser.read_lines file_name in
-
-  List.map (fun line -> parse_coords line) lines
+  InputParser.read_lines file_name |> List.map (fun line -> parse_coords line)
