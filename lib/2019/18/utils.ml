@@ -6,7 +6,7 @@ type pieces = {
   enter : point option;
   empty : (point, char) Hashtbl.t;
   keys : (point, char) Hashtbl.t;
-  doors : (point, char) Hashtbl.t;
+  doors : (char, point) Hashtbl.t;
 }
 
 let new_pieces () =

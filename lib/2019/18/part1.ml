@@ -52,22 +52,20 @@ let find_keys start map =
 
   next.keys *)
 
-type node = { pt : point; piece : piece; dist : int }
+type node = { pt : point; dist : int }
 
-type next_nodes = { empty : node list; keys : node list }
+type found_key = { pt : point; key : char; dist : int }
 
-let add_to_neighbors seen pt dist data neighbors =
+type next_nodes = { empty : node list; keys : found_key list }
+
+let add_to_neighbors seen pt dist (data : pieces) neighbors =
   if Hashtbl.mem seen pt then neighbors
-  else
-    let piece = try Hashtbl.find data.empty pt with Not_found -> WALL in
-    if is_empty piece then
-      {
-        neighbors with
-        empty = { pt; piece; dist = dist + 1 } :: neighbors.empty;
-      }
-    else if is_key piece then
-      { neighbors with keys = { pt; piece; dist = dist + 1 } :: neighbors.keys }
-    else neighbors
+  else if Hashtbl.mem data.empty pt then
+    { neighbors with empty = { pt; dist = dist + 1 } :: neighbors.empty }
+  else if Hashtbl.mem data.keys pt then
+    let key = Hashtbl.find data.keys pt in
+    { neighbors with keys = { pt; key; dist = dist + 1 } :: neighbors.keys }
+  else neighbors
 
 let get_neighbors seen pt dist data =
   { empty = []; keys = [] }
@@ -77,9 +75,10 @@ let get_neighbors seen pt dist data =
   |> add_to_neighbors seen { pt with x = pt.x - 1 } dist data
 
 let visit_nodes seen dist nodes data =
-  List.iter (fun n -> Hashtbl.replace seen n.pt dist) nodes.empty;
+  List.iter (fun (n : node) -> Hashtbl.replace seen n.pt dist) nodes.empty;
+  List.iter (fun n -> Hashtbl.replace seen n.pt dist) nodes.keys;
   List.fold_left
-    (fun acc n ->
+    (fun acc (n : node) ->
       let neighbors = get_neighbors seen n.pt dist data in
       { empty = acc.empty @ neighbors.empty; keys = acc.keys @ neighbors.keys })
     { empty = []; keys = nodes.keys }
@@ -96,16 +95,44 @@ let find_keys pt data =
 
   loop 1 nodes
 
+let rec walk_map pt (data : pieces) =
+  if Hashtbl.length data.keys = 0 then Printf.printf "NO KEYS\n";
+  let keys = find_keys pt data in
+
+  (* Printf.printf "walk_map %c %d,%d [" from_key pt.x pt.y;
+     List.iter (fun v -> Printf.printf " %c" v.key) keys;
+     Printf.printf "] [";
+     Hashtbl.iter (fun d _ -> Printf.printf " %c" d) data.doors;
+     Printf.printf "]\n"; *)
+  List.iter
+    (fun found_key ->
+      let empty_copy = Hashtbl.copy data.empty in
+      let keys_copy = Hashtbl.copy data.keys in
+      let doors_copy = Hashtbl.copy data.doors in
+
+      Hashtbl.replace empty_copy found_key.pt '.';
+      if Hashtbl.mem doors_copy found_key.key then
+        Hashtbl.replace empty_copy (Hashtbl.find doors_copy found_key.key) '.';
+      Hashtbl.remove keys_copy found_key.pt;
+      Hashtbl.remove doors_copy found_key.key;
+
+      (* Printf.printf "  %d,%d %c\n" found_key.pt.x found_key.pt.y found_key.key;
+
+         Hashtbl.iter (fun _ v -> Printf.printf " %c" v) keys_copy;
+         Printf.printf "\n"; *)
+      walk_map found_key.pt
+        { data with empty = empty_copy; keys = keys_copy; doors = doors_copy })
+    keys;
+  ()
+
 let run file_name =
   let piece_data = Parser.parse_input file_name in
 
-  let keys =
-    match piece_data.enter with
-    | None -> failwith "No entrance"
-    | Some pt -> find_keys pt piece_data
-  in
+  (match piece_data.enter with
+  | None -> failwith "No entrance"
+  | Some pt -> walk_map pt piece_data);
 
-  Printf.printf "Keys %d" @@ List.length keys;
+  (* List.iter (fun k -> Printf.printf "%d,%d %d\n" k.pt.x k.pt.y k.dist) keys; *)
   0
 
 (* let keys =
