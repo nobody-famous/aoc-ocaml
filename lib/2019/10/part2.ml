@@ -31,7 +31,7 @@ let slope_to_quadrant slope point origin =
   else if (slope < 0. || slope = Float.infinity) && point.y > origin.y then
     SOUTH_WEST
   else if slope >= 0. && point.x <= origin.x then NORTH_WEST
-  else raise @@ Failure "Could not assign quadrant"
+  else failwith "Could not assign quadrant"
 
 let sort_points points origin =
   if List.length points = 1 then points

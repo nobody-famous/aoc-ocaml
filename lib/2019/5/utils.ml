@@ -3,12 +3,12 @@ let run_prog input m =
     let m = Intcode.step m in
 
     match Intcode.get_state m with
-    | RUN -> loop m output
-    | HALT -> output
-    | INPUT ->
+    | Run -> loop m output
+    | Halt -> output
+    | NeedInput ->
         let m = Intcode.set_input input m in
         loop m output
-    | OUTPUT ->
+    | HasOutput ->
         let m, out = Intcode.get_output m in
         loop m out
   in

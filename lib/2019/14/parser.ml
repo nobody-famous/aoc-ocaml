@@ -10,7 +10,7 @@ let parse_chem chem_str =
     let name = Str.matched_group 2 chem_str in
 
     { amount; name }
-  else raise @@ Failure (Printf.sprintf "Invalid chemical %s" chem_str)
+  else failwith (Printf.sprintf "Invalid chemical %s" chem_str)
 
 let parse_line ht line =
   let str = Str.regexp "\\(.*\\) => \\([0-9]+\\) \\(.*\\)" in
@@ -30,7 +30,7 @@ let parse_line ht line =
 
     Hashtbl.replace ht out_chem.name
       { amount = out_chem.amount; chems = in_chems }
-  else raise @@ Failure (Printf.sprintf "Invalid input %s" line)
+  else failwith (Printf.sprintf "Invalid input %s" line)
 
 let parse_input file_name =
   let ht = Hashtbl.create 64 in

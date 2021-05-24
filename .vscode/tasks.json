@@ -23,7 +23,7 @@
             ],
             "options": {
                 "env": {
-                    "OCAMLRUNPARAM": "b"
+                    "OCAMLRunPARAM": "b"
                 }
             },
             "problemMatcher": []

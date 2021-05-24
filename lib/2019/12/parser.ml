@@ -11,7 +11,7 @@ let parse_coords line =
     let z = int_of_string @@ Str.matched_group 3 line in
 
     new_moon { x; y; z } { x = 0; y = 0; z = 0 }
-  else raise @@ Failure "INVALID INPUT"
+  else failwith "INVALID NeedInput"
 
 let parse_input file_name =
   InputParser.read_lines file_name |> List.map (fun line -> parse_coords line)

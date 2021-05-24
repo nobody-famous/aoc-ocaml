@@ -5,12 +5,12 @@ let run_amp machine signal =
     let m = Intcode.step m in
 
     match Intcode.get_state m with
-    | RUN -> loop m out
-    | HALT -> out
-    | INPUT ->
+    | Run -> loop m out
+    | Halt -> out
+    | NeedInput ->
         let m = Intcode.set_input signal m in
         loop m out
-    | OUTPUT ->
+    | HasOutput ->
         let m, v = Intcode.get_output m in
         let out' = match v with None -> out | Some v -> v in
 

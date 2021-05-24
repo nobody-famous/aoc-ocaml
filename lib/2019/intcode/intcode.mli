@@ -1,6 +1,6 @@
 type 'a machine
 
-type machine_state = HALT | RUN | INPUT | OUTPUT
+type machine_state = Halt | Run | NeedInput | HasOutput
 
 val new_machine : 'a -> int array -> 'a machine
 
@@ -18,7 +18,7 @@ val get_output : 'a machine -> 'a machine * int option
 
 val set_addr : int -> int -> 'a machine -> 'a machine
 
-val set_debug : 'a machine -> bool -> 'a machine
+val set_debug : bool -> 'a machine -> 'a machine
 
 val get_addr : int -> 'a machine -> int
 

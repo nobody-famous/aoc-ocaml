@@ -11,12 +11,12 @@ let run_machine mach =
     let m = Intcode.step m in
 
     match Intcode.get_state m with
-    | HALT -> m
-    | RUN -> loop m
-    | OUTPUT -> handle_output m |> loop
+    | Halt -> m
+    | Run -> loop m
+    | HasOutput -> handle_output m |> loop
     | s ->
         let str = Intcode.state_to_string s in
-        raise @@ Failure (Printf.sprintf "Unhandled state %s" str)
+        failwith (Printf.sprintf "Unhandled state %s" str)
   in
 
   loop mach

@@ -5,14 +5,14 @@ let run_amp signal machine =
     let m = Intcode.step m in
 
     match Intcode.get_state m with
-    | RUN -> loop m out
-    | OUTPUT ->
+    | Run -> loop m out
+    | HasOutput ->
         let m, v = Intcode.get_output m in
         let out' = match v with None -> out | Some v -> v in
 
         (m, out')
-    | HALT -> (m, out)
-    | INPUT ->
+    | Halt -> (m, out)
+    | NeedInput ->
         let m = Intcode.set_input signal m in
         loop m out
   in
@@ -27,7 +27,7 @@ let run_seq machines =
 
     machines.(ndx) <- m;
 
-    if Intcode.get_state m = HALT && ndx = Array.length machines - 1 then out
+    if Intcode.get_state m = Halt && ndx = Array.length machines - 1 then out
     else loop next signal' out'
   in
 

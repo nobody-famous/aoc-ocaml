@@ -2,9 +2,9 @@ let rec run_mach out m =
   let m = Intcode.step m in
 
   match Intcode.get_state m with
-  | HALT -> out
-  | RUN -> run_mach out m
-  | OUTPUT -> (
+  | Halt -> out
+  | Run -> run_mach out m
+  | HasOutput -> (
       let m, out' = Intcode.get_output m in
       match out' with Some v -> v | None -> run_mach 0 m)
   | s ->

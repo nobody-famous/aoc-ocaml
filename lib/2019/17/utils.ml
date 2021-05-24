@@ -35,7 +35,7 @@ let char_to_piece = function
   | '>' -> ROBOT_RIGHT
   | 'v' -> ROBOT_DOWN
   | '<' -> ROBOT_LEFT
-  | ch -> raise @@ Failure (Printf.sprintf "Invalid piece %c" ch)
+  | ch -> failwith (Printf.sprintf "Invalid piece %c" ch)
 
 let is_piece v =
   let ch = char_of_int v in
@@ -102,7 +102,7 @@ let handle_output mach =
   let m, out = Intcode.get_output mach in
 
   match out with
-  | None -> raise @@ Failure "Expected output, but had none"
+  | None -> failwith "Expected output, but had none"
   | Some v ->
       let ht = state.board in
 
