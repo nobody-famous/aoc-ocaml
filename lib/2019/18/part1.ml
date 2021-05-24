@@ -1,7 +1,7 @@
 open AocUtils
 open Utils
 
-type node = { pt : point; piece : piece; dist : int }
+(* type node = { pt : point; piece : piece; dist : int }
 
 type next_nodes = { empty : node list; keys : node list }
 
@@ -50,24 +50,74 @@ let find_keys start map =
 
   let next = loop neighbors 1 in
 
-  next.keys
+  next.keys *)
 
-let run file_name =
-  let piece_map = Parser.parse_input file_name in
-  let bounds = get_board_bounds piece_map in
-  let enter = find_entrance piece_map in
+type node = { pt : point; piece : piece; dist : int }
 
-  Printf.printf "%d,%d to %d,%d\n" bounds.low_x bounds.low_y bounds.high_x
-    bounds.high_y;
+type next_nodes = { empty : node list; keys : node list }
 
-  let keys =
-    match enter with None -> [] | Some pt -> find_keys pt piece_map
+let add_to_neighbors seen pt dist data neighbors =
+  if Hashtbl.mem seen pt then neighbors
+  else
+    let piece = try Hashtbl.find data.empty pt with Not_found -> WALL in
+    if is_empty piece then
+      {
+        neighbors with
+        empty = { pt; piece; dist = dist + 1 } :: neighbors.empty;
+      }
+    else if is_key piece then
+      { neighbors with keys = { pt; piece; dist = dist + 1 } :: neighbors.keys }
+    else neighbors
+
+let get_neighbors seen pt dist data =
+  { empty = []; keys = [] }
+  |> add_to_neighbors seen { pt with y = pt.y - 1 } dist data
+  |> add_to_neighbors seen { pt with y = pt.y + 1 } dist data
+  |> add_to_neighbors seen { pt with x = pt.x + 1 } dist data
+  |> add_to_neighbors seen { pt with x = pt.x - 1 } dist data
+
+let visit_nodes seen dist nodes data =
+  List.iter (fun n -> Hashtbl.replace seen n.pt dist) nodes.empty;
+  List.fold_left
+    (fun acc n ->
+      let neighbors = get_neighbors seen n.pt dist data in
+      { empty = acc.empty @ neighbors.empty; keys = acc.keys @ neighbors.keys })
+    { empty = []; keys = nodes.keys }
+    nodes.empty
+
+let find_keys pt data =
+  let seen = Hashtbl.create 64 in
+  let nodes = get_neighbors seen pt 0 data in
+
+  let rec loop dist nodes' =
+    if List.length nodes'.empty = 0 then nodes'.keys
+    else loop (dist + 1) @@ visit_nodes seen dist nodes' data
   in
 
-  Printf.printf "%d\n" @@ List.length keys;
-  List.iter
-    (fun k ->
-      Printf.printf "%d,%d %d %c\n" k.pt.x k.pt.y k.dist
-        (match k.piece with KEY v -> v | DOOR v -> v | _ -> '0'))
-    keys;
+  loop 1 nodes
+
+let run file_name =
+  let piece_data = Parser.parse_input file_name in
+
+  let keys =
+    match piece_data.enter with
+    | None -> failwith "No entrance"
+    | Some pt -> find_keys pt piece_data
+  in
+
+  Printf.printf "Keys %d" @@ List.length keys;
   0
+
+(* let keys =
+     match piece_data.enter with
+     | None -> []
+     | Some pt -> find_keys pt piece_data.keys
+   in
+
+   Printf.printf "%d\n" @@ List.length keys;
+   List.iter
+     (fun k ->
+       Printf.printf "%d,%d %d %c\n" k.pt.x k.pt.y k.dist
+         (match k.piece with KEY v -> v | DOOR v -> v | _ -> '0'))
+     keys;
+   0 *)
