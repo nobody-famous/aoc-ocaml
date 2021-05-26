@@ -7,7 +7,7 @@ let add_to_data pt piece data =
       Hashtbl.replace data.keys pt k;
       data
   | DOOR d ->
-      Hashtbl.replace data.doors (Char.lowercase_ascii d) pt;
+      Hashtbl.replace data.doors pt d;
       data
   | EMPTY ->
       Hashtbl.replace data.empty pt '.';
