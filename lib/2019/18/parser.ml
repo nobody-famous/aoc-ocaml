@@ -12,7 +12,9 @@ let add_to_data pt piece data =
   | EMPTY ->
       Hashtbl.replace data.empty pt '.';
       data
-  | ENTRANCE -> { data with enter = Some pt }
+  | ENTRANCE ->
+      Hashtbl.replace data.empty pt '@';
+      { data with enter = Some pt }
   | _ -> data
 
 let parse_line row line data =

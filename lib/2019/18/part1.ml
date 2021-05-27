@@ -81,46 +81,89 @@ let rec walk_map pt min_steps dist (data : pieces) =
 
 type key_dist = { dist : int; keys : int }
 
-type graph_node = { pt : point; keys : int }
+type graph_node = { pt : point; dist : int; keys : int }
 
 type graph_state = {
   seen : (point, bool) Hashtbl.t;
   grid : pieces;
-  dist : int;
   dist_map : (char, key_dist) Hashtbl.t;
+  to_visit : graph_node list;
 }
 
 let new_graph_state data =
   {
     seen = Hashtbl.create 64;
     grid = data;
-    dist = 0;
     dist_map = Hashtbl.create 64;
+    to_visit = [];
   }
 
 let mark_seen pt state =
   Hashtbl.replace state.seen pt true;
   state
 
-let visit_empty pt state = { state with dist = state.dist + 1 }
+let visit_empty node state =
+  {
+    state with
+    to_visit =
+      { pt = node.pt; dist = node.dist + 1; keys = node.keys } :: state.to_visit;
+  }
 
-let visit_key pt state = { state with dist = state.dist + 1 }
+let visit_key node state = state
 
-let visit_node pt state =
-  if Hashtbl.mem state.seen pt then state
-  else if Hashtbl.mem state.grid.empty pt then visit_empty pt state
-  else if Hashtbl.mem state.grid.keys pt then visit_key pt state
-  else if Hashtbl.mem state.grid.doors pt then state
+let visit_node node state =
+  if Hashtbl.mem state.seen node.pt then state
+  else if Hashtbl.mem state.grid.empty node.pt then visit_empty node state
+  else if Hashtbl.mem state.grid.keys node.pt then visit_key node state
+  else if Hashtbl.mem state.grid.doors node.pt then state
   else state
 
-let all_neighbors pt data =
-  let state = new_graph_state data in
+let visit node diff state =
+  let node' =
+    { node with pt = { x = node.pt.x + diff.x; y = node.pt.y + diff.y } }
+  in
 
-  let pt' = { pt with y = pt.y + 1 } in
-  state |> visit_node pt' |> mark_seen pt'
+  state |> visit_node node' |> mark_seen node'.pt
+
+let node_neighbors node state =
+  state
+  |> visit node { x = 0; y = 1 }
+  |> visit node { x = 0; y = -1 }
+  |> visit node { x = 1; y = 0 }
+  |> visit node { x = -1; y = 0 }
+
+let all_neighbors pt data =
+  let rec loop state =
+    match state.to_visit with
+    | [] -> state
+    | nodes ->
+        let next_nodes =
+          List.fold_left
+            (fun acc n ->
+              let s = node_neighbors n { state with to_visit = [] } in
+              Printf.printf "n %d\n" @@ List.length s.to_visit;
+              s.to_visit @ acc)
+            [] nodes
+        in
+
+        Printf.printf "next_nodes %d\n" @@ List.length next_nodes;
+        loop { state with to_visit = next_nodes }
+  in
+
+  let state = new_graph_state data in
+  loop { state with to_visit = [ { pt; dist = 0; keys = 0 } ] }
 
 let run file_name =
   let piece_data = Parser.parse_input file_name in
+
+  let state =
+    match piece_data.enter with
+    | None -> failwith "No entrance"
+    | Some pt -> all_neighbors pt piece_data
+  in
+
+  Printf.printf "to_visit %d\n" @@ List.length state.to_visit;
+  List.iter (fun n -> Printf.printf "%d,%d\n" n.pt.x n.pt.y) state.to_visit;
 
   (* let steps =
        match piece_data.enter with
