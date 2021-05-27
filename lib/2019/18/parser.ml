@@ -1,7 +1,7 @@
 open AocUtils
 open Utils
 
-let add_to_data pt piece data =
+let add_to_data pt piece (data : pieces) =
   match piece with
   | KEY k ->
       Hashtbl.replace data.keys pt k;

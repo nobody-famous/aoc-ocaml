@@ -9,6 +9,8 @@ type pieces = {
   doors : (point, char) Hashtbl.t;
 }
 
+type graph_node = { pt : point; dist : int; keys : int }
+
 let door_to_key door = Char.lowercase_ascii door
 
 let key_mask = function
