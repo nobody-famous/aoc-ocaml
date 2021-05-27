@@ -208,6 +208,12 @@ let problems : problem list =
       fn = Aoc_2019_17.Part2.run;
       exp = 880360;
     };
+    {
+      name = "2019.18.1";
+      file = "input/2019/18/puzzle.txt";
+      fn = Aoc_2019_18.Part1.run;
+      exp = 880360;
+    };
   ]
 
 let timed_run p =

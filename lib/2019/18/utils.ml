@@ -3,11 +3,13 @@ open AocUtils
 type piece = EMPTY | WALL | ENTRANCE | KEY of char | DOOR of char
 
 type pieces = {
-  enter : point option;
+  enter : point;
   empty : (point, char) Hashtbl.t;
   keys : (point, char) Hashtbl.t;
   doors : (point, char) Hashtbl.t;
 }
+
+let door_to_key door = Char.lowercase_ascii door
 
 let key_mask = function
   | 'a' -> 0x1
@@ -40,7 +42,7 @@ let key_mask = function
 
 let new_pieces () =
   {
-    enter = None;
+    enter = { x = 0; y = 0 };
     empty = Hashtbl.create 64;
     keys = Hashtbl.create 64;
     doors = Hashtbl.create 64;
