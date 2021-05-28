@@ -26,10 +26,12 @@ let visit_empty node state =
   { state with to_visit = new_node :: state.to_visit }
 
 let visit_key node state =
+  let mask = Hashtbl.find state.grid.keys node.pt |> key_mask in
+  let blocked = node.keys land mask = mask in
   let new_node = { node with dist = node.dist + 1 } in
 
-  Hashtbl.replace state.dist_map node.pt
-    { node with dist = node.dist + 1; keys = node.keys };
+  if not blocked then
+    Hashtbl.replace state.dist_map node.pt { new_node with keys = node.keys };
 
   { state with to_visit = new_node :: state.to_visit }
 

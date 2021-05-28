@@ -41,16 +41,17 @@ let visit node state =
 
 let walk_map pt grid dists =
   let state = new_state { pt; dist = 0; keys = 0 } grid dists in
-  let closest = find_closest state in
 
+  let closest = find_closest state in
   let state = visit closest state in
 
   let closest = find_closest state in
-
   let state = visit closest state in
 
   let closest = find_closest state in
+  let state = visit closest state in
 
+  let closest = find_closest state in
   let state = visit closest state in
 
   Printf.printf "closest %d,%d\n" closest.pt.x closest.pt.y;
