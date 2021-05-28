@@ -1,6 +1,6 @@
 type point = { x : int; y : int }
 
-type point_3d = { x3 : int; y3 : int; z3 : int }
+type point_3d = { i : int; j : int; k : int }
 
 let point_to_string pt = Printf.sprintf "(%d,%d)" pt.x pt.y
 
