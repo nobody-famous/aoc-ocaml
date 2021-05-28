@@ -1,5 +1,7 @@
 type point = { x : int; y : int }
 
+type point_3d = { x3 : int; y3 : int; z3 : int }
+
 let point_to_string pt = Printf.sprintf "(%d,%d)" pt.x pt.y
 
 type board_bounds = { low_x : int; high_x : int; low_y : int; high_y : int }

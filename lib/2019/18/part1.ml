@@ -3,13 +3,22 @@ open Utils
 
 type state = {
   grid : pieces;
+  grid_3d : (point_3d, int) Hashtbl.t;
   dists : (point, (point, graph_node) Hashtbl.t) Hashtbl.t;
   unvisited : (point, graph_node) Hashtbl.t;
   have_keys : int;
 }
 
 let new_state node grid dists =
-  let state = { grid; dists; unvisited = Hashtbl.create 64; have_keys = 0 } in
+  let state =
+    {
+      grid;
+      grid_3d = Hashtbl.create 64;
+      dists;
+      unvisited = Hashtbl.create 64;
+      have_keys = 0;
+    }
+  in
   Hashtbl.replace state.unvisited node.pt node;
   state
 
