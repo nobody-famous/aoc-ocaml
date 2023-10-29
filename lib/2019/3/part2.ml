@@ -25,12 +25,11 @@ let coll_dists wire colls =
     match rem with
     | [] -> hmap
     | line :: rest ->
-        let points = coll_on_line colls line in
         let add_map point =
           Hashtbl.add hmap point (dist + man_dist line.p1 point)
         in
 
-        List.iter add_map points;
+        coll_on_line colls line |> List.iter add_map;
         loop rest (dist + man_dist line.p1 line.p2)
   in
 
@@ -51,7 +50,7 @@ let combine dists_1 dists_2 =
 
 let run file_name =
   let wire1, wire2 = parse_input file_name in
-  let colls = collisions wire1 wire2 in
+  let colls = collisions (wire1, wire2) in
   let wire1_dists = coll_dists wire1 colls in
   let wire2_dists = coll_dists wire2 colls in
   let combined = combine wire1_dists wire2_dists in

@@ -37,7 +37,7 @@ let piece_of_id id =
   | 2 -> BLOCK
   | 3 -> PADDLE
   | 4 -> BALL
-  | _ -> raise @@ Failure (Printf.sprintf "Invalid ID %d" id)
+  | _ -> failwith (Printf.sprintf "Invalid ID %d" id)
 
 let update_tile game =
   let point = { x = game.cur_instr.x; y = game.cur_instr.y } in
@@ -76,7 +76,7 @@ let machine_output game =
 
   let game' =
     match out with
-    | None -> raise @@ Failure "Expected output, but had none"
+    | None -> failwith "Expected output, but had none"
     | Some v -> proc_out game' v
   in
 
@@ -102,10 +102,10 @@ let run_game game =
     let g = { g with mach = m } in
 
     match Intcode.get_state m with
-    | HALT -> g
-    | RUN -> loop { g with mach = m }
-    | OUTPUT -> loop @@ machine_output g
-    | INPUT -> loop @@ machine_input g
+    | Halt -> g
+    | Run -> loop { g with mach = m }
+    | HasOutput -> loop @@ machine_output g
+    | NeedInput -> loop @@ machine_input g
   in
 
   loop game

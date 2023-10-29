@@ -73,7 +73,7 @@ let add_to_cycle cycle item =
   | Some _ -> cycle
   | None ->
       if cycle.ndx >= Array.length cycle.seen then
-        raise @@ Failure (Printf.sprintf "NDX %d\n" cycle.ndx);
+        failwith (Printf.sprintf "NDX %d\n" cycle.ndx);
 
       if has_cycle cycle then cycle
       else (

@@ -31,7 +31,7 @@ let slope_to_quadrant slope point origin =
   else if (slope < 0. || slope = Float.infinity) && point.y > origin.y then
     SOUTH_WEST
   else if slope >= 0. && point.x <= origin.x then NORTH_WEST
-  else raise @@ Failure "Could not assign quadrant"
+  else failwith "Could not assign quadrant"
 
 let sort_points points origin =
   if List.length points = 1 then points
@@ -86,16 +86,15 @@ let compare_slopes s1 s2 =
     else compare s1.slope s2.slope
   else compare_quadrant s1.quad s2.quad
 
-let map_to_array map origin =
-  let items = Hashtbl.to_seq map in
-
-  let point_data =
-    Seq.fold_left
-      (fun acc (slope, sides) -> add_sides acc slope sides origin)
-      [] items
+let map_to_array (origin, map) =
+  let point_array =
+    Hashtbl.to_seq map
+    |> Seq.fold_left
+         (fun acc (slope, sides) -> add_sides acc slope sides origin)
+         []
+    |> Array.of_list
   in
 
-  let point_array = Array.of_list point_data in
   Array.sort compare_slopes point_array;
 
   point_array
@@ -122,8 +121,6 @@ let remove_asteroids arr =
   loop 0 0 None
 
 let run file_name =
-  let input = Parser.parse_input file_name in
-  let origin, map = find_station_map input in
-  let arr = map_to_array map origin in
+  let arr = Parser.parse_input file_name |> find_station_map |> map_to_array in
 
   match remove_asteroids arr with None -> 0 | Some p -> (p.x * 100) + p.y

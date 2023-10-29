@@ -16,7 +16,7 @@ Part 2 had to brute force finding inputs that gave the expected output.
 
 ### Day 3
 
-Had to find where 2 wires cross. May algorithm was
+Had to find where 2 wires cross. My algorithm was
 
 1. convert the direction input into x, y deltas
 2. convert the deltas into a list of lines

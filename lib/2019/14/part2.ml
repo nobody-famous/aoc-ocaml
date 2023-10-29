@@ -6,7 +6,7 @@ let run file_name =
 
   let rec loop low high =
     let mid = low + ((high - low) / 2) in
-    let ore = calc_ore input mid in
+    let ore = calc_ore mid input in
 
     if low = mid then low
     else if ore > ore_target then loop low mid

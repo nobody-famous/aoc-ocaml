@@ -6,24 +6,18 @@
         {
             "label": "run 2019",
             "type": "shell",
-            "command": "dune",
-            "args": [
-                "exec",
-                "bin/2019/runner.exe"
-            ],
+            "command": "opam",
+            "args": ["exec", "dune", "exec", "bin/2019/runner.exe"],
             "problemMatcher": []
         },
         {
             "label": "debug 2019",
             "type": "shell",
             "command": "dune",
-            "args": [
-                "exec",
-                "bin/2019/runner.exe"
-            ],
+            "args": ["exec", "bin/2019/runner.exe"],
             "options": {
                 "env": {
-                    "OCAMLRUNPARAM": "b"
+                    "OCAMLRunPARAM": "b"
                 }
             },
             "problemMatcher": []
@@ -31,19 +25,15 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "dune",
-            "args": [
-                "build"
-            ],
-            "problemMatcher": []
+            "command": "opam",
+            "args": ["exec", "dune", "build"],
+            "problemMatcher": ["$ocamlc"]
         },
         {
             "label": "clean",
             "type": "shell",
-            "command": "dune",
-            "args": [
-                "clean"
-            ],
+            "command": "opam",
+            "args": ["exec", "dune", "clean"],
             "problemMatcher": []
         }
     ]

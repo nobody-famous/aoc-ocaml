@@ -37,14 +37,14 @@ let start_machine machine phase =
   let rec loop m =
     let m = Intcode.step m in
 
-    match Intcode.get_state m with RUN -> loop m | _ -> m
+    match Intcode.get_state m with Run -> loop m | _ -> m
   in
 
   let machine = Intcode.set_input phase machine in
 
   loop machine
 
-let start_machines machines phases =
+let start_machines phases machines =
   let rec loop ndx ph_list =
     match ph_list with
     | [] -> ()
@@ -53,4 +53,5 @@ let start_machines machines phases =
         loop (ndx + 1) rest
   in
 
-  loop 0 phases
+  loop 0 phases;
+  machines

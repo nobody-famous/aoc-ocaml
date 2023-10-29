@@ -74,15 +74,15 @@ let run_robot in_bot in_color =
     let bot = { bot with mach = Intcode.step bot.mach } in
 
     match Intcode.get_state bot.mach with
-    | HALT -> ()
-    | RUN -> loop bot
-    | INPUT ->
+    | Halt -> ()
+    | Run -> loop bot
+    | NeedInput ->
         let m = Intcode.set_input (get_color_input bot) bot.mach in
         loop { bot with mach = m }
-    | OUTPUT -> (
+    | HasOutput -> (
         let m, out = Intcode.get_output bot.mach in
         match out with
-        | None -> raise @@ Failure "NO OUTPUT"
+        | None -> failwith "NO HasOutput"
         | Some v -> loop (proc_output { bot with mach = m } v))
   in
 

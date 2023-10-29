@@ -1,4 +1,5 @@
 open Utils
+open AocUtils
 
 let find_crosses board =
   Hashtbl.fold
@@ -10,12 +11,12 @@ let run_machine mach =
     let m = Intcode.step m in
 
     match Intcode.get_state m with
-    | HALT -> m
-    | RUN -> loop m
-    | OUTPUT -> handle_output m |> loop
+    | Halt -> m
+    | Run -> loop m
+    | HasOutput -> handle_output m |> loop
     | s ->
         let str = Intcode.state_to_string s in
-        raise @@ Failure (Printf.sprintf "Unhandled state %s" str)
+        failwith (Printf.sprintf "Unhandled state %s" str)
   in
 
   loop mach
@@ -26,6 +27,6 @@ let run file_name =
     |> Intcode.new_machine new_state
     |> run_machine |> Intcode.get_payload
   in
-  let crosses = find_crosses state.board in
 
-  List.fold_left (fun acc pt -> acc + (pt.row * pt.col)) 0 crosses
+  find_crosses state.board
+  |> List.fold_left (fun acc pt -> acc + (pt.x * pt.y)) 0

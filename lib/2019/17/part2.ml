@@ -1,4 +1,5 @@
 open Utils
+open AocUtils
 
 type turn = RIGHT | LEFT
 
@@ -9,10 +10,10 @@ let run_machine mach =
     let m = Intcode.step m in
 
     match Intcode.get_state m with
-    | HALT -> m
-    | RUN -> loop m
-    | OUTPUT -> handle_output m |> loop
-    | INPUT -> m
+    | Halt -> m
+    | Run -> loop m
+    | HasOutput -> handle_output m |> loop
+    | NeedInput -> m
   in
 
   loop mach
@@ -30,26 +31,26 @@ let get_turn state =
 
   match robot_piece with
   | ROBOT_UP ->
-      if has_point board { robot_pt with col = robot_pt.col - 1 } then Some LEFT
-      else if has_point board { robot_pt with col = robot_pt.col + 1 } then
+      if has_point board { robot_pt with y = robot_pt.y - 1 } then Some LEFT
+      else if has_point board { robot_pt with y = robot_pt.y + 1 } then
         Some RIGHT
       else None
   | ROBOT_DOWN ->
-      if has_point board { robot_pt with col = robot_pt.col + 1 } then Some LEFT
-      else if has_point board { robot_pt with col = robot_pt.col - 1 } then
+      if has_point board { robot_pt with y = robot_pt.y + 1 } then Some LEFT
+      else if has_point board { robot_pt with y = robot_pt.y - 1 } then
         Some RIGHT
       else None
   | ROBOT_LEFT ->
-      if has_point board { robot_pt with row = robot_pt.row + 1 } then Some LEFT
-      else if has_point board { robot_pt with row = robot_pt.row - 1 } then
+      if has_point board { robot_pt with x = robot_pt.x + 1 } then Some LEFT
+      else if has_point board { robot_pt with x = robot_pt.x - 1 } then
         Some RIGHT
       else None
   | ROBOT_RIGHT ->
-      if has_point board { robot_pt with row = robot_pt.row - 1 } then Some LEFT
-      else if has_point board { robot_pt with row = robot_pt.row + 1 } then
+      if has_point board { robot_pt with x = robot_pt.x - 1 } then Some LEFT
+      else if has_point board { robot_pt with x = robot_pt.x + 1 } then
         Some RIGHT
       else None
-  | p -> raise @@ Failure (Printf.sprintf "get_turn %s" @@ piece_to_string p)
+  | p -> failwith (Printf.sprintf "get_turn %s" @@ piece_to_string p)
 
 let turn_robot robot dir =
   match robot with
@@ -63,15 +64,15 @@ let forward state =
   let robot = Hashtbl.find state.board state.robot in
   let diff =
     match robot with
-    | ROBOT_UP -> { row = -1; col = 0 }
-    | ROBOT_DOWN -> { row = 1; col = 0 }
-    | ROBOT_RIGHT -> { row = 0; col = 1 }
-    | ROBOT_LEFT -> { row = 0; col = -1 }
-    | _ -> { row = 0; col = 0 }
+    | ROBOT_UP -> { x = -1; y = 0 }
+    | ROBOT_DOWN -> { x = 1; y = 0 }
+    | ROBOT_RIGHT -> { x = 0; y = 1 }
+    | ROBOT_LEFT -> { x = 0; y = -1 }
+    | _ -> { x = 0; y = 0 }
   in
 
   let rec loop pt count =
-    let next_pt = { row = pt.row + diff.row; col = pt.col + diff.col } in
+    let next_pt = { x = pt.x + diff.x; y = pt.y + diff.y } in
     let next_item =
       try Hashtbl.find state.board next_pt with Not_found -> SPACE
     in
@@ -238,7 +239,7 @@ let traverse_opts path_opts =
 
   { state with str_path = List.rev state.str_path }
 
-let str_to_input str =
+let str_to_buffer str =
   let buffer = Array.make (String.length str) @@ Char.code '\n' in
 
   let rec loop ndx =
@@ -257,10 +258,10 @@ let send_input input mach =
       let m = Intcode.step m in
 
       match Intcode.get_state m with
-      | RUN -> loop ndx m
-      | HALT -> m
-      | INPUT -> loop (ndx + 1) @@ Intcode.set_input input.(ndx) m
-      | OUTPUT ->
+      | Run -> loop ndx m
+      | Halt -> m
+      | NeedInput -> loop (ndx + 1) @@ Intcode.set_input input.(ndx) m
+      | HasOutput ->
           let m, _ = Intcode.get_output m in
           loop ndx m
   in
@@ -271,13 +272,11 @@ let final_output mach =
   let rec loop m out =
     let m = Intcode.step m in
     match Intcode.get_state m with
-    | HALT -> out
-    | RUN -> loop m out
-    | OUTPUT -> (
+    | Halt -> out
+    | Run -> loop m out
+    | HasOutput -> (
         let m', out' = Intcode.get_output m in
-        match out' with
-        | Some v -> loop m' v
-        | _ -> raise @@ Failure "No output")
+        match out' with Some v -> loop m' v | _ -> failwith "No output")
     | s ->
         raise
         @@ Failure
@@ -288,37 +287,32 @@ let final_output mach =
 
 let get_fns state =
   let a =
-    match state.a_fn with
-    | None -> raise @@ Failure "Fn A not defined"
-    | Some f -> f
+    match state.a_fn with None -> failwith "Fn A not defined" | Some f -> f
   in
   let b =
-    match state.b_fn with
-    | None -> raise @@ Failure "Fn B not defined"
-    | Some f -> f
+    match state.b_fn with None -> failwith "Fn B not defined" | Some f -> f
   in
   let c =
-    match state.c_fn with
-    | None -> raise @@ Failure "Fn C not defined"
-    | Some f -> f
+    match state.c_fn with None -> failwith "Fn C not defined" | Some f -> f
   in
 
   (a, b, c)
 
 let run file_name =
-  let prog = Intcode.parse_input file_name in
   let mach =
-    Intcode.new_machine new_state prog |> Intcode.set_addr 0 2 |> run_machine
+    Intcode.parse_input file_name
+    |> Intcode.new_machine new_state
+    |> Intcode.set_addr 0 2 |> run_machine
   in
   let state =
-    Intcode.get_payload mach |> walk_path |> gen_path_opts |> traverse_opts
+    mach |> Intcode.get_payload |> walk_path |> gen_path_opts |> traverse_opts
   in
 
   let a_fn, b_fn, c_fn = get_fns state in
 
-  let fns_buf = Printf.sprintf "%s\n%s\n%s\n" a_fn b_fn c_fn |> str_to_input in
-  let path_buf = Printf.sprintf "%s\n" state.fn_path |> str_to_input in
-  let yn_buf = Printf.sprintf "n\n" |> str_to_input in
+  let fns_buf = Printf.sprintf "%s\n%s\n%s\n" a_fn b_fn c_fn |> str_to_buffer in
+  let path_buf = Printf.sprintf "%s\n" state.fn_path |> str_to_buffer in
+  let yn_buf = Printf.sprintf "n\n" |> str_to_buffer in
 
   mach |> send_input path_buf |> send_input fns_buf |> send_input yn_buf
   |> final_output

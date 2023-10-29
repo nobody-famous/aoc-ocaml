@@ -4,13 +4,12 @@ let calc_stats m =
   let rec row_loop row stats =
     let rec col_loop col stats =
       if col >= Array.length m.(row) then stats
-      else if m.(row).(col) = '0' then
-        col_loop (col + 1) { stats with zeros = stats.zeros + 1 }
-      else if m.(row).(col) = '1' then
-        col_loop (col + 1) { stats with ones = stats.ones + 1 }
-      else if m.(row).(col) = '2' then
-        col_loop (col + 1) { stats with twos = stats.twos + 1 }
-      else col_loop (col + 1) stats
+      else
+        match m.(row).(col) with
+        | '0' -> col_loop (col + 1) { stats with zeros = stats.zeros + 1 }
+        | '1' -> col_loop (col + 1) { stats with ones = stats.ones + 1 }
+        | '2' -> col_loop (col + 1) { stats with twos = stats.twos + 1 }
+        | _ -> col_loop (col + 1) stats
     in
 
     if row < Array.length m then

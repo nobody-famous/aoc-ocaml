@@ -1,18 +1,18 @@
 open Utils
 
-let run_amp machine signal =
+let run_amp signal machine =
   let rec loop m out =
     let m = Intcode.step m in
 
     match Intcode.get_state m with
-    | RUN -> loop m out
-    | OUTPUT ->
+    | Run -> loop m out
+    | HasOutput ->
         let m, v = Intcode.get_output m in
         let out' = match v with None -> out | Some v -> v in
 
         (m, out')
-    | HALT -> (m, out)
-    | INPUT ->
+    | Halt -> (m, out)
+    | NeedInput ->
         let m = Intcode.set_input signal m in
         loop m out
   in
@@ -22,13 +22,12 @@ let run_amp machine signal =
 let run_seq machines =
   let rec loop ndx signal out =
     let next = if ndx + 1 < Array.length machines then ndx + 1 else 0 in
-    let m = machines.(ndx) in
-    let m, signal' = run_amp m signal in
+    let m, signal' = machines.(ndx) |> run_amp signal in
     let out' = if ndx = Array.length machines - 1 then signal' else out in
 
     machines.(ndx) <- m;
 
-    if Intcode.get_state m = HALT && ndx = Array.length machines - 1 then out
+    if Intcode.get_state m = Halt && ndx = Array.length machines - 1 then out
     else loop next signal' out'
   in
 
@@ -37,12 +36,7 @@ let run_seq machines =
 let run_perms prog perms =
   List.fold_left
     (fun acc perm ->
-      let machines = make_machines prog in
-
-      start_machines machines perm;
-
-      let result = run_seq machines in
-      Stdlib.max result acc)
+      prog |> make_machines |> start_machines perm |> run_seq |> Stdlib.max acc)
     0 perms
 
 let run file_name =

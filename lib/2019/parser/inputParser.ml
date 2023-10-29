@@ -10,3 +10,5 @@ let read_lines file_name =
   in
 
   read_all []
+
+let get_first_line lines = match lines with first :: _ -> first | [] -> ""

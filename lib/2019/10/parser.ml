@@ -17,13 +17,9 @@ let find_asteroids lines =
           else col_asteroids
         in
 
-        let asteroids' = col_loop 0 asteroids in
-        loop rest (row + 1) asteroids'
+        col_loop 0 asteroids |> loop rest (row + 1)
   in
 
   loop lines 0 []
 
-let parse_input file_name =
-  let lines = InputParser.read_lines file_name in
-
-  find_asteroids lines
+let parse_input file_name = InputParser.read_lines file_name |> find_asteroids

@@ -1,9 +1,9 @@
 open Utils
 
 let run file_name =
-  let prog = Intcode.parse_input file_name in
   let mach, _ =
-    Intcode.new_machine (new_state { x = 0; y = 0 }) prog
+    Intcode.parse_input file_name
+    |> Intcode.new_machine (new_state { x = 0; y = 0 })
     |> Intcode.set_input (dir_to_int NORTH)
     |> search_for_sys
   in

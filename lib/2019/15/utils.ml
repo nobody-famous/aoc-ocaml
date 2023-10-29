@@ -30,7 +30,7 @@ let status_of_int = function
   | 0 -> HIT_WALL
   | 1 -> MOVED
   | 2 -> FOUND_SYS
-  | s -> raise @@ Failure (Printf.sprintf "Invalid status code %d" s)
+  | s -> failwith (Printf.sprintf "Invalid status code %d" s)
 
 let piece_to_string = function
   | WALL -> "WALL"
@@ -131,12 +131,12 @@ let get_output mach =
     let m = Intcode.step m in
 
     match Intcode.get_state m with
-    | RUN -> loop m
-    | HALT -> (m, None)
-    | OUTPUT -> (
+    | Run -> loop m
+    | Halt -> (m, None)
+    | HasOutput -> (
         let m, out = Intcode.get_output m in
         match out with
-        | None -> raise @@ Failure (Printf.sprintf "No output")
+        | None -> failwith (Printf.sprintf "No output")
         | Some v -> (m, Some v))
     | s ->
         raise
@@ -171,7 +171,7 @@ let get_neighbors mach =
       let m, out = get_output m in
 
       match out with
-      | None -> raise @@ Failure "No output"
+      | None -> failwith "No output"
       | Some v -> proc_output acc m v)
     [] to_try
 

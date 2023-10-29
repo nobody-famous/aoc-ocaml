@@ -1,8 +1,7 @@
 type image = int array array list
 
 let parse_input file_name width height =
-  let lines = InputParser.read_lines file_name in
-  let line = match lines with first :: _ -> first | [] -> "" in
+  let line = InputParser.read_lines file_name |> InputParser.get_first_line in
 
   let rec loop ndx img =
     let matrix = Array.make_matrix height width '0' in
