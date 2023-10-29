@@ -276,9 +276,7 @@ let final_output mach =
     | Run -> loop m out
     | HasOutput -> (
         let m', out' = Intcode.get_output m in
-        match out' with
-        | Some v -> loop m' v
-        | _ -> failwith "No output")
+        match out' with Some v -> loop m' v | _ -> failwith "No output")
     | s ->
         raise
         @@ Failure
@@ -289,19 +287,13 @@ let final_output mach =
 
 let get_fns state =
   let a =
-    match state.a_fn with
-    | None -> failwith "Fn A not defined"
-    | Some f -> f
+    match state.a_fn with None -> failwith "Fn A not defined" | Some f -> f
   in
   let b =
-    match state.b_fn with
-    | None -> failwith "Fn B not defined"
-    | Some f -> f
+    match state.b_fn with None -> failwith "Fn B not defined" | Some f -> f
   in
   let c =
-    match state.c_fn with
-    | None -> failwith "Fn C not defined"
-    | Some f -> f
+    match state.c_fn with None -> failwith "Fn C not defined" | Some f -> f
   in
 
   (a, b, c)
