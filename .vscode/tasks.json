@@ -4,10 +4,10 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "run 2019",
+            "label": "run",
             "type": "shell",
             "command": "opam",
-            "args": ["exec", "dune", "exec", "bin/2019/runner.exe"],
+            "args": ["exec", "dune", "exec", "bin/runner.exe"],
             "problemMatcher": []
         },
         {
