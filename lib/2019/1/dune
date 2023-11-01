@@ -1,2 +1,3 @@
 (library
- (name aoc_2019_1))
+ (name aoc_2019_1)
+ (libraries inputParser))
