@@ -1,6 +1,6 @@
 open Printf
 
-type problem = { d : int; part : int; fn : string -> int; exp : int }
+type problem = { d : int; part : int; fn : string list -> int; exp : int }
 type year = { label : int; probs : problem list }
 
 let years : year list =
@@ -67,7 +67,7 @@ let time_prob year prob =
   let file = sprintf "input/%d/%d/puzzle.txt" year prob.d
   and name = sprintf "%d.%d" prob.d prob.part in
 
-  let diff, actual = timed_run prob.fn file in
+  let diff, actual = InputParser.read_lines file |> timed_run prob.fn in
   let label = get_label (actual = prob.exp) in
 
   printf "[%s] %s %d ms\n" label name diff;

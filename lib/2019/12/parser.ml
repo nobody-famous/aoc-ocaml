@@ -13,5 +13,4 @@ let parse_coords line =
     new_moon { x; y; z } { x = 0; y = 0; z = 0 }
   else failwith "INVALID NeedInput"
 
-let parse_input file_name =
-  InputParser.read_lines file_name |> List.map (fun line -> parse_coords line)
+let parse_input lines = lines |> List.map (fun line -> parse_coords line)

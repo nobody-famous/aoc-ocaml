@@ -1,3 +1,9 @@
 (library
  (name aoc_2019_1)
+ (modules parser part1 part2 utils)
  (libraries inputParser))
+
+(test
+ (name test1)
+ (modules test1)
+ (libraries ounit2))

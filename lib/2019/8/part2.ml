@@ -1,5 +1,4 @@
 let height = 6
-
 let width = 25
 
 let calc_pixel layers row col =
@@ -23,8 +22,8 @@ let print_img img =
 
   row_loop 0
 
-let run file_name =
-  let input = Parser.parse_input file_name width height in
+let run lines =
+  let input = Parser.parse_input lines width height in
   let img = Array.make_matrix height width '2' in
 
   let rec row_loop row =

@@ -3,7 +3,7 @@ open Utils
 let run_machine m noun verb =
   m |> Intcode.set_addr 1 noun |> Intcode.set_addr 2 verb |> run_prog
 
-let find_values input low high target =
+let find_values low high target input =
   let rec outer_loop noun noun_max =
     let rec inner_loop verb verb_max =
       let m = Intcode.new_machine () (Array.copy input) in
@@ -16,15 +16,14 @@ let find_values input low high target =
 
     match inner_loop low high with
     | Some v -> Some v
-    | _ -> if noun = noun_max then None else outer_loop (noun + 1) noun_max
+    | None -> if noun = noun_max then None else outer_loop (noun + 1) noun_max
   in
 
   outer_loop low high
 
-let run file_name =
-  let input = Intcode.parse_input file_name in
+let run lines =
   let target = 19690720 in
 
-  match find_values input 0 99 target with
+  match Intcode.parse_input lines |> find_values 0 99 target with
   | Some (noun, verb) -> (noun * 100) + verb
   | None -> 0

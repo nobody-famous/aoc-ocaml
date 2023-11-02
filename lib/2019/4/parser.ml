@@ -14,8 +14,7 @@ let to_int_array input =
 
   loop input []
 
-let parse_input file_name =
-  let lines = read_lines file_name in
+let parse_input lines =
   match lines with
   | [] -> ([||], [||])
   | first :: _ ->

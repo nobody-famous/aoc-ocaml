@@ -8,19 +8,14 @@
             "type": "shell",
             "command": "opam",
             "args": ["exec", "dune", "exec", "bin/runner.exe"],
-            "problemMatcher": []
+            "problemMatcher": ["$ocamlc"]
         },
         {
-            "label": "debug 2019",
+            "label": "tests",
             "type": "shell",
-            "command": "dune",
-            "args": ["exec", "bin/2019/runner.exe"],
-            "options": {
-                "env": {
-                    "OCAMLRunPARAM": "b"
-                }
-            },
-            "problemMatcher": []
+            "command": "opam",
+            "args": ["exec", "dune", "runtest"],
+            "problemMatcher": ["$ocamlc"]
         },
         {
             "label": "build",

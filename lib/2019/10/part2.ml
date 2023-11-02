@@ -1,7 +1,6 @@
 open Utils
 
 type quadrant = NORTH_EAST | SOUTH_EAST | NORTH_WEST | SOUTH_WEST
-
 type slope_point = { slope : float; quad : quadrant; points : point list }
 
 let quad_to_string quad =
@@ -74,8 +73,14 @@ let compare_quadrant q1 q2 =
   else
     match q1 with
     | NORTH_EAST -> -1
-    | SOUTH_EAST -> ( match q2 with NORTH_EAST -> 1 | _ -> -1)
-    | SOUTH_WEST -> ( match q2 with NORTH_WEST -> -1 | _ -> 1)
+    | SOUTH_EAST -> (
+        match q2 with
+        | NORTH_EAST -> 1
+        | _ -> -1)
+    | SOUTH_WEST -> (
+        match q2 with
+        | NORTH_WEST -> -1
+        | _ -> 1)
     | NORTH_WEST -> 1
 
 let compare_slopes s1 s2 =
@@ -120,7 +125,9 @@ let remove_asteroids arr =
 
   loop 0 0 None
 
-let run file_name =
-  let arr = Parser.parse_input file_name |> find_station_map |> map_to_array in
+let run lines =
+  let arr = Parser.parse_input lines |> find_station_map |> map_to_array in
 
-  match remove_asteroids arr with None -> 0 | Some p -> (p.x * 100) + p.y
+  match remove_asteroids arr with
+  | None -> 0
+  | Some p -> (p.x * 100) + p.y

@@ -1,1 +1,3 @@
 profile = default
+break-cases = toplevel
+break-infix = fit-or-vertical

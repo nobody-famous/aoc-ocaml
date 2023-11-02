@@ -1,5 +1,4 @@
 type chemical = { amount : int; name : string }
-
 type reaction = { amount : int; chems : chemical list }
 
 let parse_chem chem_str =
@@ -32,9 +31,9 @@ let parse_line ht line =
       { amount = out_chem.amount; chems = in_chems }
   else failwith (Printf.sprintf "Invalid input %s" line)
 
-let parse_input file_name =
+let parse_input lines =
   let ht = Hashtbl.create 64 in
 
-  InputParser.read_lines file_name |> List.iter (fun line -> parse_line ht line);
+  lines |> List.iter (fun line -> parse_line ht line);
 
   ht

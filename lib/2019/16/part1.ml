@@ -1,7 +1,7 @@
 open Utils
 
-let run file_name =
-  let input = Parser.parse_input file_name in
+let run lines =
+  let input = Parser.parse_input lines in
   let seqs = Hashtbl.create 64 in
 
   let rec loop count =

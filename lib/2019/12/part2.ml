@@ -17,9 +17,21 @@ let steps moons =
 let get_cycles moons =
   List.fold_left
     (fun acc m ->
-      let x_cycle = match m.cycles.(0).size with None -> 0 | Some s -> s in
-      let y_cycle = match m.cycles.(1).size with None -> 0 | Some s -> s in
-      let z_cycle = match m.cycles.(2).size with None -> 0 | Some s -> s in
+      let x_cycle =
+        match m.cycles.(0).size with
+        | None -> 0
+        | Some s -> s
+      in
+      let y_cycle =
+        match m.cycles.(1).size with
+        | None -> 0
+        | Some s -> s
+      in
+      let z_cycle =
+        match m.cycles.(2).size with
+        | None -> 0
+        | Some s -> s
+      in
 
       acc.(0) <- max acc.(0) x_cycle;
       acc.(1) <- max acc.(1) y_cycle;
@@ -31,9 +43,12 @@ let get_cycles moons =
 let rec gcd m n = if n <> 0 then gcd n (m mod n) else abs m
 
 let lcm m n =
-  match (m, n) with 0, _ | _, 0 -> 0 | m, n -> abs (m * n) / gcd m n
+  match (m, n) with
+  | 0, _ | _, 0 -> 0
+  | m, n -> abs (m * n) / gcd m n
 
-let run file_name =
-  Parser.parse_input file_name
-  |> steps |> get_cycles
+let run lines =
+  Parser.parse_input lines
+  |> steps
+  |> get_cycles
   |> Array.fold_left (fun acc c -> lcm acc c) 1

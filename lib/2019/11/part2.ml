@@ -27,7 +27,10 @@ let print_grid bot =
         let loc = { row; col } in
         let color = try Hashtbl.find bot.seen loc with Not_found -> BLACK in
 
-        Printf.printf "%c" (match color with BLACK -> ' ' | WHITE -> 'X');
+        Printf.printf "%c"
+          (match color with
+          | BLACK -> ' '
+          | WHITE -> 'X');
 
         col_loop (col + 1))
     in
@@ -39,8 +42,8 @@ let print_grid bot =
 
   row_loop bounds.min_row
 
-let run file_name =
-  let bot = Intcode.parse_input file_name |> new_robot in
+let run lines =
+  let bot = Intcode.parse_input lines |> new_robot in
 
   run_robot bot WHITE;
 

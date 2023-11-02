@@ -1,7 +1,7 @@
 open Utils
 
-let run file_name =
-  let input = Parser.parse_input file_name in
+let run lines =
+  let input = Parser.parse_input lines in
   let ore_target = 1000000000000 in
 
   let rec loop low high =

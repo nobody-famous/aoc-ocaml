@@ -20,16 +20,13 @@ let calc_stats m =
 
   row_loop 0 { zeros = 0; ones = 0; twos = 0 }
 
-let run file_name =
-  let img = Parser.parse_input file_name 25 6 in
+let calc_answer stats = stats.ones * stats.twos
 
-  let stats =
-    List.fold_left
-      (fun cur m ->
-        let stats = calc_stats m in
-        if stats.zeros < cur.zeros then stats else cur)
-      { zeros = max_int; ones = 0; twos = 0 }
-      img
-  in
-
-  stats.ones * stats.twos
+let run lines =
+  Parser.parse_input lines 25 6
+  |> List.fold_left
+       (fun cur m ->
+         let stats = calc_stats m in
+         if stats.zeros < cur.zeros then stats else cur)
+       { zeros = max_int; ones = 0; twos = 0 }
+  |> calc_answer

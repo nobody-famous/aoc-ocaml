@@ -21,11 +21,12 @@ let run_machine mach =
 
   loop mach
 
-let run file_name =
+let run lines =
   let state =
-    Intcode.parse_input file_name
+    Intcode.parse_input lines
     |> Intcode.new_machine new_state
-    |> run_machine |> Intcode.get_payload
+    |> run_machine
+    |> Intcode.get_payload
   in
 
   find_crosses state.board

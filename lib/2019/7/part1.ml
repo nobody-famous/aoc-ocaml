@@ -12,7 +12,11 @@ let run_amp machine signal =
         loop m out
     | HasOutput ->
         let m, v = Intcode.get_output m in
-        let out' = match v with None -> out | Some v -> v in
+        let out' =
+          match v with
+          | None -> out
+          | Some v -> v
+        in
 
         loop m out'
   in

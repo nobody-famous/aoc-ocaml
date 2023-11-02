@@ -1,3 +1,3 @@
 open Utils
 
-let run file_name = Parser.parse_input file_name |> calc_ore 1
+let run lines = Parser.parse_input lines |> calc_ore 1
