@@ -3,7 +3,7 @@ open OUnit2
 let check_equal x y = assert_equal x y ~printer:string_of_int
 
 let part1_tests =
-  "2019 Day Part 1"
+  "2019 Day 1 Part 1"
   >::: [
          ( "sample" >:: fun _ ->
            [ "12"; "14"; "1969"; "100756" ]
@@ -12,7 +12,7 @@ let part1_tests =
        ]
 
 let part2_tests =
-  "2019 Day Part 2"
+  "2019 Day 1 Part 2"
   >::: [
          ( "sample" >:: fun _ ->
            [ "12"; "14"; "1969"; "100756" ]
