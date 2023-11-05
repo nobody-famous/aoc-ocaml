@@ -85,5 +85,3 @@ let time_year (y : year) =
 let all_years years = List.iter time_year years;;
 
 all_years years
-
-(* Aoc_2019_18.Part1.run "input/2019/18/sample.txt" *)

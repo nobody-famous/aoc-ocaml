@@ -1,6 +1,5 @@
 open OUnit2
-
-let check_equal x y = assert_equal x y ~printer:string_of_int
+open TestUtils
 
 let part1_tests =
   "2019 Day 3 Part 1"

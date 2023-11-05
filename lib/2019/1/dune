@@ -6,4 +6,4 @@
 (test
  (name test)
  (modules test)
- (libraries ounit2 aoc_2019_1))
+ (libraries ounit2 aoc_2019_1 testUtils))
