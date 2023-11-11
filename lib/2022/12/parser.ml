@@ -57,12 +57,15 @@ let build_graph cells =
   let create_node es = { G.edges = es } in
 
   let to_node pos ch nodes =
-    get_neighbors pos
-    |> List.map (fun n -> to_edge cells ch n)
-    |> List.filter Option.is_some
-    |> List.map Option.get
-    |> create_node
-    |> Hashtbl.replace nodes pos;
+    let node =
+      get_neighbors pos
+      |> List.map (fun n -> to_edge cells ch n)
+      |> List.filter Option.is_some
+      |> List.map Option.get
+      |> create_node
+    in
+
+    Hashtbl.replace nodes pos node;
 
     nodes
   in
