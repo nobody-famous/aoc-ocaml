@@ -1,19 +1,7 @@
 module G = Aoc.Graph
 
-(* type position = { row : int; col : int } *)
 type cell = { pos : G.position; ch : char }
-
-(* type grid = { s : G.position; e : G.position; cells : cell list } *)
 type grid = { s : G.position; e : G.position; graph : int G.graph }
-
-(* type 'a edge = { weight : 'a }
-   type 'a node = { pos : Aoc.Graph.position; edges : 'a edge list }
-
-   type 'a graph = {
-     startPos : position;
-     endPos : position;
-     nodes : (position, 'a node) Hashtbl.t;
-   } *)
 
 let to_cells row (line : string) =
   line
@@ -21,20 +9,32 @@ let to_cells row (line : string) =
   |> List.of_seq
   |> List.mapi (fun col ch -> { pos = { row; col }; ch })
 
+let to_map =
+  List.fold_left
+    (fun ht c ->
+      Hashtbl.replace ht c.pos c.ch;
+      ht)
+    (Hashtbl.create 64)
+
 let get_cells data =
-  let update (s, e, cells) item =
-    match item.ch with
-    | 'S' -> (item.pos, e, { pos = item.pos; ch = 'a' } :: cells)
-    | 'E' -> (s, item.pos, { pos = item.pos; ch = 'z' } :: cells)
-    | _ -> (s, e, item :: cells)
+  let update pos ch (s, e, cells) =
+    match ch with
+    | 'S' ->
+        Hashtbl.replace cells pos 'a';
+        (pos, e, cells)
+    | 'E' ->
+        Hashtbl.replace cells pos 'z';
+        (s, pos, cells)
+    | _ ->
+        Hashtbl.replace cells pos ch;
+        (s, e, cells)
   in
 
-  List.fold_left update
-    ({ G.row = 0; G.col = 0 }, { G.row = 0; G.col = 0 }, [])
-    data
+  Hashtbl.fold update data
+    ({ G.row = 0; G.col = 0 }, { G.row = 0; G.col = 0 }, Hashtbl.create 64)
 
 let build_graph cells =
-  let get_candidates (pos : G.position) =
+  let get_neighbors (pos : G.position) =
     [
       { G.row = pos.row - 1; G.col = pos.col };
       { G.row = pos.row + 1; G.col = pos.col };
@@ -43,33 +43,36 @@ let build_graph cells =
     ]
   in
 
-  let to_edge p : 'a G.edge option =
-    Some { G.target = { G.row = 0; G.col = 0 }; G.weight = 0 }
+  let inc_char ch = Char.code ch + 1 |> Char.chr in
+
+  let to_edge cells ch neighbor_pos : 'a G.edge option =
+    match Hashtbl.find_opt cells neighbor_pos with
+    | Some neighbor_ch ->
+        if neighbor_ch <= inc_char ch then
+          Some { G.target = neighbor_pos; G.weight = 1 }
+        else None
+    | None -> None
   in
 
-  let create_node p es = { G.edges = es } in
+  let create_node es = { G.edges = es } in
 
-  let insert_node nodes cell =
-    get_candidates cell.pos
-    |> List.map to_edge
+  let to_node pos ch nodes =
+    get_neighbors pos
+    |> List.map (fun n -> to_edge cells ch n)
     |> List.filter Option.is_some
     |> List.map Option.get
-    |> create_node cell.pos
-    |> Hashtbl.replace nodes cell.pos;
+    |> create_node
+    |> Hashtbl.replace nodes pos;
+
     nodes
   in
 
-  List.fold_left insert_node (Hashtbl.create 64) cells
-
-(* let toGraph grid =
-   let graph =
-     { startPos = grid.s; endPos = grid.e; nodes = cellsToNodes grid.cells }
-   in
-
-   graph *)
+  let foo = Hashtbl.fold to_node cells (Hashtbl.create 64) in
+  foo
 
 let build_grid data =
   let s, e, cells = get_cells data in
   { s; e; graph = build_graph cells }
 
-let parse_input lines = List.mapi to_cells lines |> List.flatten |> build_grid
+let parse_input lines =
+  List.mapi to_cells lines |> List.flatten |> to_map |> build_grid
