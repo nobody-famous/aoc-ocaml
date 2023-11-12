@@ -43,7 +43,7 @@ let build_graph cells =
     ]
   in
 
-  let inc_char ch = Char.code ch + 1 |> Char.chr in
+  let inc_char ch = ch |> Char.code |> ( + ) 1 |> Char.chr in
 
   let to_edge cells ch neighbor_pos : 'a G.edge option =
     match Hashtbl.find_opt cells neighbor_pos with
