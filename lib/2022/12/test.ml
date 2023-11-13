@@ -7,7 +7,7 @@ let part1_tests =
          ( "Sample" >:: fun _ ->
            [ "Sabqponm"; "abcryxxl"; "accszExk"; "acctuvwj"; "abdefghi" ]
            |> Aoc_2022_12.Part1.run
-           |> check_equal 1 );
+           |> check_equal 31 );
        ]
 
 let _ = run_test_tt_main part1_tests
