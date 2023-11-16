@@ -1,7 +1,12 @@
 module G = Aoc.Graph
 
 type cell = { pos : G.position; ch : char }
-type grid = { s : G.position; e : G.position; graph : int G.graph }
+
+type grid = {
+  s : G.position;
+  e : G.position;
+  graph : (G.position, int) G.graph;
+}
 
 let to_cells row (line : string) =
   line
@@ -45,7 +50,7 @@ let build_graph cells =
 
   let inc_char ch = ch |> Char.code |> ( + ) 1 |> Char.chr in
 
-  let to_edge cells ch neighbor_pos : 'a G.edge option =
+  let to_edge cells ch neighbor_pos =
     match Hashtbl.find_opt cells neighbor_pos with
     | Some neighbor_ch ->
         if neighbor_ch <= inc_char ch then

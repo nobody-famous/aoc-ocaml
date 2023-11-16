@@ -1,2 +1,8 @@
 (library
- (name aoc))
+ (name aoc)
+ (modules graph))
+
+(test
+ (name test)
+ (modules test)
+ (libraries ounit2 testUtils aoc))

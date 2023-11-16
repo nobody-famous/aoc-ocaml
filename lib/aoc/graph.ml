@@ -1,12 +1,12 @@
 type position = { row : int; col : int }
-type 'a edge = { target : position; weight : 'a }
-type 'a node = { edges : 'a edge list }
-type 'a graph = (position, 'a node) Hashtbl.t
-type 'a visited_node = { path : position list; weight : 'a }
+type ('pos, 'w) edge = { target : 'pos; weight : 'w }
+type ('pos, 'w) node = { edges : ('pos, 'w) edge list }
+type ('pos, 'w) graph = ('pos, ('pos, 'w) node) Hashtbl.t
+type ('pos, 'w) visited_node = { path : 'pos list; weight : 'w }
 
-type 'a path_state = {
-  visited : (position, 'a visited_node) Hashtbl.t;
-  frontier : (position, int) Hashtbl.t;
+type ('pos, 'w) path_state = {
+  visited : ('pos, ('pos, 'w) visited_node) Hashtbl.t;
+  frontier : ('pos, int) Hashtbl.t;
 }
 
 let shortest_path ~start_pos:s ~end_pos:e ~init_weight:w graph =
@@ -22,6 +22,6 @@ let shortest_path ~start_pos:s ~end_pos:e ~init_weight:w graph =
     |> update_frontier s
   in
 
-  let find_path state = 0 in
+  let find_path state = { path = []; weight = w } in
 
   init_state |> find_path
