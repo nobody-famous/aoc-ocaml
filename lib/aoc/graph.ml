@@ -18,13 +18,16 @@ let shortest_path ~start_pos:s ~end_pos:e ~init_weight:w graph =
     | None -> Hashtbl.add state.frontier pos { path; weight }
   in
 
+  let get_edges pos = pos |> Hashtbl.find graph |> fun n -> n.edges in
+
+  let add_edges state node =
+    List.iter (fun e ->
+        add_to_frontier state e.target (e.target :: node.path)
+          (e.weight + node.weight))
+  in
+
   let update_frontier state node =
-    node.path
-    |> List.hd
-    |> Hashtbl.find graph
-    |> (fun n -> n.edges)
-    |> List.iter (fun e ->
-           add_to_frontier state e.target (e.target :: node.path) e.weight);
+    node.path |> List.hd |> get_edges |> add_edges state node;
 
     state
   in
