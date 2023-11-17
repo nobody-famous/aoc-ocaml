@@ -18,6 +18,13 @@
             "problemMatcher": ["$ocamlc"]
         },
         {
+            "label": "one test",
+            "type": "shell",
+            "command": "opam",
+            "args": ["exec", "dune", "exec","lib/aoc/test.exe"],
+            "problemMatcher": ["$ocamlc"]
+        },
+        {
             "label": "build",
             "type": "shell",
             "command": "opam",
