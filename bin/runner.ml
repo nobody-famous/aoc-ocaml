@@ -50,10 +50,14 @@ let years : year list =
           { d = 17; part = 2; fn = Aoc_2019_17.Part2.run; exp = 880360 };
         ];
     };
-    { label = 2022; probs = [] };
+    {
+      label = 2022;
+      probs = [ { d = 12; part = 1; fn = Aoc_2022_12.Part1.run; exp = 370 } ];
+    };
   ]
 
-let get_label ok = if ok then "OK" else "FAIL"
+let get_label actual expected =
+  if actual = expected then "OK" else sprintf "FAIL %d <> %d" actual expected
 
 let timed_run fn file =
   let start = int_of_float (Unix.gettimeofday () *. 1000.0)
@@ -68,7 +72,7 @@ let time_prob year prob =
   and name = sprintf "%d.%d" prob.d prob.part in
 
   let diff, actual = InputParser.read_lines file |> timed_run prob.fn in
-  let label = get_label (actual = prob.exp) in
+  let label = get_label actual prob.exp in
 
   printf "[%s] %s %d ms\n" label name diff;
   diff

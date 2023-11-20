@@ -8,59 +8,54 @@ type ('pos, 'w) path_state = {
   frontier : ('pos, ('pos, 'w) path_node) Hashtbl.t;
 }
 
+let create_state visited = { visited; frontier = Hashtbl.create 64 }
+
+let init_state start_pos =
+  [ (start_pos, true) ] |> List.to_seq |> Hashtbl.of_seq |> create_state
+
+let add_to_frontier state pos path weight =
+  match Hashtbl.find_opt state.frontier pos with
+  | Some n when weight < n.weight ->
+      Hashtbl.replace state.frontier pos { pos; path; weight }
+  | Some _ -> ()
+  | None -> Hashtbl.add state.frontier pos { pos; path; weight }
+
+let get_edges graph pos = pos |> Hashtbl.find graph |> fun n -> n.edges
+
+let add_edges state node =
+  List.iter (fun edge ->
+      if Option.is_none @@ Hashtbl.find_opt state.visited edge.target then
+        add_to_frontier state edge.target (edge.target :: node.path)
+          (edge.weight + node.weight))
+
+let init_frontier start_pos graph state =
+  get_edges graph start_pos
+  |> add_edges state { pos = start_pos; path = [ start_pos ]; weight = 0 };
+  state
+
+let next_node start_pos init_weight state =
+  Hashtbl.fold
+    (fun _ value node ->
+      if node.path = [] then value
+      else if Option.is_some (Hashtbl.find_opt state.visited node.pos) then node
+      else if value.weight < node.weight then value
+      else node)
+    state.frontier
+    { pos = start_pos; path = []; weight = init_weight }
+
+let visit_node state node graph =
+  node.pos |> get_edges graph |> add_edges state node;
+  node.pos |> Hashtbl.remove state.frontier;
+
+  Hashtbl.replace state.visited node.pos true;
+
+  state
+
+let rec find_path start_pos end_pos init_weight graph state =
+  match next_node start_pos init_weight state with
+  | n when n.pos = end_pos -> n
+  | n ->
+      visit_node state n graph |> find_path start_pos end_pos init_weight graph
+
 let shortest_path ~start_pos:s ~end_pos:e ~init_weight:w graph =
-  let add_to_frontier state pos path weight =
-    match Hashtbl.find_opt state.frontier pos with
-    | Some n when weight < n.weight ->
-        Hashtbl.replace state.frontier pos { pos; path; weight }
-    | Some _ -> ()
-    | None -> Hashtbl.add state.frontier pos { pos; path; weight }
-  in
-
-  let get_edges pos = pos |> Hashtbl.find graph |> fun n -> n.edges in
-
-  let add_edges state node =
-    List.iter (fun e ->
-        if Option.is_none @@ Hashtbl.find_opt state.visited e.target then
-          add_to_frontier state e.target (e.target :: node.path)
-            (e.weight + node.weight))
-  in
-
-  let create_state visited = { visited; frontier = Hashtbl.create 64 } in
-
-  let init_state =
-    [ (s, true) ] |> List.to_seq |> Hashtbl.of_seq |> create_state
-  in
-
-  let init_frontier state =
-    get_edges s |> add_edges state { pos = s; path = [ s ]; weight = 0 };
-    state
-  in
-
-  let next_node state =
-    Hashtbl.fold
-      (fun _ v n ->
-        if n.path = [] then v
-        else if Option.is_some (Hashtbl.find_opt state.visited n.pos) then n
-        else if v.weight < n.weight then v
-        else n)
-      state.frontier
-      { pos = s; path = []; weight = w }
-  in
-
-  let visit_node state node =
-    node.pos |> get_edges |> add_edges state node;
-    node.pos |> Hashtbl.remove state.frontier;
-
-    Hashtbl.replace state.visited node.pos true;
-
-    state
-  in
-
-  let rec find_path state =
-    match next_node state with
-    | n when n.pos = e -> n
-    | n -> visit_node state n |> find_path
-  in
-
-  init_state |> init_frontier |> find_path
+  init_state s |> init_frontier s graph |> find_path s e w graph
