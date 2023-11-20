@@ -207,7 +207,7 @@ let update_c_fn fn state =
       else state
 
 let update_fn fn opt orig_state state =
-  if orig_state == state then fn opt state else state
+  if orig_state = state then fn opt state else state
 
 let update_fns opt state =
   update_fn update_a_fn opt state state

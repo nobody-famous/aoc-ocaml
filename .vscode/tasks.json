@@ -21,7 +21,7 @@
             "label": "one test",
             "type": "shell",
             "command": "opam",
-            "args": ["exec", "dune", "exec","lib/aoc/test.exe"],
+            "args": ["exec", "dune", "exec","lib/2022/12/test.exe"],
             "problemMatcher": ["$ocamlc"]
         },
         {

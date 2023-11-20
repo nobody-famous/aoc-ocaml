@@ -1,12 +1,8 @@
 module G = Aoc.Graph
 
-type cell = { pos : G.position; ch : char }
-
-type grid = {
-  s : G.position;
-  e : G.position;
-  graph : (G.position, int) G.graph;
-}
+type position = { row : int; col : int }
+type cell = { pos : position; ch : char }
+type grid = { s : position; e : position; graph : (position, int) G.graph }
 
 let to_cells row (line : string) =
   line
@@ -36,15 +32,15 @@ let get_cells data =
   in
 
   Hashtbl.fold update data
-    ({ G.row = 0; G.col = 0 }, { G.row = 0; G.col = 0 }, Hashtbl.create 64)
+    ({ row = 0; col = 0 }, { row = 0; col = 0 }, Hashtbl.create 64)
 
 let build_graph cells =
-  let get_neighbors (pos : G.position) =
+  let get_neighbors (pos : position) =
     [
-      { G.row = pos.row - 1; G.col = pos.col };
-      { G.row = pos.row + 1; G.col = pos.col };
-      { G.row = pos.row; G.col = pos.col - 1 };
-      { G.row = pos.row; G.col = pos.col + 1 };
+      { row = pos.row - 1; col = pos.col };
+      { row = pos.row + 1; col = pos.col };
+      { row = pos.row; col = pos.col - 1 };
+      { row = pos.row; col = pos.col + 1 };
     ]
   in
 
