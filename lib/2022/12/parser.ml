@@ -4,7 +4,7 @@ type position = { row : int; col : int }
 type cell = { pos : position; ch : char }
 type grid = { s : position; e : position; graph : (position, int) G.graph }
 
-let to_cells row (line : string) =
+let to_cells row line =
   line
   |> String.to_seq
   |> List.of_seq
@@ -34,45 +34,39 @@ let get_cells data =
   Hashtbl.fold update data
     ({ row = 0; col = 0 }, { row = 0; col = 0 }, Hashtbl.create 64)
 
+let get_neighbors pos =
+  [
+    { row = pos.row - 1; col = pos.col };
+    { row = pos.row + 1; col = pos.col };
+    { row = pos.row; col = pos.col - 1 };
+    { row = pos.row; col = pos.col + 1 };
+  ]
+
+let inc_char ch = ch |> Char.code |> ( + ) 1 |> Char.chr
+
+let to_edge cells ch neighbor_pos =
+  match Hashtbl.find_opt cells neighbor_pos with
+  | Some neighbor_ch ->
+      if neighbor_ch <= inc_char ch then
+        Some { G.target = neighbor_pos; G.weight = 1 }
+      else None
+  | None -> None
+
+let create_node es = { G.edges = es }
+
 let build_graph cells =
-  let get_neighbors (pos : position) =
-    [
-      { row = pos.row - 1; col = pos.col };
-      { row = pos.row + 1; col = pos.col };
-      { row = pos.row; col = pos.col - 1 };
-      { row = pos.row; col = pos.col + 1 };
-    ]
-  in
-
-  let inc_char ch = ch |> Char.code |> ( + ) 1 |> Char.chr in
-
-  let to_edge cells ch neighbor_pos =
-    match Hashtbl.find_opt cells neighbor_pos with
-    | Some neighbor_ch ->
-        if neighbor_ch <= inc_char ch then
-          Some { G.target = neighbor_pos; G.weight = 1 }
-        else None
-    | None -> None
-  in
-
-  let create_node es = { G.edges = es } in
-
   let to_node pos ch nodes =
-    let node =
-      get_neighbors pos
-      |> List.map (fun n -> to_edge cells ch n)
-      |> List.filter Option.is_some
-      |> List.map Option.get
-      |> create_node
-    in
-
-    Hashtbl.replace nodes pos node;
+    get_neighbors pos
+    |> List.map (fun n -> to_edge cells ch n)
+    |> List.filter Option.is_some
+    |> List.map Option.get
+    |> create_node
+    |> Hashtbl.replace nodes pos;
 
     nodes
   in
 
-  let foo = Hashtbl.fold to_node cells (Hashtbl.create 64) in
-  foo
+  Hashtbl.fold to_node cells (Hashtbl.create 64)
 
 let build_grid data =
   let s, e, cells = get_cells data in

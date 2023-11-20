@@ -10,4 +10,14 @@ let part1_tests =
            |> check_equal 31 );
        ]
 
+let part2_tests =
+  "2022 Day 12 Part 2"
+  >::: [
+         ( "Sample" >:: fun _ ->
+           [ "Sabqponm"; "abcryxxl"; "accszExk"; "acctuvwj"; "abdefghi" ]
+           |> Aoc_2022_12.Part2.run
+           |> check_equal 29 );
+       ]
+
 let _ = run_test_tt_main part1_tests
+let _ = run_test_tt_main part2_tests
