@@ -16,7 +16,7 @@ let to_edge cells ch neighbor_pos =
   | None -> None
 
 let solve grid =
-  G.shortest_path ~start_pos:grid.s ~end_pos:grid.e ~init_weight:0 grid.graph
+  G.shortest_path ~start_pos:grid.e ~end_pos:grid.s ~init_weight:0 grid.graph
   |> fun n -> n.weight
 
 let run lines = parse_input lines |> Utils.build_grid to_edge |> solve

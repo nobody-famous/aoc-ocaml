@@ -1,7 +1,13 @@
 module G = Aoc.Graph
 
 type position = { row : int; col : int }
-type grid = { s : position; e : position; graph : (position, int) G.graph }
+
+type grid = {
+  s : position;
+  e : position;
+  cells : (position, char) Hashtbl.t;
+  graph : (position, int) G.graph;
+}
 
 let get_cells data =
   let update pos ch (s, e, cells) =
@@ -46,4 +52,4 @@ let build_graph to_edge cells =
 
 let build_grid to_edge data =
   let s, e, cells = get_cells data in
-  { s; e; graph = build_graph to_edge cells }
+  { s; e; cells; graph = build_graph to_edge cells }
