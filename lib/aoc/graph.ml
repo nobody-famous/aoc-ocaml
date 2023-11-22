@@ -3,6 +3,12 @@ type ('pos, 'w) node = { edges : ('pos, 'w) edge list }
 type ('pos, 'w) graph = ('pos, ('pos, 'w) node) Hashtbl.t
 type ('pos, 'w) path_node = { pos : 'pos; path : 'pos list; weight : 'w }
 
+type ('pos, 'w) options = {
+  start_pos : 'pos;
+  is_end : 'pos -> bool;
+  initial_weight : 'w;
+}
+
 type ('pos, 'w) path_state = {
   visited : ('pos, bool) Hashtbl.t;
   frontier : ('pos, ('pos, 'w) path_node) Hashtbl.t;
@@ -59,11 +65,13 @@ let visit_node state node graph =
 
   state
 
-let rec find_path start_pos end_pos init_weight graph state =
+let rec find_path start_pos is_end init_weight graph state =
   match next_node start_pos init_weight state with
-  | n when n.pos = end_pos -> n
+  | n when is_end n.pos -> n
   | n ->
-      visit_node state n graph |> find_path start_pos end_pos init_weight graph
+      visit_node state n graph |> find_path start_pos is_end init_weight graph
 
-let shortest_path ~start_pos:s ~end_pos:e ~init_weight:w graph =
-  init_state s |> init_frontier s graph |> find_path s e w graph
+let shortest_path opts graph =
+  init_state opts.start_pos
+  |> init_frontier opts.start_pos graph
+  |> find_path opts.start_pos opts.is_end opts.initial_weight graph

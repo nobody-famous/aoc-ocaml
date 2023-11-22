@@ -52,7 +52,11 @@ let years : year list =
     };
     {
       label = 2022;
-      probs = [ { d = 12; part = 1; fn = Aoc_2022_12.Part1.run; exp = 370 } ];
+      probs =
+        [
+          { d = 12; part = 1; fn = Aoc_2022_12.Part1.run; exp = 370 };
+          { d = 12; part = 2; fn = Aoc_2022_12.Part2.run; exp = 363 };
+        ];
     };
   ]
 

@@ -19,7 +19,8 @@ let graph_tests =
            ]
            |> List.to_seq
            |> Hashtbl.of_seq
-           |> G.shortest_path ~start_pos:1 ~end_pos:5 ~init_weight:0
+           |> G.shortest_path
+                { start_pos = 1; initial_weight = 0; is_end = (fun p -> p = 5) }
            |> fun node -> node.weight |> check_equal 20 );
        ]
 

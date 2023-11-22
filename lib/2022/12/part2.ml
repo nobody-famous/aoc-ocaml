@@ -15,8 +15,19 @@ let to_edge cells ch neighbor_pos =
       else None
   | None -> None
 
+let is_end cells p =
+  match Hashtbl.find_opt cells p with
+  | Some ch when ch = 'a' -> true
+  | _ -> false
+
 let solve grid =
-  G.shortest_path ~start_pos:grid.e ~end_pos:grid.s ~init_weight:0 grid.graph
+  grid.graph
+  |> G.shortest_path
+       {
+         start_pos = grid.e;
+         initial_weight = 0;
+         is_end = (fun p -> is_end grid.cells p);
+       }
   |> fun n -> n.weight
 
 let run lines = parse_input lines |> Utils.build_grid to_edge |> solve
