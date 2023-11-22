@@ -1,6 +1,6 @@
 (library
  (name aoc_2022_13)
- (modules parser part1)
+ (modules parser utils part1)
  (libraries inputParser aoc))
 
 (test
