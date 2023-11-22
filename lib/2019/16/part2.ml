@@ -16,8 +16,8 @@ let mult_input times input =
 let arr_to_num arr =
   Array.fold_left (fun total item -> (total * 10) + item) 0 arr
 
-let run file_name =
-  let input = Parser.parse_input file_name |> mult_input 10000 in
+let run lines =
+  let input = Parser.parse_input lines |> mult_input 10000 in
   let seqs = Hashtbl.create 64 in
 
   let offset = arr_to_num @@ Array.sub input 0 7 in

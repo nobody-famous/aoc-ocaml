@@ -14,8 +14,8 @@ let reset_state mach =
 
   Intcode.set_payload { state with oxygen_sys = None } mach
 
-let run file_name =
-  let mach, _ = Intcode.parse_input file_name |> find_oxygen_sys in
+let run lines =
+  let mach, _ = Intcode.parse_input lines |> find_oxygen_sys in
 
   match mach with
   | None -> 0

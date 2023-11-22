@@ -8,7 +8,11 @@ let run_amp signal machine =
     | Run -> loop m out
     | HasOutput ->
         let m, v = Intcode.get_output m in
-        let out' = match v with None -> out | Some v -> v in
+        let out' =
+          match v with
+          | None -> out
+          | Some v -> v
+        in
 
         (m, out')
     | Halt -> (m, out)
@@ -39,8 +43,8 @@ let run_perms prog perms =
       prog |> make_machines |> start_machines perm |> run_seq |> Stdlib.max acc)
     0 perms
 
-let run file_name =
-  let prog = Intcode.parse_input file_name in
+let run lines =
+  let prog = Intcode.parse_input lines in
   let perms = permutations [| 9; 8; 7; 6; 5 |] in
 
   run_perms prog perms

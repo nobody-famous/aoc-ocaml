@@ -22,4 +22,4 @@ let find_asteroids lines =
 
   loop lines 0 []
 
-let parse_input file_name = InputParser.read_lines file_name |> find_asteroids
+let parse_input lines = lines |> find_asteroids

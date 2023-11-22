@@ -3,7 +3,9 @@ open AocUtils
 
 type turn = RIGHT | LEFT
 
-let turn_to_string = function RIGHT -> "RIGHT" | LEFT -> "LEFT"
+let turn_to_string = function
+  | RIGHT -> "RIGHT"
+  | LEFT -> "LEFT"
 
 let run_machine mach =
   let rec loop m =
@@ -159,9 +161,21 @@ let new_path_state () =
   }
 
 let state_to_string state =
-  let a_str = match state.a_fn with None -> "None" | Some f -> f in
-  let b_str = match state.b_fn with None -> "None" | Some f -> f in
-  let c_str = match state.c_fn with None -> "None" | Some f -> f in
+  let a_str =
+    match state.a_fn with
+    | None -> "None"
+    | Some f -> f
+  in
+  let b_str =
+    match state.b_fn with
+    | None -> "None"
+    | Some f -> f
+  in
+  let c_str =
+    match state.c_fn with
+    | None -> "None"
+    | Some f -> f
+  in
 
   Printf.sprintf "{A: %s B: %s C: %s fns: %s}" a_str b_str c_str state.fn_path
 
@@ -193,7 +207,7 @@ let update_c_fn fn state =
       else state
 
 let update_fn fn opt orig_state state =
-  if orig_state == state then fn opt state else state
+  if orig_state = state then fn opt state else state
 
 let update_fns opt state =
   update_fn update_a_fn opt state state
@@ -276,7 +290,9 @@ let final_output mach =
     | Run -> loop m out
     | HasOutput -> (
         let m', out' = Intcode.get_output m in
-        match out' with Some v -> loop m' v | _ -> failwith "No output")
+        match out' with
+        | Some v -> loop m' v
+        | _ -> failwith "No output")
     | s ->
         raise
         @@ Failure
@@ -287,22 +303,29 @@ let final_output mach =
 
 let get_fns state =
   let a =
-    match state.a_fn with None -> failwith "Fn A not defined" | Some f -> f
+    match state.a_fn with
+    | None -> failwith "Fn A not defined"
+    | Some f -> f
   in
   let b =
-    match state.b_fn with None -> failwith "Fn B not defined" | Some f -> f
+    match state.b_fn with
+    | None -> failwith "Fn B not defined"
+    | Some f -> f
   in
   let c =
-    match state.c_fn with None -> failwith "Fn C not defined" | Some f -> f
+    match state.c_fn with
+    | None -> failwith "Fn C not defined"
+    | Some f -> f
   in
 
   (a, b, c)
 
-let run file_name =
+let run lines =
   let mach =
-    Intcode.parse_input file_name
+    Intcode.parse_input lines
     |> Intcode.new_machine new_state
-    |> Intcode.set_addr 0 2 |> run_machine
+    |> Intcode.set_addr 0 2
+    |> run_machine
   in
   let state =
     mach |> Intcode.get_payload |> walk_path |> gen_path_opts |> traverse_opts
@@ -314,5 +337,8 @@ let run file_name =
   let path_buf = Printf.sprintf "%s\n" state.fn_path |> str_to_buffer in
   let yn_buf = Printf.sprintf "n\n" |> str_to_buffer in
 
-  mach |> send_input path_buf |> send_input fns_buf |> send_input yn_buf
+  mach
+  |> send_input path_buf
+  |> send_input fns_buf
+  |> send_input yn_buf
   |> final_output

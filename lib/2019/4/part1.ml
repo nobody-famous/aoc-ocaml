@@ -10,4 +10,4 @@ let has_adj input =
 
   loop 1
 
-let run file_name = parse_input file_name |> find_first |> count_pws has_adj
+let run lines = parse_input lines |> find_first |> count_pws has_adj

@@ -1,2 +1,8 @@
 (library
- (name aocUtils))
+ (name aocUtils)
+ (modules aocUtils))
+
+(library
+ (name testUtils)
+ (modules testUtils)
+ (libraries ounit2))

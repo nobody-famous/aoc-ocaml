@@ -48,8 +48,8 @@ let combine dists_1 dists_2 =
 
   loop dists_1_list []
 
-let run file_name =
-  let wire1, wire2 = parse_input file_name in
+let run lines =
+  let wire1, wire2 = parse_input lines in
   let colls = collisions (wire1, wire2) in
   let wire1_dists = coll_dists wire1 colls in
   let wire2_dists = coll_dists wire2 colls in

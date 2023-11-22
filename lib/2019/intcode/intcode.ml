@@ -50,15 +50,10 @@ let get_param_mode instr mask =
   | _ -> failwith (sprintf "Invalid Mode %d" digit)
 
 let halted mach = mach.state = Halt
-
 let get_prog mach = mach.prog
-
 let set_prog prog mach = { mach with prog }
-
 let set_payload payload mach = { mach with payload }
-
 let get_payload mach = mach.payload
-
 let set_input value mach = { mach with input = Some value }
 
 let get_output mach =
@@ -67,7 +62,6 @@ let get_output mach =
   | Some v -> ({ mach with output = None; state = Run }, Some v)
 
 let set_state mach state = { mach with state }
-
 let get_state mach = mach.state
 
 let get_addr addr mach =
@@ -156,7 +150,6 @@ let equal arg1 arg2 addr mach =
   set_addr addr (if arg1 = arg2 then 1 else 0) mach
 
 let set_ip value mach = { mach with ip = value }
-
 let inc_ip inc mach = set_ip (mach.ip + inc) mach
 
 let exec_instr (instr, mach) =
@@ -202,11 +195,8 @@ let run_machine in_fn out_fn mach =
 
   loop mach
 
-let read_line input = try Some (input_line input) with End_of_file -> None
-
-let parse_input file_name =
-  let input = open_in file_name in
-  match read_line input with
-  | Some line ->
+let parse_input lines =
+  match lines with
+  | line :: _ ->
       String.split_on_char ',' line |> List.map int_of_string |> Array.of_list
-  | None -> [||]
+  | [] -> [||]

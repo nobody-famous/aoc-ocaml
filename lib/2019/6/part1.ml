@@ -22,7 +22,7 @@ let count_orbits start tree =
   loop start;
   counts
 
-let run file_name =
-  let counts = parse_input file_name |> create_tree |> count_orbits "COM" in
+let run lines =
+  let counts = parse_input lines |> create_tree |> count_orbits "COM" in
 
   Hashtbl.fold (fun _ count acc -> acc + count) counts 0

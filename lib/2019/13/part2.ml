@@ -1,7 +1,7 @@
 open Utils
 
-let run file_name =
-  let prog = Intcode.parse_input file_name in
+let run lines =
+  let prog = Intcode.parse_input lines in
 
   prog.(0) <- 2;
 

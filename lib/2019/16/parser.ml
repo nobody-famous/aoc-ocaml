@@ -1,5 +1,5 @@
-let parse_input file_name =
-  let line = InputParser.read_lines file_name |> InputParser.get_first_line in
+let parse_input lines =
+  let line = lines |> InputParser.get_first_line in
   let out = Array.make (String.length line) 0 in
 
   let _ =
