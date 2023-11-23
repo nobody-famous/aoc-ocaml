@@ -10,16 +10,42 @@ let parse_num chars =
 
   loop 0 chars
 
-let chars_to_pkt chars =
-  let rec parse_list chars =
-    match chars with
-    | '[' :: rest -> parse_list rest
-    | '0' .. '9' :: _ -> parse_num chars
-    | _ -> (chars, 0)
-  in
+let collapse stack =
+  match stack with
+  | fst :: snd :: rem -> (
+      match snd with
+      | Utils.PacketList pkt -> Utils.PacketList (fst :: pkt) :: rem
+      | Utils.Integer _ -> failwith "Collapse found an integer on the stack")
+  | hd -> (
+      match hd with
+      | top :: rem -> (
+          match top with
+          | Utils.PacketList pkt -> Utils.PacketList (List.rev pkt) :: rem
+          | Utils.Integer _ -> hd)
+      | _ -> hd)
 
+let push num stack =
+  match stack with
+  | hd :: rest -> (
+      match hd with
+      | Utils.PacketList pkt ->
+          Utils.PacketList (Utils.Integer num :: pkt) :: rest
+      | Utils.Integer _ -> failwith "Push top of stack is integer")
+  | _ -> failwith "Push given empty stack"
+
+let rec parse_list stack chars =
   match chars with
-  | '[' :: rest -> parse_list rest
+  | '[' :: rem -> parse_list (Utils.PacketList [] :: stack) rem
+  | ']' :: rem -> parse_list (collapse stack) rem
+  | '0' .. '9' :: _ ->
+      let rem, num = parse_num chars in
+      parse_list (push num stack) rem
+  | ',' :: rem -> parse_list stack rem
+  | _ -> (chars, List.hd stack)
+
+let chars_to_pkt chars =
+  match chars with
+  | '[' :: _ -> parse_list [] chars
   | _ -> failwith "Invalid packet"
 
 let parse_line (line : string) =
