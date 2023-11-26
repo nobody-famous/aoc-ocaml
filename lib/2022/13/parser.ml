@@ -57,7 +57,9 @@ let group_lines lines =
     | hd :: rest -> (
         match line with
         | "" -> [] :: hd :: rest
-        | _ -> (parse_line line :: hd) :: rest)
+        | _ ->
+            let _, pkt = parse_line line in
+            (pkt :: hd) :: rest)
     | _ -> acc
   in
 
