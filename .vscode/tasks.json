@@ -29,7 +29,7 @@
                 "lib/2022/13/test.exe",
                 "--",
                 "-only-test",
-                "Part1 Tests:7"
+                "Part1 Tests:8"
             ],
             "problemMatcher": ["$ocamlc"]
         },

@@ -15,21 +15,17 @@ let part1_tests =
            assert_equal rem [ ',' ];
            assert_equal value 123 );
          ( "Parse list" >:: fun _ ->
-           [ '['; ']' ] |> Aoc_2022_13.Parser.parse_list []
-           |> fun (rem, value) ->
+           "[]" |> Aoc_2022_13.Parser.parse_line |> fun (rem, value) ->
            assert_equal ~msg:"Remaining" rem [];
            assert_equal ~msg:"Value" value (Aoc_2022_13.Utils.PacketList []) );
          ( "Parse nested list" >:: fun _ ->
-           [ '['; '['; ']'; ']' ] |> Aoc_2022_13.Parser.parse_list []
-           |> fun (rem, value) ->
+           "[[]]" |> Aoc_2022_13.Parser.parse_line |> fun (rem, value) ->
            assert_equal ~msg:"Remaining" rem [];
            assert_equal ~msg:"Value" value
              (Aoc_2022_13.Utils.PacketList [ Aoc_2022_13.Utils.PacketList [] ])
          );
          ( "Parse multiple nested lists" >:: fun _ ->
-           [ '['; '['; ']'; ','; '['; ']'; ']' ]
-           |> Aoc_2022_13.Parser.parse_list []
-           |> fun (rem, value) ->
+           "[[],[]]" |> Aoc_2022_13.Parser.parse_line |> fun (rem, value) ->
            assert_equal ~msg:"Remaining" rem [];
            assert_equal ~msg:"Value" value
              (Aoc_2022_13.Utils.PacketList
@@ -38,33 +34,32 @@ let part1_tests =
                   Aoc_2022_13.Utils.PacketList [];
                 ]) );
          ( "Parse number list" >:: fun _ ->
-           [ '['; '4'; '5'; ']' ] |> Aoc_2022_13.Parser.parse_list []
-           |> fun (rem, value) ->
+           "[45]" |> Aoc_2022_13.Parser.parse_line |> fun (rem, value) ->
            assert_equal ~msg:"Remaining" rem [];
            assert_equal ~msg:"Value" value
              (Aoc_2022_13.Utils.PacketList [ Aoc_2022_13.Utils.Integer 45 ]) );
          ( "Parse multiple numbers list" >:: fun _ ->
-           [ '['; '4'; '5'; ','; '2'; ']' ] |> Aoc_2022_13.Parser.parse_list []
-           |> fun (rem, value) ->
+           "[45,2]" |> Aoc_2022_13.Parser.parse_line |> fun (rem, value) ->
            assert_equal ~msg:"Remaining" rem [];
            assert_equal ~msg:"Value" value
              (Aoc_2022_13.Utils.PacketList
                 [ Aoc_2022_13.Utils.Integer 45; Aoc_2022_13.Utils.Integer 2 ])
          );
+         ( "Nested list with content" >:: fun _ ->
+           "[1,[45,2]]" |> Aoc_2022_13.Parser.parse_line |> fun (rem, value) ->
+           assert_equal ~msg:"Remaining" rem [];
+           assert_equal ~msg:"Value" value
+             (Aoc_2022_13.Utils.PacketList
+                [
+                  Aoc_2022_13.Utils.Integer 1;
+                  Aoc_2022_13.Utils.PacketList
+                    [
+                      Aoc_2022_13.Utils.Integer 45; Aoc_2022_13.Utils.Integer 2;
+                    ];
+                ]) );
          ( "Parse example line" >:: fun _ ->
            "[1,[2,[3,[4,[5,6,7]]]],8,9]" |> Aoc_2022_13.Parser.parse_line
            |> fun (rem, value) ->
-           (match value with
-           | Aoc_2022_13.Utils.PacketList pkt ->
-               Printf.printf "***** %d\n" @@ List.length pkt;
-               List.iter
-                 (fun item ->
-                   match item with
-                   | Aoc_2022_13.Utils.PacketList _ -> Printf.printf "  list\n"
-                   | Aoc_2022_13.Utils.Integer n -> Printf.printf "  int %d\n" n)
-                 pkt
-           | Aoc_2022_13.Utils.Integer _ -> ());
-
            assert_equal ~msg:"Remaining" rem [];
            assert_equal ~msg:"Value" value
              (Aoc_2022_13.Utils.PacketList
