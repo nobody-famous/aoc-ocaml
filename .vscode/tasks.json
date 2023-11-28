@@ -21,7 +21,16 @@
             "label": "one test",
             "type": "shell",
             "command": "opam",
-            "args": ["exec", "dune", "exec","lib/2022/12/test.exe"],
+            "args": [
+                "exec",
+                "dune",
+                "--",
+                "exec",
+                "lib/2022/13/test.exe",
+                "--",
+                "-only-test",
+                "Part1 Tests:8"
+            ],
             "problemMatcher": ["$ocamlc"]
         },
         {
