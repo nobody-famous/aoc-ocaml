@@ -51,7 +51,7 @@ let chars_to_pkt chars =
 let parse_line (line : string) =
   line |> String.to_seq |> List.of_seq |> chars_to_pkt
 
-let group_lines lines =
+let parse_input lines =
   let proc_line acc line =
     match acc with
     | hd :: rest -> (
@@ -63,6 +63,13 @@ let group_lines lines =
     | _ -> acc
   in
 
-  List.fold_left proc_line [ [] ] lines |> List.map List.rev |> List.rev
+  let to_pair pkts =
+    match pkts with
+    | fst :: snd :: _ -> (fst, snd)
+    | _ -> failwith "Wrong number of items in list"
+  in
 
-let parse_input lines = group_lines lines
+  List.fold_left proc_line [ [] ] lines
+  |> List.map List.rev
+  |> List.map to_pair
+  |> List.rev
