@@ -1,6 +1,6 @@
 (library
  (name aoc)
- (modules graph))
+ (modules graph geo2d))
 
 (test
  (name test)
