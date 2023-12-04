@@ -6,6 +6,12 @@ type grid = {
   points : (int, int list) Hashtbl.t;
 }
 
+let add_to_map map pt =
+  (match Hashtbl.find_opt map pt.G.x with
+  | Some ys -> Hashtbl.add map pt.G.x (pt.G.y :: ys)
+  | None -> Hashtbl.add map pt.G.x [ pt.G.y ]);
+  map
+
 let print_grid grid =
   let xs =
     List.init (grid.max_pt.x - grid.min_pt.x + 1) (( + ) grid.min_pt.x)

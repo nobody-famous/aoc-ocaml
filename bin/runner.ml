@@ -58,6 +58,7 @@ let years : year list =
           { d = 12; part = 2; fn = Aoc_2022_12.Part2.run; exp = 363 };
           { d = 13; part = 1; fn = Aoc_2022_13.Part1.run; exp = 5185 };
           { d = 13; part = 2; fn = Aoc_2022_13.Part2.run; exp = 23751 };
+          { d = 14; part = 1; fn = Aoc_2022_14.Part1.run; exp = 1078 };
         ];
     };
   ]

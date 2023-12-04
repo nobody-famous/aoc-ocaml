@@ -34,12 +34,6 @@ let parse_line line =
   |> List.map parse_point
   |> fill_points
 
-let add_to_map map pt =
-  (match Hashtbl.find_opt map pt.G.x with
-  | Some ys -> Hashtbl.add map pt.G.x (pt.G.y :: ys)
-  | None -> Hashtbl.add map pt.G.x [ pt.G.y ]);
-  map
-
 let to_grid points =
   let min_pt, max_pt =
     Hashtbl.fold
@@ -56,5 +50,5 @@ let parse_input lines =
   lines
   |> List.map parse_line
   |> List.flatten
-  |> List.fold_left add_to_map (Hashtbl.create 64)
+  |> List.fold_left Utils.add_to_map (Hashtbl.create 64)
   |> to_grid

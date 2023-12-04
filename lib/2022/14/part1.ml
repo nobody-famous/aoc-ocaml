@@ -10,16 +10,39 @@ let next_y points x y =
       | [] -> None)
   | None -> None
 
+let get_move_for_y x old_y ys =
+  match ys with
+  | [] -> IntoAbyss
+  | _ -> if old_y = List.hd ys then Blocked else NextPoint { G.x; G.y = old_y }
+
+let check_point grid x y =
+  match Hashtbl.find_opt grid.Utils.points x with
+  | Some ys ->
+      ys
+      |> List.filter (fun item -> item >= y)
+      |> List.sort compare
+      |> get_move_for_y x y
+  | None -> IntoAbyss
+
+let rec drop_grain grid x y =
+  match next_y grid.Utils.points x y with
+  | Some new_y -> (
+      match check_point grid (x - 1) (new_y + 1) with
+      | NextPoint p -> drop_grain grid p.x p.y
+      | IntoAbyss -> ()
+      | Blocked -> (
+          match check_point grid (x + 1) (new_y + 1) with
+          | NextPoint p -> drop_grain grid p.x p.y
+          | IntoAbyss -> ()
+          | Blocked ->
+              let _ = Utils.add_to_map grid.points { G.x; G.y = new_y } in
+              drop_grain grid 500 0))
+  | None -> ()
+
 let run lines =
-  let data = Parser.parse_input lines in
-  Printf.printf "min %d,%d\n" data.min_pt.x data.min_pt.y;
-  Printf.printf "max %d,%d\n" data.max_pt.x data.max_pt.y;
-  Printf.printf "size %d\n" @@ Hashtbl.length data.points;
+  let grid = Parser.parse_input lines in
+  let orig_size = Hashtbl.length grid.points in
 
-  Utils.print_grid data;
+  drop_grain grid 500 0;
 
-  (match next_y data.points 500 0 with
-  | Some y -> Printf.printf "new y: %d\n" y
-  | None -> Printf.printf "No new y\n");
-
-  0
+  Hashtbl.length grid.points - orig_size
