@@ -1,5 +1,3 @@
-open InputParser
-
 let to_int_array input =
   let rec loop str acc =
     match str with
