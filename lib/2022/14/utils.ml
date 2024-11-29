@@ -7,9 +7,7 @@ type grid = {
 }
 
 let add_to_map map pt =
-  (match Hashtbl.find_opt map pt.G.x with
-  | Some ys -> Hashtbl.add map pt.G.x (pt.G.y :: ys)
-  | None -> Hashtbl.add map pt.G.x [ pt.G.y ]);
+  Hashtbl.add map pt true;
   map
 
 let print_grid grid =

@@ -32,12 +32,10 @@ let add_edges state node edges =
   let not_visited edge =
     Option.is_none @@ Hashtbl.find_opt state.visited edge.target
   in
-
   let process_edge edge =
     add_to_frontier state edge.target (edge.target :: node.path)
       (edge.weight + node.weight)
   in
-
   edges |> List.filter not_visited |> List.iter process_edge
 
 let init_frontier start_pos graph state =
@@ -52,17 +50,13 @@ let next_node start_pos init_weight state =
     else if value.weight < node.weight then value
     else node
   in
-
   let new_node = { pos = start_pos; path = []; weight = init_weight } in
-
   Hashtbl.fold process_item state.frontier new_node
 
 let visit_node state node graph =
   node.pos |> get_edges graph |> add_edges state node;
   node.pos |> Hashtbl.remove state.frontier;
-
   Hashtbl.replace state.visited node.pos true;
-
   state
 
 let rec find_path start_pos is_end init_weight graph state =
