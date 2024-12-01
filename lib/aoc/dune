@@ -1,6 +1,6 @@
 (library
  (name aoc)
- (modules graph))
+ (modules utils graph))
 
 (test
  (name test)
