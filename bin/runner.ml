@@ -79,6 +79,4 @@ let time_year (y : year) =
 
   printf "Total: %d ms\n\n" total
 
-let all_years years = List.iter time_year years;;
-
-all_years years
+let _ = years |> List.iter time_year
