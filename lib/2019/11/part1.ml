@@ -5,4 +5,4 @@ let run lines =
 
   run_robot bot BLACK;
 
-  Hashtbl.length bot.seen
+  Aoc.Utils.IntResult (Hashtbl.length bot.seen)

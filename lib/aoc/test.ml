@@ -19,9 +19,8 @@ let graph_tests =
            ]
            |> List.to_seq
            |> Hashtbl.of_seq
-           |> G.shortest_path
-                { start_pos = 1; initial_weight = 0; is_end = (fun p -> p = 5) }
-           |> fun node -> node.weight |> check_equal 20 );
+           |> G.shortest_path { start_pos = 1; initial_weight = 0; is_end = (fun p -> p = 5) }
+           |> fun node -> Aoc.Utils.IntResult node.weight |> check_equal @@ Aoc.Utils.IntResult 20 );
        ]
 
 let _ = run_test_tt_main graph_tests

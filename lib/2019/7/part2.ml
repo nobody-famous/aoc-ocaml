@@ -31,20 +31,19 @@ let run_seq machines =
 
     machines.(ndx) <- m;
 
-    if Intcode.get_state m = Halt && ndx = Array.length machines - 1 then out
-    else loop next signal' out'
+    if Intcode.get_state m = Halt && ndx = Array.length machines - 1 then
+      out
+    else
+      loop next signal' out'
   in
 
   loop 0 0 0
 
 let run_perms prog perms =
-  List.fold_left
-    (fun acc perm ->
-      prog |> make_machines |> start_machines perm |> run_seq |> Stdlib.max acc)
-    0 perms
+  List.fold_left (fun acc perm -> prog |> make_machines |> start_machines perm |> run_seq |> Stdlib.max acc) 0 perms
 
 let run lines =
   let prog = Intcode.parse_input lines in
   let perms = permutations [| 9; 8; 7; 6; 5 |] in
 
-  run_perms prog perms
+  Aoc.Utils.IntResult (run_perms prog perms)

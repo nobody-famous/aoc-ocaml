@@ -8,8 +8,9 @@ let run lines =
     |> search_for_sys
   in
 
-  match mach with
-  | None -> 0
-  | Some m ->
-      let state = Intcode.get_payload m in
-      List.length state.path
+  Aoc.Utils.IntResult
+    (match mach with
+    | None -> 0
+    | Some m ->
+        let state = Intcode.get_payload m in
+        List.length state.path)

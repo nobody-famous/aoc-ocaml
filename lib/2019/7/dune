@@ -1,7 +1,7 @@
 (library
  (name aoc_2019_7)
  (modules utils part1 part2)
- (libraries intcode))
+ (libraries aoc intcode))
 
 (test
  (name test)

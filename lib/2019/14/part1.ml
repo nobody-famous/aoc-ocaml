@@ -1,3 +1,3 @@
 open Utils
 
-let run lines = Parser.parse_input lines |> calc_ore 1
+let run lines = Aoc.Utils.IntResult (Parser.parse_input lines |> calc_ore 1)

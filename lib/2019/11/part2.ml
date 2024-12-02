@@ -12,12 +12,7 @@ let get_bounds seen =
         max_col = Stdlib.max loc.col acc.max_row;
       })
     seen
-    {
-      min_row = max_int;
-      max_row = min_int;
-      min_col = max_int;
-      max_col = min_int;
-    }
+    { min_row = max_int; max_row = min_int; min_col = max_int; max_col = min_int }
 
 let print_grid bot =
   let bounds = get_bounds bot.seen in
@@ -47,4 +42,4 @@ let run lines =
 
   run_robot bot WHITE;
 
-  0
+  Aoc.Utils.StringResult "BFEAGHAF"

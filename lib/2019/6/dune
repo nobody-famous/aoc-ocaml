@@ -1,7 +1,7 @@
 (library
  (name aoc_2019_6)
  (modules parser utils part1 part2)
- (libraries inputParser))
+ (libraries aoc inputParser))
 
 (test
  (name test)

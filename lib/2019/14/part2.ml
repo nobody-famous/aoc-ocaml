@@ -8,10 +8,14 @@ let run lines =
     let mid = low + ((high - low) / 2) in
     let ore = calc_ore mid input in
 
-    if low = mid then low
-    else if ore > ore_target then loop low mid
-    else if ore < ore_target then loop mid high
-    else mid
+    if low = mid then
+      low
+    else if ore > ore_target then
+      loop low mid
+    else if ore < ore_target then
+      loop mid high
+    else
+      mid
   in
 
-  loop 0 ore_target
+  Aoc.Utils.IntResult (loop 0 ore_target)

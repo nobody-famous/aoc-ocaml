@@ -1,10 +1,7 @@
 open Utils
 open AocUtils
 
-let find_crosses board =
-  Hashtbl.fold
-    (fun pt _ acc -> if is_cross pt board then pt :: acc else acc)
-    board []
+let find_crosses board = Hashtbl.fold (fun pt _ acc -> if is_cross pt board then pt :: acc else acc) board []
 
 let run_machine mach =
   let rec loop m =
@@ -22,12 +19,6 @@ let run_machine mach =
   loop mach
 
 let run lines =
-  let state =
-    Intcode.parse_input lines
-    |> Intcode.new_machine new_state
-    |> run_machine
-    |> Intcode.get_payload
-  in
+  let state = Intcode.parse_input lines |> Intcode.new_machine new_state |> run_machine |> Intcode.get_payload in
 
-  find_crosses state.board
-  |> List.fold_left (fun acc pt -> acc + (pt.x * pt.y)) 0
+  Aoc.Utils.IntResult (find_crosses state.board |> List.fold_left (fun acc pt -> acc + (pt.x * pt.y)) 0)

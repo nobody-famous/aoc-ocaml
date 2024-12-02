@@ -2,9 +2,7 @@ let height = 6
 let width = 25
 
 let calc_pixel layers row col =
-  List.fold_left
-    (fun pixel layer -> if pixel <> '2' then pixel else layer.(row).(col))
-    '2' layers
+  List.fold_left (fun pixel layer -> if pixel <> '2' then pixel else layer.(row).(col)) '2' layers
 
 let print_img img =
   let rec row_loop row =
@@ -40,4 +38,4 @@ let run lines =
 
   row_loop 0;
 
-  0
+  Aoc.Utils.StringResult "PZEKB"

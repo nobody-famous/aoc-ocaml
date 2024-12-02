@@ -7,7 +7,7 @@ let part1_tests =
          ( "Sample" >:: fun _ ->
            [ "Sabqponm"; "abcryxxl"; "accszExk"; "acctuvwj"; "abdefghi" ]
            |> Aoc_2022_12.Part1.run
-           |> check_equal 31 );
+           |> check_equal @@ Aoc.Utils.IntResult 31 );
        ]
 
 let part2_tests =
@@ -16,7 +16,7 @@ let part2_tests =
          ( "Sample" >:: fun _ ->
            [ "Sabqponm"; "abcryxxl"; "accszExk"; "acctuvwj"; "abdefghi" ]
            |> Aoc_2022_12.Part2.run
-           |> check_equal 29 );
+           |> check_equal @@ Aoc.Utils.IntResult 29 );
        ]
 
 let _ = run_test_tt_main part1_tests

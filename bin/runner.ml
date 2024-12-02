@@ -25,13 +25,13 @@ let years : year list =
           { label = "7.1"; file = "2019/7"; fn = Aoc_2019_7.Part1.run; exp = IntResult 21760 };
           { label = "7.2"; file = "2019/7"; fn = Aoc_2019_7.Part2.run; exp = IntResult 69816958 };
           { label = "8.1"; file = "2019/8"; fn = Aoc_2019_8.Part1.run; exp = IntResult 2356 };
-          { label = "8.2"; file = "2019/8"; fn = Aoc_2019_8.Part2.run; exp = IntResult 0 };
+          { label = "8.2"; file = "2019/8"; fn = Aoc_2019_8.Part2.run; exp = StringResult "PZEKB" };
           { label = "9.1"; file = "2019/9"; fn = Aoc_2019_9.Part1.run; exp = IntResult 2870072642 };
           { label = "9.2"; file = "2019/9"; fn = Aoc_2019_9.Part2.run; exp = IntResult 58534 };
           { label = "10.1"; file = "2019/10"; fn = Aoc_2019_10.Part1.run; exp = IntResult 347 };
           { label = "10.2"; file = "2019/10"; fn = Aoc_2019_10.Part2.run; exp = IntResult 829 };
           { label = "11.1"; file = "2019/11"; fn = Aoc_2019_11.Part1.run; exp = IntResult 1885 };
-          { label = "11.2"; file = "2019/11"; fn = Aoc_2019_11.Part2.run; exp = IntResult 0 };
+          { label = "11.2"; file = "2019/11"; fn = Aoc_2019_11.Part2.run; exp = StringResult "BFEAGHAF" };
           { label = "12.1"; file = "2019/12"; fn = Aoc_2019_12.Part1.run; exp = IntResult 7077 };
           { label = "12.2"; file = "2019/12"; fn = Aoc_2019_12.Part2.run; exp = IntResult 402951477454512 };
           { label = "13.1"; file = "2019/13"; fn = Aoc_2019_13.Part1.run; exp = IntResult 251 };
