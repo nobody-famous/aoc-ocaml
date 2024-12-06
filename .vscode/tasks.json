@@ -26,10 +26,10 @@
                 "dune",
                 "--",
                 "exec",
-                "lib/2022/13/test.exe",
-                "--",
-                "-only-test",
-                "Part1 Tests:8"
+                "lib/2024/1/test.exe",
+                // "--",
+                // "-only-test",
+                // "Part1 Tests:8"
             ],
             "problemMatcher": ["$ocamlc"]
         },

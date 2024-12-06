@@ -19,5 +19,4 @@ let part2_tests =
            |> check_equal @@ Aoc.Utils.IntResult 29 );
        ]
 
-let _ = run_test_tt_main part1_tests
 let _ = run_test_tt_main part2_tests

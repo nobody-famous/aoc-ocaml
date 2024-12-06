@@ -1,7 +1,7 @@
 (library
  (name aoc_2024_1)
  (modules parser part1 part2)
- (libraries inputParser aoc))
+ (libraries re inputParser aoc))
 
 (test
  (name test)
