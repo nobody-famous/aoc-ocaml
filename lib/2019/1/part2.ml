@@ -6,5 +6,4 @@ let rec total_fuel mass =
   | f when f <= 0 -> 0
   | f -> f + total_fuel f
 
-let run lines =
-  parse_input lines |> List.map total_fuel |> List.fold_left ( + ) 0
+let run lines = Aoc.Utils.IntResult (parse_input lines |> List.map total_fuel |> List.fold_left ( + ) 0)

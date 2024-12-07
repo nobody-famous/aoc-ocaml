@@ -12,5 +12,4 @@ let run lines =
 
   loop 100;
 
-  Array.sub input 0 8
-  |> Array.fold_left (fun total item -> (total * 10) + item) 0
+  Aoc.Utils.IntResult (Array.sub input 0 8 |> Array.fold_left (fun total item -> (total * 10) + item) 0)

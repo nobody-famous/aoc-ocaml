@@ -13,8 +13,10 @@ let coll_on_line colls line =
     match c with
     | [] -> acc
     | point :: rest ->
-        if point_on_line point line then loop rest (point :: acc)
-        else loop rest acc
+        if point_on_line point line then
+          loop rest (point :: acc)
+        else
+          loop rest acc
   in
 
   loop colls []
@@ -25,9 +27,7 @@ let coll_dists wire colls =
     match rem with
     | [] -> hmap
     | line :: rest ->
-        let add_map point =
-          Hashtbl.add hmap point (dist + man_dist line.p1 point)
-        in
+        let add_map point = Hashtbl.add hmap point (dist + man_dist line.p1 point) in
 
         coll_on_line colls line |> List.iter add_map;
         loop rest (dist + man_dist line.p1 line.p2)
@@ -55,4 +55,4 @@ let run lines =
   let wire2_dists = coll_dists wire2 colls in
   let combined = combine wire1_dists wire2_dists in
 
-  List.fold_left Stdlib.min Int.max_int combined
+  Aoc.Utils.IntResult (List.fold_left Stdlib.min Int.max_int combined)

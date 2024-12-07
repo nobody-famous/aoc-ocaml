@@ -4,12 +4,10 @@ let steps moons =
   let rec loop ms =
     let stop = List.fold_left (fun acc m -> acc && all_cycles m) true moons in
 
-    if stop then ms
-    else
+    if stop then
       ms
-      |> List.map (fun m -> compute_vel m ms)
-      |> List.map (fun m -> apply_vel m)
-      |> loop
+    else
+      ms |> List.map (fun m -> compute_vel m ms) |> List.map (fun m -> apply_vel m) |> loop
   in
 
   loop moons
@@ -48,7 +46,4 @@ let lcm m n =
   | m, n -> abs (m * n) / gcd m n
 
 let run lines =
-  Parser.parse_input lines
-  |> steps
-  |> get_cycles
-  |> Array.fold_left (fun acc c -> lcm acc c) 1
+  Aoc.Utils.IntResult (Parser.parse_input lines |> steps |> get_cycles |> Array.fold_left (fun acc c -> lcm acc c) 1)

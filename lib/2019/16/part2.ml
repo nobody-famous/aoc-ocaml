@@ -13,8 +13,7 @@ let mult_input times input =
   loop 0;
   out
 
-let arr_to_num arr =
-  Array.fold_left (fun total item -> (total * 10) + item) 0 arr
+let arr_to_num arr = Array.fold_left (fun total item -> (total * 10) + item) 0 arr
 
 let run lines =
   let input = Parser.parse_input lines |> mult_input 10000 in
@@ -30,5 +29,4 @@ let run lines =
 
   loop 100;
 
-  Array.sub input offset 8
-  |> Array.fold_left (fun total item -> (total * 10) + item) 0
+  Aoc.Utils.IntResult (Array.sub input offset 8 |> Array.fold_left (fun total item -> (total * 10) + item) 0)

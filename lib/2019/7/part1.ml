@@ -31,19 +31,17 @@ let run_seq machines =
 
       machines.(ndx) <- m;
       loop (ndx + 1) signal')
-    else signal
+    else
+      signal
   in
 
   loop 0 0
 
 let run_perms prog perms =
-  List.fold_left
-    (fun acc perm ->
-      prog |> make_machines |> start_machines perm |> run_seq |> Stdlib.max acc)
-    0 perms
+  List.fold_left (fun acc perm -> prog |> make_machines |> start_machines perm |> run_seq |> Stdlib.max acc) 0 perms
 
 let run file_name =
   let prog = Intcode.parse_input file_name in
   let perms = permutations [| 0; 1; 2; 3; 4 |] in
 
-  run_perms prog perms
+  Aoc.Utils.IntResult (run_perms prog perms)

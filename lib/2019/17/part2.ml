@@ -33,25 +33,33 @@ let get_turn state =
 
   match robot_piece with
   | ROBOT_UP ->
-      if has_point board { robot_pt with y = robot_pt.y - 1 } then Some LEFT
+      if has_point board { robot_pt with y = robot_pt.y - 1 } then
+        Some LEFT
       else if has_point board { robot_pt with y = robot_pt.y + 1 } then
         Some RIGHT
-      else None
+      else
+        None
   | ROBOT_DOWN ->
-      if has_point board { robot_pt with y = robot_pt.y + 1 } then Some LEFT
+      if has_point board { robot_pt with y = robot_pt.y + 1 } then
+        Some LEFT
       else if has_point board { robot_pt with y = robot_pt.y - 1 } then
         Some RIGHT
-      else None
+      else
+        None
   | ROBOT_LEFT ->
-      if has_point board { robot_pt with x = robot_pt.x + 1 } then Some LEFT
+      if has_point board { robot_pt with x = robot_pt.x + 1 } then
+        Some LEFT
       else if has_point board { robot_pt with x = robot_pt.x - 1 } then
         Some RIGHT
-      else None
+      else
+        None
   | ROBOT_RIGHT ->
-      if has_point board { robot_pt with x = robot_pt.x - 1 } then Some LEFT
+      if has_point board { robot_pt with x = robot_pt.x - 1 } then
+        Some LEFT
       else if has_point board { robot_pt with x = robot_pt.x + 1 } then
         Some RIGHT
-      else None
+      else
+        None
   | p -> failwith (Printf.sprintf "get_turn %s" @@ piece_to_string p)
 
 let turn_robot robot dir =
@@ -75,9 +83,7 @@ let forward state =
 
   let rec loop pt count =
     let next_pt = { x = pt.x + diff.x; y = pt.y + diff.y } in
-    let next_item =
-      try Hashtbl.find state.board next_pt with Not_found -> SPACE
-    in
+    let next_item = try Hashtbl.find state.board next_pt with Not_found -> SPACE in
 
     match next_item with
     | SCAFFOLD ->
@@ -117,8 +123,10 @@ let gen_path_opts path =
       if n <= ndx then (
         let opts = path_opts.(n) in
         let new_opt =
-          if List.length opts = 0 then Printf.sprintf "%c,%d" dir elem.dist
-          else Printf.sprintf "%s,%c,%d" (List.nth opts 0) dir elem.dist
+          if List.length opts = 0 then
+            Printf.sprintf "%c,%d" dir elem.dist
+          else
+            Printf.sprintf "%s,%c,%d" (List.nth opts 0) dir elem.dist
         in
 
         if String.length new_opt < 20 then
@@ -150,15 +158,7 @@ type path_state = {
   is_done : bool;
 }
 
-let new_path_state () =
-  {
-    a_fn = None;
-    b_fn = None;
-    c_fn = None;
-    fn_path = "";
-    str_path = [];
-    is_done = false;
-  }
+let new_path_state () = { a_fn = None; b_fn = None; c_fn = None; fn_path = ""; str_path = []; is_done = false }
 
 let state_to_string state =
   let a_str =
@@ -179,43 +179,41 @@ let state_to_string state =
 
   Printf.sprintf "{A: %s B: %s C: %s fns: %s}" a_str b_str c_str state.fn_path
 
-let append_str base str =
-  if base = "" then str else Printf.sprintf "%s,%s" base str
+let append_str base str = if base = "" then str else Printf.sprintf "%s,%s" base str
 
 let update_a_fn fn state =
   match state.a_fn with
-  | None ->
-      { state with a_fn = Some fn; fn_path = append_str state.fn_path "A" }
+  | None -> { state with a_fn = Some fn; fn_path = append_str state.fn_path "A" }
   | Some f ->
-      if f = fn then { state with fn_path = append_str state.fn_path "A" }
-      else state
+      if f = fn then
+        { state with fn_path = append_str state.fn_path "A" }
+      else
+        state
 
 let update_b_fn fn state =
   match state.b_fn with
-  | None ->
-      { state with b_fn = Some fn; fn_path = append_str state.fn_path "B" }
+  | None -> { state with b_fn = Some fn; fn_path = append_str state.fn_path "B" }
   | Some f ->
-      if f = fn then { state with fn_path = append_str state.fn_path "B" }
-      else state
+      if f = fn then
+        { state with fn_path = append_str state.fn_path "B" }
+      else
+        state
 
 let update_c_fn fn state =
   match state.c_fn with
-  | None ->
-      { state with c_fn = Some fn; fn_path = append_str state.fn_path "C" }
+  | None -> { state with c_fn = Some fn; fn_path = append_str state.fn_path "C" }
   | Some f ->
-      if f = fn then { state with fn_path = append_str state.fn_path "C" }
-      else state
+      if f = fn then
+        { state with fn_path = append_str state.fn_path "C" }
+      else
+        state
 
-let update_fn fn opt orig_state state =
-  if orig_state = state then fn opt state else state
+let update_fn fn opt orig_state state = if orig_state = state then fn opt state else state
 
 let update_fns opt state =
-  update_fn update_a_fn opt state state
-  |> update_fn update_b_fn opt state
-  |> update_fn update_c_fn opt state
+  update_fn update_a_fn opt state state |> update_fn update_b_fn opt state |> update_fn update_c_fn opt state
 
-let list_to_string arr =
-  List.fold_left (fun s n -> Printf.sprintf "%s %s" s n) "" arr
+let list_to_string arr = List.fold_left (fun s n -> Printf.sprintf "%s %s" s n) "" arr
 
 let traverse_opts path_opts =
   let rec loop ndx state =
@@ -229,18 +227,14 @@ let traverse_opts path_opts =
           let state' = update_fns first state in
 
           let state' =
-            if state' = state then state
-            else if ndx' > Array.length path_opts then state
+            if state' = state then
+              state
+            else if ndx' > Array.length path_opts then
+              state
             else if ndx' = Array.length path_opts then
-              {
-                state' with
-                str_path = first :: state'.str_path;
-                is_done = true;
-              }
+              { state' with str_path = first :: state'.str_path; is_done = true }
             else
-              loop
-                (ndx + List.length opts)
-                { state' with str_path = first :: state'.str_path }
+              loop (ndx + List.length opts) { state' with str_path = first :: state'.str_path }
           in
 
           if state'.is_done then state' else opts_loop rest state'
@@ -267,7 +261,8 @@ let str_to_buffer str =
 
 let send_input input mach =
   let rec loop ndx m =
-    if ndx >= Array.length input then m
+    if ndx >= Array.length input then
+      m
     else
       let m = Intcode.step m in
 
@@ -293,10 +288,7 @@ let final_output mach =
         match out' with
         | Some v -> loop m' v
         | _ -> failwith "No output")
-    | s ->
-        raise
-        @@ Failure
-             (Printf.sprintf "final_output %s" @@ Intcode.state_to_string s)
+    | s -> raise @@ Failure (Printf.sprintf "final_output %s" @@ Intcode.state_to_string s)
   in
 
   loop mach 0
@@ -321,15 +313,8 @@ let get_fns state =
   (a, b, c)
 
 let run lines =
-  let mach =
-    Intcode.parse_input lines
-    |> Intcode.new_machine new_state
-    |> Intcode.set_addr 0 2
-    |> run_machine
-  in
-  let state =
-    mach |> Intcode.get_payload |> walk_path |> gen_path_opts |> traverse_opts
-  in
+  let mach = Intcode.parse_input lines |> Intcode.new_machine new_state |> Intcode.set_addr 0 2 |> run_machine in
+  let state = mach |> Intcode.get_payload |> walk_path |> gen_path_opts |> traverse_opts in
 
   let a_fn, b_fn, c_fn = get_fns state in
 
@@ -337,8 +322,4 @@ let run lines =
   let path_buf = Printf.sprintf "%s\n" state.fn_path |> str_to_buffer in
   let yn_buf = Printf.sprintf "n\n" |> str_to_buffer in
 
-  mach
-  |> send_input path_buf
-  |> send_input fns_buf
-  |> send_input yn_buf
-  |> final_output
+  Aoc.Utils.IntResult (mach |> send_input path_buf |> send_input fns_buf |> send_input yn_buf |> final_output)

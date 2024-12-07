@@ -12,7 +12,8 @@ let to_edge cells ch neighbor_pos =
   | Some neighbor_ch ->
       if neighbor_ch >= dec_char ch then
         Some { G.target = neighbor_pos; G.weight = 1 }
-      else None
+      else
+        None
   | None -> None
 
 let is_end cells p =
@@ -21,13 +22,7 @@ let is_end cells p =
   | _ -> false
 
 let solve grid =
-  grid.graph
-  |> G.shortest_path
-       {
-         start_pos = grid.e;
-         initial_weight = 0;
-         is_end = (fun p -> is_end grid.cells p);
-       }
+  grid.graph |> G.shortest_path { start_pos = grid.e; initial_weight = 0; is_end = (fun p -> is_end grid.cells p) }
   |> fun n -> n.weight
 
-let run lines = parse_input lines |> Utils.build_grid to_edge |> solve
+let run lines = Aoc.Utils.IntResult (parse_input lines |> Utils.build_grid to_edge |> solve)

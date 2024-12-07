@@ -3,7 +3,8 @@ open Utils
 
 let find_path tree target =
   let rec loop path node =
-    if node = target then Some (List.rev path)
+    if node = target then
+      Some (List.rev path)
     else
       let kids = try Hashtbl.find_all tree node with Not_found -> [] in
 
@@ -24,8 +25,7 @@ let find_path tree target =
 let remove_common path1 path2 =
   let rec loop p1 p2 =
     match (p1, p2) with
-    | first :: rest, first' :: rest' ->
-        if first = first' then loop rest rest' else (p1, p2)
+    | first :: rest, first' :: rest' -> if first = first' then loop rest rest' else (p1, p2)
     | _, _ -> (path1, path2)
   in
 
@@ -41,4 +41,4 @@ let run file_name =
     | _, _ -> ([], [])
   in
 
-  List.length you_path - 1 + (List.length san_path - 1)
+  Aoc.Utils.IntResult (List.length you_path - 1 + (List.length san_path - 1))

@@ -5,6 +5,4 @@ let run lines =
 
   prog.(0) <- 2;
 
-  let game = new_game prog |> run_game in
-
-  game.score
+  Aoc.Utils.IntResult (new_game prog |> run_game |> fun g -> g.score)
