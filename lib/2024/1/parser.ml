@@ -1,10 +1,10 @@
 type inputItem = { left : int; right : int }
 
-let parse_line line =
-  let matcher = Re.Perl.compile_pat "(\\d+)\\s+(\\d+)" in
-  let group = Re.exec matcher line in
+let group_to_item grp = { left = int_of_string (Re.Group.get grp 1); right = int_of_string (Re.Group.get grp 2) }
+let parse_line line = "(\\d+)\\s+(\\d+)" |> Re.Perl.compile_pat |> (fun re -> Re.exec re line) |> group_to_item
+let rev_lists (left, right) = (List.rev left, List.rev right)
 
-  Printf.printf "***** MATCHED %s, %s, %s\n" (Re.Group.get group 0) (Re.Group.get group 1) (Re.Group.get group 2);
-  ()
+let unzip items =
+  items |> List.fold_left (fun (left, right) item -> (item.left :: left, item.right :: right)) ([], []) |> rev_lists
 
-let parse_input lines = lines |> List.iter parse_line
+let parse_input lines = lines |> List.map parse_line |> unzip

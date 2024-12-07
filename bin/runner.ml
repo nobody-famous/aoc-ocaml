@@ -56,6 +56,14 @@ let years : year list =
           { label = "13.2"; file = "2022/13/puzzle.txt"; fn = Aoc_2022_13.Part2.run; exp = IntResult 23751 };
         ];
     };
+    {
+      year = 2024;
+      probs =
+        [
+          { label = "1.1"; file = "2024/day1.txt"; fn = Aoc_2024_1.Part1.run; exp = IntResult 2057374 };
+          { label = "1.2"; file = "2024/day1.txt"; fn = Aoc_2024_1.Part2.run; exp = IntResult 23177084 };
+        ];
+    };
   ]
 
 let get_result actual expected =
@@ -92,4 +100,5 @@ let time_year (y : year) =
 
   printf "Total: %d ms\n\n" total
 
-let _ = years |> List.iter time_year
+(* let _ = years |> List.iter time_year *)
+let _ = years |> List.iter (fun item -> if item.year = 2024 then time_year item)
