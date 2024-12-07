@@ -100,5 +100,5 @@ let time_year (y : year) =
 
   printf "Total: %d ms\n\n" total
 
-(* let _ = years |> List.iter time_year *)
-let _ = years |> List.iter (fun item -> if item.year = 2024 then time_year item)
+let _ = years |> List.iter time_year
+(* let _ = years |> List.iter (fun item -> if item.year = 2024 then time_year item) *)
