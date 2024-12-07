@@ -62,6 +62,7 @@ let years : year list =
         [
           { label = "1.1"; file = "2024/day1.txt"; fn = Aoc_2024_1.Part1.run; exp = IntResult 2057374 };
           { label = "1.2"; file = "2024/day1.txt"; fn = Aoc_2024_1.Part2.run; exp = IntResult 23177084 };
+          { label = "6.1"; file = "2024/day6.txt"; fn = Aoc_2024_6.Part1.run; exp = IntResult 4776 };
         ];
     };
   ]
@@ -100,5 +101,5 @@ let time_year (y : year) =
 
   printf "Total: %d ms\n\n" total
 
-let _ = years |> List.iter time_year
-(* let _ = years |> List.iter (fun item -> if item.year = 2024 then time_year item) *)
+(* let _ = years |> List.iter time_year *)
+let _ = years |> List.iter (fun item -> if item.year = 2024 then time_year item)
