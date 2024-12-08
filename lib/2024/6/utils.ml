@@ -6,3 +6,4 @@ module Point = struct
 end
 
 module Points = Set.Make (Point)
+module Grid = Map.Make (Point)

@@ -7,7 +7,7 @@ let turn_right = function
   | Right -> Down
 
 let find_start grid =
-  Hashtbl.fold
+  Utils.Grid.fold
     (fun k v acc ->
       match acc with
       | Some _, _ -> acc
@@ -18,7 +18,7 @@ let rec do_steps dir (row, col) grid path =
   let new_path = Utils.Points.add (row, col) path in
 
   let handle_step new_row new_col grid =
-    match Hashtbl.find_opt grid (new_row, new_col) with
+    match Utils.Grid.find_opt (new_row, new_col) grid with
     | None -> new_path
     | Some v ->
         if v = '#' then
