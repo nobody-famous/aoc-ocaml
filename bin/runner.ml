@@ -63,23 +63,21 @@ let years : year list =
           { label = "1.1"; file = "2024/day1.txt"; fn = Aoc_2024_1.Part1.run; exp = IntResult 2057374 };
           { label = "1.2"; file = "2024/day1.txt"; fn = Aoc_2024_1.Part2.run; exp = IntResult 23177084 };
           { label = "6.1"; file = "2024/day6.txt"; fn = Aoc_2024_6.Part1.run; exp = IntResult 4776 };
+          { label = "6.2"; file = "2024/day6.txt"; fn = Aoc_2024_6.Part2.run; exp = IntResult 1586 };
         ];
     };
   ]
 
 let get_result actual expected =
-  let ok =
-    match expected with
-    | IntResult e -> (
-        match actual with
-        | IntResult a -> e = a
-        | StringResult _ -> false)
-    | StringResult e -> (
-        match actual with
-        | IntResult _ -> false
-        | StringResult a -> e = a)
-  in
-  if ok then "OK" else "FAIL"
+  match expected with
+  | IntResult e -> (
+      match actual with
+      | IntResult a -> if e = a then "OK" else Printf.sprintf "FAIL %d <> %d" e a
+      | StringResult _ -> "Actual has wrong type")
+  | StringResult e -> (
+      match actual with
+      | IntResult _ -> "Actual has wrong type"
+      | StringResult a -> if e = a then "OK" else Printf.sprintf "FAIL %s <> %s" e a)
 
 let timed_run fn file =
   let start = int_of_float (Unix.gettimeofday () *. 1000.0) and actual = fn file in
