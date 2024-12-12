@@ -43,21 +43,23 @@ module Grid = Map.Make (Point)
 module Seen = Set.Make (Vector)
 
 let find_start grid =
-  let walk_cols ((r, c), row_num, col_num) ch =
-    if r = -1 && c = -1 then
-      if ch = '^' then ((row_num, col_num), row_num, col_num) else ((r, c), row_num, col_num + 1)
+  let rec walk_cols start row col grid =
+    if (fst start <> -1 && snd start <> -1) || col >= Array.length grid.(0) then
+      start
+    else if grid.(row).(col) = '^' then
+      (row, col)
     else
-      ((r, c), row_num, col_num)
+      walk_cols start row (col + 1) grid
   in
-  let strip_col_num ((r, c), rn, _) = ((r, c), rn + 1) in
-  let strip_row_num ((r, c), _) = (r, c) in
-  let walk_rows ((r, c), row_num) row =
-    if r = -1 && c = -1 then
-      Array.fold_left walk_cols ((r, c), row_num, 0) row |> strip_col_num
+
+  let rec walk_rows start row grid =
+    if (fst start <> -1 && snd start <> -1) || row >= Array.length grid then
+      start
     else
-      ((r, c), row_num)
+      walk_rows (walk_cols start row 0 grid) (row + 1) grid
   in
-  Array.fold_left walk_rows ((-1, -1), 0) grid |> strip_row_num
+
+  grid |> walk_rows (-1, -1) 0
 
 let turn_right = function
   | Up -> Right
