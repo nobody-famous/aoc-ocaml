@@ -47,6 +47,30 @@ let rec do_steps dir pt grid path seen =
       do_steps dir (new_row, new_col) grid path seen
   in
 
+  let rec find_wall row col dir grid =
+    let rowDiff =
+      match dir with
+      | Up -> -1
+      | Down -> 1
+      | Right -> 0
+      | Left -> 0
+    in
+    let colDiff =
+      match dir with
+      | Up -> 0
+      | Down -> 0
+      | Right -> 1
+      | Left -> -1
+    in
+
+    if not @@ on_grid row col grid then
+      (-1, -1)
+    else if grid.(row).(col) = '#' then
+      (row, col)
+    else
+      find_wall (row + rowDiff) (col + colDiff) dir grid
+  in
+
   match Hashtbl.find_opt seen vec with
   | Some _ -> Hashtbl.create 16
   | None -> (
