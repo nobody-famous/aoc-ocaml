@@ -8,7 +8,7 @@ let count_loops (start, grid, path) =
   Hashtbl.fold
     (fun pt _ acc ->
       grid.(fst pt).(snd pt) <- '#';
-      let inc = if pt <> start && is_loop start grid then 1 else 0 in
+      let inc = if pt <> start && Utils.is_loop start grid then 1 else 0 in
       grid.(fst pt).(snd pt) <- '.';
       acc + inc)
     path 0

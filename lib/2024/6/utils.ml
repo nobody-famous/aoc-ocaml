@@ -1,7 +1,3 @@
-module Point = struct
-  type t = int * int
-end
-
 type direction = Up | Down | Left | Right
 
 let find_start grid =
@@ -47,30 +43,6 @@ let rec do_steps dir pt grid path seen =
       do_steps dir (new_row, new_col) grid path seen
   in
 
-  let rec find_wall row col dir grid =
-    let rowDiff =
-      match dir with
-      | Up -> -1
-      | Down -> 1
-      | Right -> 0
-      | Left -> 0
-    in
-    let colDiff =
-      match dir with
-      | Up -> 0
-      | Down -> 0
-      | Right -> 1
-      | Left -> -1
-    in
-
-    if not @@ on_grid row col grid then
-      (-1, -1)
-    else if grid.(row).(col) = '#' then
-      (row, col)
-    else
-      find_wall (row + rowDiff) (col + colDiff) dir grid
-  in
-
   match Hashtbl.find_opt seen vec with
   | Some _ -> Hashtbl.create 16
   | None -> (
@@ -84,3 +56,40 @@ let rec do_steps dir pt grid path seen =
       | Right -> handle_step row (col + 1) grid)
 
 let walk_path (start, grid) = do_steps Up start grid (Hashtbl.create 16) (Hashtbl.create 16)
+
+let get_row_diff = function
+  | Up -> -1
+  | Down -> 1
+  | Right -> 0
+  | Left -> 0
+
+let get_col_diff = function
+  | Up -> 0
+  | Down -> 0
+  | Right -> 1
+  | Left -> -1
+
+let rec find_wall pt row_diff col_diff grid =
+  if not (on_grid (fst pt) (snd pt) grid) then
+    (-1, -1)
+  else if grid.(fst pt).(snd pt) = '#' then
+    (fst pt - row_diff, snd pt - col_diff)
+  else
+    find_wall (fst pt + row_diff, snd pt + col_diff) row_diff col_diff grid
+
+let rec find_loop seen dir pt grid =
+  match Hashtbl.find_opt seen (pt, dir) with
+  | Some _ -> true
+  | None ->
+      if on_grid (fst pt) (snd pt) grid then (
+        Hashtbl.replace seen (pt, dir) true;
+
+        let new_dir = turn_right dir in
+        let new_pt = find_wall pt (get_row_diff new_dir) (get_col_diff new_dir) grid in
+
+        find_loop seen new_dir new_pt grid)
+      else
+        false
+
+let is_loop start grid =
+  find_loop (Hashtbl.create 16) Up (find_wall start (get_row_diff Up) (get_col_diff Up) grid) grid
