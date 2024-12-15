@@ -64,6 +64,8 @@ let years : year list =
           { label = "1.2"; file = "2024/day1.txt"; fn = Aoc_2024_1.Part2.run; exp = IntResult 23177084 };
           { label = "6.1"; file = "2024/day6.txt"; fn = Aoc_2024_6.Part1.run; exp = IntResult 4776 };
           { label = "6.2"; file = "2024/day6.txt"; fn = Aoc_2024_6.Part2.run; exp = IntResult 1586 };
+          { label = "7.1"; file = "2024/day7.txt"; fn = Aoc_2024_7.Part1.run; exp = IntResult 663613490587 };
+          { label = "7.2"; file = "2024/day7.txt"; fn = Aoc_2024_7.Part2.run; exp = IntResult 110365987435001 };
         ];
     };
   ]
