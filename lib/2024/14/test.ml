@@ -21,9 +21,4 @@ let part1_tests =
   "2024 Day 14 Part 1"
   >::: [ ("Sample" >:: fun _ -> lines |> Aoc_2024_14.Part1.run_sized 11 7 |> check_equal @@ Aoc.Utils.IntResult 12) ]
 
-(* let part2_tests =
-   "2024 Day 14 Part 2"
-   >::: [ ("Sample" >:: fun _ -> lines |> Aoc_2024_14.Part2.run 11 7 |> check_equal @@ Aoc.Utils.IntResult 11387) ] *)
-
 let _ = run_test_tt_main part1_tests
-(* let _ = run_test_tt_main part2_tests *)

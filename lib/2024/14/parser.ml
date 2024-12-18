@@ -1,4 +1,4 @@
-type robot = { position : int * int; velocity : int * int }
+open Utils
 
 let re_patterns lines = (Re.Perl.compile_pat "p=(\\d+),(\\d+)\\s+v=(-?\\d+),(-?\\d+)", lines)
 
