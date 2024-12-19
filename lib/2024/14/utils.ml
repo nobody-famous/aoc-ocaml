@@ -30,5 +30,19 @@ let get_bounds width height robots = (calculate_quadrants width height, robots)
 let count_robots area robots =
   List.fold_left (fun total robot -> if is_in_quadrant area robot then total + 1 else total) 0 robots
 
+let update_quadrant_counts quadrants counts robot =
+  match quadrants with
+  | [ tl; tr; bl; br ] ->
+      if is_in_quadrant tl robot then
+        counts.(0) <- counts.(0) + 1
+      else if is_in_quadrant tr robot then
+        counts.(1) <- counts.(1) + 1
+      else if is_in_quadrant bl robot then
+        counts.(2) <- counts.(2) + 1
+      else if is_in_quadrant br robot then
+        counts.(3) <- counts.(3) + 1;
+      counts
+  | _ -> counts
+
 let calculate_safety (quadrants, robots) =
-  quadrants |> List.map (fun area -> count_robots area robots) |> List.fold_left ( * ) 1
+  robots |> List.fold_left (update_quadrant_counts quadrants) [| 0; 0; 0; 0 |] |> Array.fold_left ( * ) 1
