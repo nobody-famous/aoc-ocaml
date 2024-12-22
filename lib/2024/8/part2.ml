@@ -1,5 +1,8 @@
 let rec all_pts fn pts grid diff pt =
-  if Utils.on_grid (fst pt) (snd pt) grid then all_pts fn (pt :: pts) grid diff @@ fn pt diff else pts
+  if Utils.on_grid (fst pt) (snd pt) grid then
+    all_pts fn (pt :: pts) grid diff @@ fn pt diff
+  else
+    pts
 
 let pair_antinodes grid (left, right) =
   let diff = Utils.pt_diff left right in
