@@ -1,7 +1,16 @@
-let next_empty_block disk = Array.find_index (fun item -> item = -1) disk
+let next_empty_block start disk =
+  let rec do_find index disk =
+    if index >= Array.length disk then
+      None
+    else if disk.(index) = -1 then
+      Some index
+    else
+      do_find (index + 1) disk
+  in
+  do_find start disk
 
 let init_ptrs disk =
-  let left_ptr = next_empty_block disk in
+  let left_ptr = next_empty_block 0 disk in
   let right_ptr = Array.length disk - 1 in
   (left_ptr, right_ptr, disk)
 
@@ -11,7 +20,7 @@ let defrag (left, right, disk) =
     | Some ptr when ptr < right_ptr ->
         disk.(ptr) <- disk.(right_ptr);
         disk.(right_ptr) <- -1;
-        do_defrag (next_empty_block disk) (right_ptr - 1) disk
+        do_defrag (next_empty_block ptr disk) (right_ptr - 1) disk
     | Some ptr when ptr >= right_ptr -> disk
     | _ -> disk
   in
