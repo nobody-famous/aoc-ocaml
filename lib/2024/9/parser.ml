@@ -1,4 +1,4 @@
-type file = { id : int; blocks : int }
+type block = File of { id : int; size : int } | Empty of int
 
 let to_tuple x y = (x, y)
 let char_to_digit ch = Char.code ch - Char.code '0'
@@ -23,4 +23,19 @@ let populate_disk (line, disk) =
 let build_disk line =
   line |> String.to_seq |> List.of_seq |> List.map char_to_digit |> calculate_disk_size |> create_disk |> populate_disk
 
-let parse_input lines = lines |> List.hd |> build_disk
+let build_blocks lines =
+  let rec do_build is_file next_id blocks rem =
+    match rem with
+    | n :: rest ->
+        let new_is_file = not is_file in
+        let new_id = if is_file then next_id + 1 else next_id in
+        let new_block = if is_file then File { id = next_id; size = char_to_digit n } else Empty (char_to_digit n) in
+
+        do_build new_is_file new_id (new_block :: blocks) rest
+    | [] -> blocks
+  in
+
+  lines |> List.hd |> String.to_seq |> List.of_seq |> do_build true 0 [] |> List.rev
+
+(* let parse_input lines = lines |> List.hd |> build_disk *)
+let parse_input lines = lines |> build_blocks
