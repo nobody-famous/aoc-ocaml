@@ -1,4 +1,5 @@
-type block = File of { id : int; size : int } | Empty of int
+type fileInfo = { id : int; size : int }
+type block = File of fileInfo | Empty of int
 
 let to_tuple x y = (x, y)
 let char_to_digit ch = Char.code ch - Char.code '0'

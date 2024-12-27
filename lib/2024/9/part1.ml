@@ -30,32 +30,60 @@ let checksum disk =
   disk |> Array.fold_left (fun (i, sum) v -> (i + 1, if v >= 0 then sum + (i * v) else sum)) (0, 0) |> fun (_, s) -> s
 
 let init_lists blocks =
-  let get_blocks want_file blocks =
-    List.filter
-      (fun block ->
+  let get_files blocks =
+    List.fold_left
+      (fun acc block ->
         match block with
-        | Parser.File _ -> want_file
-        | Parser.Empty _ -> not want_file)
-      blocks
+        | Parser.File f -> f :: acc
+        | Parser.Empty _ -> acc)
+      [] blocks
   in
 
-  match blocks with
-  | hd :: rest -> (hd, get_blocks false rest, get_blocks true rest |> List.rev)
-  | _ -> (Parser.Empty 0, [], [])
-
-let defrag (block, empty, files) =
-  let rec do_defrag blocks rem_empty rem_files =
-    match rem_files with
-    | _ :: rest_files -> (
-        match rem_empty with
-        | _ :: rest_empty -> do_defrag blocks rest_empty rest_files
-        | [] -> blocks)
-    | [] -> blocks
+  let get_empty blocks =
+    List.fold_left
+      (fun acc block ->
+        match block with
+        | Parser.File _ -> acc
+        | Parser.Empty e -> e :: acc)
+      [] blocks
   in
 
-  do_defrag [ block ] empty files |> List.rev
+  (get_empty blocks |> List.rev, get_files blocks |> List.rev, get_files blocks)
+
+let defrag (empty, files_forward, files_backward) =
+  let rec do_defrag use_forward blocks rem_empty rem_forward rem_backward =
+    if use_forward then
+      match rem_forward with
+      | hd :: rest -> do_defrag false (Parser.File hd :: blocks) rem_empty rest rem_backward
+      | [] -> blocks
+    else
+      match rem_backward with
+      | f :: rest_backward -> (
+          match rem_empty with
+          | e :: rest_empty ->
+              if e < f.Parser.size then
+                let new_block = { f with size = e } in
+                let new_backward = { f with size = f.size - e } in
+                do_defrag true (Parser.File new_block :: blocks) rest_empty rem_forward (new_backward :: rest_backward)
+              else if e > f.size then
+                let new_empty = e - f.size in
+                do_defrag false (Parser.File f :: blocks) (new_empty :: rest_empty) rem_forward rest_backward
+              else
+                do_defrag true (Parser.File f :: blocks) rest_empty rem_forward rest_backward
+          | [] -> blocks)
+      | [] -> blocks
+  in
+
+  do_defrag true [] empty files_forward files_backward |> List.rev
 
 (* let run lines = Aoc.Utils.IntResult (lines |> Parser.parse_input |> init_ptrs |> defrag |> checksum) *)
 let run lines =
-  let _ = lines |> Parser.parse_input |> init_lists |> defrag in
+  let blocks = lines |> Parser.parse_input |> init_lists |> defrag in
+  Printf.printf "***** BLOCKS\n";
+  List.iter
+    (fun block ->
+      match block with
+      | Parser.File f -> Printf.printf "*****  FILE %d %d\n" f.id f.size
+      | Parser.Empty e -> Printf.printf "*****  EMPTY %d" e)
+    blocks;
   Aoc.Utils.IntResult 0
