@@ -1,89 +1,39 @@
-(* let next_empty_block start disk =
-     let rec do_find index disk =
-       if index >= Array.length disk then
-         None
-       else if disk.(index) = -1 then
-         Some index
-       else
-         do_find (index + 1) disk
-     in
-     do_find start disk
+let init_ptrs blocks = (0, Array.length blocks - 1, blocks)
 
-   let init_ptrs disk =
-     let left_ptr = next_empty_block 0 disk in
-     let right_ptr = Array.length disk - 1 in
-     (left_ptr, right_ptr, disk)
+let checksum input =
+  let sum_range first last = List.init (last - first + 1) (fun i -> i + first) |> List.fold_left ( + ) 0 in
 
-   let defrag (left, right, disk) =
-     let rec do_defrag left_ptr right_ptr disk =
-       match left_ptr with
-       | Some ptr when ptr < right_ptr ->
-           disk.(ptr) <- disk.(right_ptr);
-           disk.(right_ptr) <- -1;
-           do_defrag (next_empty_block ptr disk) (right_ptr - 1) disk
-       | Some ptr when ptr >= right_ptr -> disk
-       | _ -> disk
-     in
-     do_defrag left right disk *)
-
-let checksum disk =
-  disk |> Array.fold_left (fun (i, sum) v -> (i + 1, if v >= 0 then sum + (i * v) else sum)) (0, 0) |> fun (_, s) -> s
-
-let init_lists blocks =
-  let get_files blocks =
-    List.fold_left
-      (fun acc block ->
+  let rec do_checksum pos blocks total =
+    match blocks with
+    | block :: rest -> (
         match block with
-        | Parser.File f -> f :: acc
-        | Parser.Empty _ -> acc)
-      [] blocks
+        | Parser.Empty s -> do_checksum (pos + s) rest total
+        | Parser.File f -> do_checksum (pos + f.size) rest (total + (f.id * sum_range pos (pos + f.size - 1))))
+    | _ -> total
   in
+  do_checksum 0 input 0
 
-  let get_empty blocks =
-    List.fold_left
-      (fun acc block ->
-        match block with
-        | Parser.File _ -> acc
-        | Parser.Empty e -> e :: acc)
-      [] blocks
-  in
-
-  (get_empty blocks |> List.rev, get_files blocks |> List.rev, get_files blocks)
-
-let defrag (empty, files_forward, files_backward) =
-  let rec do_defrag use_forward blocks rem_empty rem_forward rem_backward =
-    if use_forward then
-      match rem_forward with
-      | hd :: rest -> do_defrag false (Parser.File hd :: blocks) rem_empty rest rem_backward
-      | [] -> blocks
+let defrag (left_ptr, right_ptr, input) =
+  let rec do_defrag left right input output =
+    if left > right then
+      output
     else
-      match rem_backward with
-      | f :: rest_backward -> (
-          match rem_empty with
-          | e :: rest_empty ->
-              if e < f.Parser.size then
-                let new_block = { f with size = e } in
-                let new_backward = { f with size = f.size - e } in
-                do_defrag true (Parser.File new_block :: blocks) rest_empty rem_forward (new_backward :: rest_backward)
-              else if e > f.size then
-                let new_empty = e - f.size in
-                do_defrag false (Parser.File f :: blocks) (new_empty :: rest_empty) rem_forward rest_backward
-              else
-                do_defrag true (Parser.File f :: blocks) rest_empty rem_forward rest_backward
-          | [] -> blocks)
-      | [] -> blocks
+      match (input.(left), input.(right)) with
+      | Parser.File _, _ -> do_defrag (left + 1) right input (input.(left) :: output)
+      | _, Parser.Empty _ -> do_defrag left (right - 1) input output
+      | Parser.Empty s, Parser.File f ->
+          if s < f.size then (
+            let new_block = Parser.File { id = f.id; size = s } in
+
+            input.(right) <- Parser.File { id = f.id; size = f.size - s };
+            do_defrag (left + 1) right input (new_block :: output))
+          else if s > f.size then (
+            input.(left) <- Parser.Empty (s - f.size);
+            do_defrag left (right - 1) input (input.(right) :: output))
+          else
+            do_defrag (left + 1) (right - 1) input (input.(right) :: output)
   in
 
-  do_defrag true [] empty files_forward files_backward |> List.rev
+  do_defrag left_ptr right_ptr input [] |> List.rev
 
-(* let run lines = Aoc.Utils.IntResult (lines |> Parser.parse_input |> init_ptrs |> defrag |> checksum) *)
-let run lines =
-  let blocks = lines |> Parser.parse_input |> init_lists |> defrag in
-  Printf.printf "***** BLOCKS\n";
-  List.iter
-    (fun block ->
-      match block with
-      | Parser.File f -> Printf.printf "*****  FILE %d %d\n" f.id f.size
-      | Parser.Empty e -> Printf.printf "*****  EMPTY %d" e)
-    blocks;
-  Aoc.Utils.IntResult 0
+let run lines = Aoc.Utils.IntResult (lines |> Parser.parse_input |> init_ptrs |> defrag |> checksum)
