@@ -1,7 +1,6 @@
 let init_ptrs blocks = (0, Array.length blocks - 1, blocks)
 
 let checksum input =
-  (* let sum_range first last = List.init (last - first + 1) (fun i -> i + first) |> List.fold_left ( + ) 0 in *)
   let sum_range first last =
     let first_float = float_of_int first in
     let last_float = float_of_int last in
