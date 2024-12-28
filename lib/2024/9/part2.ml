@@ -26,5 +26,5 @@ let defrag input =
   do_defrag input
 
 let run lines =
-  let _ = lines |> Parser.parse_input |> defrag |> Utils.checksum in
+  (* let _ = lines |> Parser.parse_input |> defrag |> Utils.checksum in *)
   Aoc.Utils.IntResult 0

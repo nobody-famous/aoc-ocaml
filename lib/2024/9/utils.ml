@@ -1,22 +1,16 @@
 type fileInfo = { id : int; size : int }
 type block = File of fileInfo | Empty of int
 
-let init_ptrs blocks = (0, Array.length blocks - 1, blocks)
+let init_ptrs disk = (0, Array.length disk - 1, disk)
 
-let checksum input =
-  let sum_range first last =
-    let first_float = float_of_int first in
-    let last_float = float_of_int last in
-    int_of_float @@ ((first_float +. last_float) /. 2. *. (last_float -. first_float +. 1.))
+let checksum in_disk =
+  let rec do_checksum pos total disk =
+    if pos >= Array.length disk then
+      total
+    else
+      let new_pos = pos + 1 in
+      let new_total = if disk.(pos) = -1 then total else total + (disk.(pos) * pos) in
+      do_checksum new_pos new_total disk
   in
 
-  let rec do_checksum pos blocks total =
-    match blocks with
-    | block :: rest -> (
-        match block with
-        | Empty s -> do_checksum (pos + s) rest total
-        | File f -> do_checksum (pos + f.size) rest (total + (f.id * sum_range pos (pos + f.size - 1))))
-    | _ -> total
-  in
-
-  do_checksum 0 input 0
+  do_checksum 0 0 in_disk
