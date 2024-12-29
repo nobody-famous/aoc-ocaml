@@ -54,4 +54,5 @@ let defrag (_, right_ptr, in_disk) =
 
   do_defrag right_ptr in_disk.(right_ptr) in_disk
 
-let run lines = Aoc.Utils.IntResult (lines |> Parser.parse_input |> Utils.init_ptrs |> defrag |> Utils.checksum)
+(* let run lines = Aoc.Utils.IntResult (lines |> Parser.parse_input |> Utils.init_ptrs |> defrag |> Utils.checksum) *)
+let run lines = Aoc.Utils.IntResult 0
