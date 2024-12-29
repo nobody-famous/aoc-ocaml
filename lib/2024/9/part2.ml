@@ -1,53 +1,57 @@
-let defrag (left_ptr, right_ptr, in_disk) =
-  let rec find_next_file stop pos size target disk =
-    if pos <= stop then
-      None
-    else if target = -1 then
-      if disk.(pos) = -1 then
-        find_next_file stop (pos - 1) 0 target disk
+let defrag (_, right_ptr, in_disk) =
+  let find_next_file start_pos in_target in_disk =
+    let rec do_find_next pos size target disk =
+      if pos < 0 then
+        None
+      else if disk.(pos) = target then
+        do_find_next (pos - 1) (size + 1) target disk
+      else if size > 0 then
+        Some (pos + 1, size)
       else
-        find_next_file stop (pos - 1) 1 disk.(pos) disk
-    else if disk.(pos) = target then
-      find_next_file stop (pos - 1) (size + 1) target disk
-    else
-      Some (pos + 1, size)
+        do_find_next (pos - 1) 0 target disk
+    in
+
+    do_find_next start_pos 0 in_target in_disk
   in
 
-  let rec find_next_empty stop pos size disk =
-    if pos >= Array.length disk || pos >= stop then
-      None
-    else if disk.(pos) != -1 then
-      if size = 0 then
-        find_next_empty stop (pos + 1) 0 disk
+  let find_next_empty end_pos target_size disk =
+    let rec do_find_next stop pos size target_size disk =
+      if pos >= Array.length disk || pos >= stop then
+        if size >= target_size then
+          Some (pos - size)
+        else
+          None
+      else if disk.(pos) != -1 then
+        if size < target_size then
+          do_find_next stop (pos + 1) 0 target_size disk
+        else
+          Some (pos - size)
       else
-        Some (pos - size, size)
-    else
-      find_next_empty stop (pos + 1) (size + 1) disk
+        do_find_next stop (pos + 1) (size + 1) target_size disk
+    in
+
+    do_find_next end_pos 0 0 target_size disk
   in
 
-  let print_disk disk =
-    Printf.printf "****** DISK\n";
-    Array.iter (fun n -> Printf.printf "%c" @@ if n >= 0 then char_of_int (n + Char.code '0') else '_') disk;
-    Printf.printf "\n******\n"
+  let rec do_defrag right target disk =
+    let file = find_next_file right target disk in
+
+    match file with
+    | None ->
+        if target = 0 then
+          disk
+        else
+          do_defrag right (target - 1) disk
+    | Some (file_pos, size) -> (
+        let empty = find_next_empty file_pos size disk in
+        match empty with
+        | None -> do_defrag (file_pos - 1) (target - 1) disk
+        | Some empty_pos ->
+            Array.fill disk empty_pos size disk.(file_pos);
+            Array.fill disk file_pos size (-1);
+            do_defrag (file_pos - 1) (target - 1) disk)
   in
 
-  let rec do_defrag left right disk =
-    Printf.printf "***** DO DEFRAG %d %d\n" left right;
-    match (find_next_empty right left 0 disk, find_next_file left right 0 (-1) disk) with
-    | Some (l, l_size), Some (r, r_size) when l_size >= r_size ->
-        Array.fill disk l r_size disk.(r);
-        Array.fill disk r r_size (-1);
-        Printf.printf "***** NEXT FILE %d %d -> %d %d\n" r r_size l l_size;
-        print_disk disk;
-        do_defrag (l + l_size) (r - 1) disk
-    | Some (l, l_size), Some (r, r_size) when l_size < r_size -> do_defrag (l + l_size) (r + r_size - 1) disk
-    | None, Some (r, r_size) ->
-        Printf.printf "***** NO EMPTY SPACE %d %d\n" r r_size;
-        disk
-    | None, None -> do_defrag 0 (right - 1) disk
-    | _ -> disk
-  in
-
-  do_defrag left_ptr right_ptr in_disk
+  do_defrag right_ptr in_disk.(right_ptr) in_disk
 
 let run lines = Aoc.Utils.IntResult (lines |> Parser.parse_input |> Utils.init_ptrs |> defrag |> Utils.checksum)
